@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'net.minecrell.licenser' version '0.2'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'Sponge maven repo'
+        url 'http://repo.spongepowered.org/maven/'
+    }
+    maven {
+        name 'minecrell-releases'
+        url 'http://repo.minecrell.net/releases'
+    }
+}
+
+dependencies {
+    compile "org.spongepowered:spongeapi:4.1.0-SNAPSHOT"
+    compile "org.reflections:reflections:0.9.10"
+}
+
+license {
+    ext.name = project.name
+    ext.organization = project.organization
+    ext.url = project.url
+    ext.inceptionYear = project.inceptionYear
+    ext.currentYear = project.currentYear
+    header rootProject.file('HEADER.txt')
+    include '**/*.java'
+    style.java = 'JAVADOC'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.11'
+}
