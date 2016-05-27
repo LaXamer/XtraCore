@@ -2,10 +2,13 @@ plugins {
     id 'java'
     id 'eclipse'
     id 'net.minecrell.licenser' version '0.2'
+    id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
+
+defaultTasks 'licenseFormat'
 
 repositories {
     mavenCentral()
@@ -21,7 +24,11 @@ repositories {
 
 dependencies {
     compile "org.spongepowered:spongeapi:4.1.0-SNAPSHOT"
-    compile "org.reflections:reflections:0.9.10"
+    shadow "org.reflections:reflections:0.9.10"
+}
+
+configurations {
+    compile.extendsFrom shadow
 }
 
 license {
@@ -33,6 +40,15 @@ license {
     header rootProject.file('HEADER.txt')
     include '**/*.java'
     style.java = 'JAVADOC'
+}
+
+tasks.getByPath(':jar').enabled = false
+shadowJar {
+    dependencies {
+        include(dependency('com.github.XtraStudio:XtraCore:-SNAPSHOT'))
+    }
+    configurations = [project.configurations.shadow]
+    classifier = ''
 }
 
 task wrapper(type: Wrapper) {
