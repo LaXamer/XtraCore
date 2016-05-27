@@ -35,8 +35,8 @@ import org.spongepowered.api.text.Text;
 import com.xtra.core.util.ReflectionScanner;
 
 /**
- * A simple utility class for automatically retrieving, building and
- * registering the commands within a plugin.
+ * A simple utility class for automatically retrieving, building and registering
+ * the commands within a plugin.
  */
 public class CommandRegistrar {
 
@@ -84,7 +84,7 @@ public class CommandRegistrar {
         }
         commands.add(new CommandStore(command, specBuilder));
     }
-    
+
     private void addChildCommands() {
         // Go through parent commands and try to find if any other command is
         // supposed to be a child of this parent command. If so, then the child
@@ -107,7 +107,7 @@ public class CommandRegistrar {
             }
         }
     }
-    
+
     /**
      * Builds a {@link CommandSpec} and registers it.
      * 
