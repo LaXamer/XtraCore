@@ -25,6 +25,8 @@
 
 package com.xtra.core.command;
 
+import javax.annotation.Nullable;
+
 import org.spongepowered.api.command.spec.CommandSpec;
 
 /**
@@ -34,8 +36,9 @@ public class CommandStore {
 
     private Command command;
     private CommandSpec.Builder commandSpecBuilder;
+    private Command childOf;
 
-    public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder) {
+    public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder, @Nullable Command childOf) {
         this.command = commandBase;
         this.commandSpecBuilder = commandSpecBuilder;
     }
@@ -46,5 +49,9 @@ public class CommandStore {
 
     public CommandSpec.Builder commandSpecBuilder() {
         return commandSpecBuilder;
+    }
+
+    public Command childOf() {
+        return childOf;
     }
 }

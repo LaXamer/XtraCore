@@ -151,7 +151,7 @@ public class HelpPaginationGen {
             paginationBuilder.title(title);
         } else {
             // Default, dev was too lazy to set their own
-            paginationBuilder.title(Text.of("Command List"));
+            paginationBuilder.title(Text.of(TextColors.GOLD, "Command List"));
         }
         if (padding != null) {
             paginationBuilder.padding(padding);

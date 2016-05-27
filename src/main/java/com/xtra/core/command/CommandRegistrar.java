@@ -42,7 +42,6 @@ public class CommandRegistrar {
 
     private Object plugin;
     private Set<CommandStore> commands = new HashSet<>();
-    private Set<CommandStore> parentCommands = new HashSet<>();
 
     public CommandRegistrar(Object plugin) {
         this.plugin = plugin;
@@ -77,32 +76,26 @@ public class CommandRegistrar {
             Command parentCommand2 = parentCommand.newInstance();
             if (!(parentCommand2 instanceof EmptyCommand)) {
                 // Keep track of parent commands
-                parentCommands.add(new CommandStore(parentCommand2, specBuilder));
+                commands.add(new CommandStore(command, specBuilder, parentCommand2));
+            } else {
+                commands.add(new CommandStore(command, specBuilder, null));
             }
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-        commands.add(new CommandStore(command, specBuilder));
     }
 
     private void addChildCommands() {
-        // Go through parent commands and try to find if any other command is
-        // supposed to be a child of this parent command. If so, then the child
-        // is applied to the parent as a child command.
-        for (CommandStore parentStore : parentCommands) {
-            for (CommandStore commandStore : commands) {
-                Class<? extends Command> parentCommand = commandStore.command().getClass().getAnnotation(RegisterCommand.class).childOf();
-                try {
-                    Command parentCommand2 = parentCommand.newInstance();
-                    // If it's EmptyCommand, it doesn't have a parent command
-                    if (!(parentCommand2 instanceof EmptyCommand)) {
-                        if (parentCommand2.equals(parentStore.command())) {
-                            // Add it as a child command
-                            parentStore.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
+        // Go through the commands to find any child commands
+        for (CommandStore commandStore : commands) {
+            if (commandStore.childOf() != null) {
+                if (!(commandStore.childOf() instanceof EmptyCommand)) {
+                    // Iterate through to find the parent
+                    for (CommandStore commandStore2 : commands) {
+                        if (commandStore2.command().equals(commandStore.childOf())) {
+                            commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
                     }
-                } catch (InstantiationException | IllegalAccessException e) {
-                    e.printStackTrace();
                 }
             }
         }

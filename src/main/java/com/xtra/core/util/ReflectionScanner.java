@@ -37,6 +37,8 @@ import com.xtra.core.command.RegisterCommand;
 
 public class ReflectionScanner {
 
+    private static Set<CommandBase<?>> commands = new HashSet<>();
+
     /**
      * Uses reflection to get the commands of the plugin.
      * 
@@ -44,9 +46,12 @@ public class ReflectionScanner {
      * @return A set of the commands
      */
     public static Set<CommandBase<?>> getCommands(Object plugin) {
+        if (!commands.isEmpty()) {
+            return commands;
+        }
+
         Reflections reflections = new Reflections(plugin.getClass().getPackage().getName(), new SubTypesScanner(false), new TypeAnnotationsScanner());
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterCommand.class);
-        Set<CommandBase<?>> commands = new HashSet<>();
         for (Class<?> oneClass : classes) {
             try {
                 Object o = oneClass.newInstance();
