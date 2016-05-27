@@ -28,13 +28,16 @@ package com.xtra.core.command;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
+import com.xtra.core.util.ReflectionScanner;
+
+/**
+ * A simple utility class for automatically retrieving, building and
+ * registering the commands within a plugin.
+ */
 public class CommandRegistrar {
 
     private Object plugin;
@@ -46,7 +49,8 @@ public class CommandRegistrar {
     }
 
     public void initialize() {
-        Set<CommandBase<?>> commands = getCommands();
+        // Get the commands for the plugin
+        Set<CommandBase<?>> commands = ReflectionScanner.getCommands(plugin);
         for (CommandBase<?> command : commands) {
             initializeCommandSpec(command);
         }
@@ -56,51 +60,44 @@ public class CommandRegistrar {
         }
     }
 
-    private Set<CommandBase<?>> getCommands() {
-        Reflections reflections = new Reflections(plugin.getClass().getPackage().getName(), new SubTypesScanner(false), new TypeAnnotationsScanner());
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterCommand.class);
-        Set<CommandBase<?>> commands = new HashSet<>();
-        for (Class<?> oneClass : classes) {
-            try {
-                Object o = oneClass.newInstance();
-                if (o instanceof CommandBase<?>) {
-                    commands.add((CommandBase<?>) o);
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        return commands;
-    }
-
     private void initializeCommandSpec(CommandBase<?> command) {
+        // Create the initial CommandSpec builder
         CommandSpec.Builder specBuilder = CommandSpec.builder()
                 .permission(command.permission())
                 .description(Text.of(command.description()))
                 .executor(command);
+        // If empty array, no args
         if (command.args().length != 0) {
             specBuilder.arguments(command.args());
         }
         try {
+            // Get the parent command specified in the annotation. If no parent
+            // command, then it will return EmptyCommand.
             Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
             Command parentCommand2 = parentCommand.newInstance();
             if (!(parentCommand2 instanceof EmptyCommand)) {
-                parentCommands.add(new CommandStore(parentCommand2, command, specBuilder));
+                // Keep track of parent commands
+                parentCommands.add(new CommandStore(parentCommand2, specBuilder));
             }
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-        commands.add(new CommandStore(command, command, specBuilder));
+        commands.add(new CommandStore(command, specBuilder));
     }
     
     private void addChildCommands() {
+        // Go through parent commands and try to find if any other command is
+        // supposed to be a child of this parent command. If so, then the child
+        // is applied to the parent as a child command.
         for (CommandStore parentStore : parentCommands) {
             for (CommandStore commandStore : commands) {
-                Class<? extends Command> parentCommand = commandStore.commandBase().getClass().getAnnotation(RegisterCommand.class).childOf();
+                Class<? extends Command> parentCommand = commandStore.command().getClass().getAnnotation(RegisterCommand.class).childOf();
                 try {
                     Command parentCommand2 = parentCommand.newInstance();
+                    // If it's EmptyCommand, it doesn't have a parent command
                     if (!(parentCommand2 instanceof EmptyCommand)) {
                         if (parentCommand2.equals(parentStore.command())) {
+                            // Add it as a child command
                             parentStore.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
                     }

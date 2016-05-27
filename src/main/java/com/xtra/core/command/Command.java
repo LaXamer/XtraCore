@@ -31,7 +31,7 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 public interface Command extends CommandExecutor {
 
     /**
-     * The aliases for the command.
+     * The aliases for the command. The first alias is used in the help list.
      * 
      * @return The command aliases
      */

@@ -25,30 +25,25 @@
 
 package com.xtra.core.command;
 
-import javax.annotation.Nullable;
-
 import org.spongepowered.api.command.spec.CommandSpec;
 
+/**
+ * Ties together a command and its appropriate command spec builder.
+ */
 public class CommandStore {
-    
+
     private Command command;
-    private CommandBase<?> commandBase;
     private CommandSpec.Builder commandSpecBuilder;
-    
-    public CommandStore(@Nullable Command command, CommandBase<?> commandBase, CommandSpec.Builder commandSpecBuilder) {
-        this.command = command;
-        this.commandBase = commandBase;
+
+    public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder) {
+        this.command = commandBase;
         this.commandSpecBuilder = commandSpecBuilder;
     }
-    
+
     public Command command() {
         return command;
     }
-    
-    public CommandBase<?> commandBase() {
-        return commandBase;
-    }
-    
+
     public CommandSpec.Builder commandSpecBuilder() {
         return commandSpecBuilder;
     }
