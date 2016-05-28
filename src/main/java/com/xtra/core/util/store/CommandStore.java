@@ -43,6 +43,7 @@ public class CommandStore {
     public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder, @Nullable Command childOf) {
         this.command = commandBase;
         this.commandSpecBuilder = commandSpecBuilder;
+        this.childOf = childOf;
     }
 
     public Command command() {

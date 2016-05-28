@@ -45,7 +45,8 @@ import com.xtra.core.util.store.CommandStore;
 public class CommandRegistrar {
 
     private Object plugin;
-    private Set<CommandStore> commands = new HashSet<>();
+    private Set<CommandStore> commandStores = new HashSet<>();
+    private Set<CommandBase<?>> commands;
 
     public CommandRegistrar(Object plugin) {
         this.plugin = plugin;
@@ -53,12 +54,12 @@ public class CommandRegistrar {
 
     public void initialize() {
         // Get the commands for the plugin
-        Set<CommandBase<?>> commands = ReflectionScanner.getCommands(plugin);
+        commands = ReflectionScanner.getCommands(plugin);
         for (CommandBase<?> command : commands) {
             initializeCommandSpec(command);
         }
         addChildCommands();
-        for (CommandStore command : this.commands) {
+        for (CommandStore command : this.commandStores) {
             buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
         }
     }
@@ -79,10 +80,19 @@ public class CommandRegistrar {
             Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
             Command parentCommand2 = parentCommand.newInstance();
             if (!(parentCommand2 instanceof EmptyCommand)) {
-                // Keep track of parent commands
-                commands.add(new CommandStore(command, specBuilder, parentCommand2));
+                // newInstance() isn't reliable for checking equals() later, so
+                // get the command from a for loop on this.commands
+                for (CommandBase<?> command2 : commands) {
+                    // Attempt to match aliases
+                    // TODO: better solution than matching aliases, could have
+                    // bugs
+                    if (parentCommand2.aliases()[0].equals(command2.aliases()[0])) {
+                        commandStores.add(new CommandStore(command, specBuilder, command2));
+                        break;
+                    }
+                }
             } else {
-                commands.add(new CommandStore(command, specBuilder, null));
+                commandStores.add(new CommandStore(command, specBuilder, null));
             }
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
@@ -91,11 +101,11 @@ public class CommandRegistrar {
 
     private void addChildCommands() {
         // Go through the commands to find any child commands
-        for (CommandStore commandStore : commands) {
+        for (CommandStore commandStore : commandStores) {
             if (commandStore.childOf() != null) {
                 if (!(commandStore.childOf() instanceof EmptyCommand)) {
                     // Iterate through to find the parent
-                    for (CommandStore commandStore2 : commands) {
+                    for (CommandStore commandStore2 : commandStores) {
                         if (commandStore2.command().equals(commandStore.childOf())) {
                             commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }

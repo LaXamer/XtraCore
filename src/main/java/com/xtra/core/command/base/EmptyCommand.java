@@ -40,27 +40,27 @@ import com.xtra.core.command.Command;
 public class EmptyCommand implements Command {
 
     @Override
-    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+    public final CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         return null;
     }
 
     @Override
-    public String[] aliases() {
+    public final String[] aliases() {
         return null;
     }
 
     @Override
-    public String permission() {
+    public final String permission() {
         return null;
     }
 
     @Override
-    public String description() {
+    public final String description() {
         return null;
     }
 
     @Override
-    public CommandElement[] args() {
+    public final CommandElement[] args() {
         return null;
     }
 }
