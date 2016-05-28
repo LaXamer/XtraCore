@@ -41,9 +41,9 @@ import org.spongepowered.api.util.TextMessageException;
 import com.xtra.core.command.Command;
 
 public abstract class CommandBase<T extends CommandSource> implements Command {
-    
+
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
-    
+
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
         // Iterate through the methods to find executeCommand()
@@ -58,12 +58,12 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
                 }
             }
         }
-        // It is possible that CommandSource was specified, so if we didn't find one,
-        // then use CommandSource as a default.
+        // It is possible that CommandSource was specified, so if we didn't find
+        // one, then use CommandSource as a default.
         if (type == null) {
             type = CommandSource.class;
         }
-        
+
         if (type.equals(Player.class) && !(source instanceof Player)) {
             source.sendMessage(Text.of(TextColors.RED, "You must be a player to execute this command!"));
             return CommandResult.empty();
@@ -74,7 +74,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
             source.sendMessage(Text.of(TextColors.RED, "Only a command block may execute this command!"));
             return CommandResult.empty();
         }
-        
+
         @SuppressWarnings("unchecked")
         T src = (T) source;
         try {
