@@ -35,9 +35,9 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.xtra.core.command.Command;
-import com.xtra.core.command.CommandBase;
-import com.xtra.core.command.EmptyCommand;
-import com.xtra.core.command.RegisterCommand;
+import com.xtra.core.command.annotation.RegisterCommand;
+import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.command.base.EmptyCommand;
 import com.xtra.core.util.ReflectionScanner;
 
 /**

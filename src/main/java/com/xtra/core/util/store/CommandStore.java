@@ -23,42 +23,37 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command;
+package com.xtra.core.util.store;
 
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
+import javax.annotation.Nullable;
+
+import org.spongepowered.api.command.spec.CommandSpec;
+
+import com.xtra.core.command.Command;
 
 /**
- * An empty command. Specifying this means no command should be processed for
- * the specified parameter (aka null where null cannot be used).
+ * Ties together a command and its appropriate command spec builder.
  */
-public class EmptyCommand implements Command {
+public class CommandStore {
 
-    @Override
-    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        return null;
+    private Command command;
+    private CommandSpec.Builder commandSpecBuilder;
+    private Command childOf;
+
+    public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder, @Nullable Command childOf) {
+        this.command = commandBase;
+        this.commandSpecBuilder = commandSpecBuilder;
     }
 
-    @Override
-    public String[] aliases() {
-        return null;
+    public Command command() {
+        return command;
     }
 
-    @Override
-    public String permission() {
-        return null;
+    public CommandSpec.Builder commandSpecBuilder() {
+        return commandSpecBuilder;
     }
 
-    @Override
-    public String description() {
-        return null;
-    }
-
-    @Override
-    public CommandElement[] args() {
-        return null;
+    public Command childOf() {
+        return childOf;
     }
 }

@@ -23,29 +23,44 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command;
+package com.xtra.core.command.base;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.CommandElement;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface RegisterCommand {
+import com.xtra.core.command.Command;
 
-    /**
-     * Whether this command should be ran async.
-     * 
-     * @return If this command should run async
-     */
-    boolean async() default false;
+/**
+ * An empty command. Specifying this means no command should be processed for
+ * the specified parameter (aka null where null cannot be used).
+ */
+public class EmptyCommand implements Command {
 
-    /**
-     * The parent for this command. If nothing is specified, this command will
-     * not have a parent command.
-     * 
-     * @return The parent command
-     */
-    Class<? extends Command> childOf() default EmptyCommand.class;
+    @Override
+    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        return null;
+    }
+
+    @Override
+    public String[] aliases() {
+        return null;
+    }
+
+    @Override
+    public String permission() {
+        return null;
+    }
+
+    @Override
+    public String description() {
+        return null;
+    }
+
+    @Override
+    public CommandElement[] args() {
+        return null;
+    }
 }

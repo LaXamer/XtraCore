@@ -23,35 +23,32 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command;
+package com.xtra.core.command.annotation;
 
-import javax.annotation.Nullable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.spongepowered.api.command.spec.CommandSpec;
+import com.xtra.core.command.Command;
+import com.xtra.core.command.base.EmptyCommand;
 
-/**
- * Ties together a command and its appropriate command spec builder.
- */
-public class CommandStore {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface RegisterCommand {
 
-    private Command command;
-    private CommandSpec.Builder commandSpecBuilder;
-    private Command childOf;
+    /**
+     * Whether this command should be ran async.
+     * 
+     * @return If this command should run async
+     */
+    boolean async() default false;
 
-    public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder, @Nullable Command childOf) {
-        this.command = commandBase;
-        this.commandSpecBuilder = commandSpecBuilder;
-    }
-
-    public Command command() {
-        return command;
-    }
-
-    public CommandSpec.Builder commandSpecBuilder() {
-        return commandSpecBuilder;
-    }
-
-    public Command childOf() {
-        return childOf;
-    }
+    /**
+     * The parent for this command. If nothing is specified, this command will
+     * not have a parent command.
+     * 
+     * @return The parent command
+     */
+    Class<? extends Command> childOf() default EmptyCommand.class;
 }

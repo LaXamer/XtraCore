@@ -32,8 +32,8 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
-import com.xtra.core.command.CommandBase;
-import com.xtra.core.command.RegisterCommand;
+import com.xtra.core.command.annotation.RegisterCommand;
+import com.xtra.core.command.base.CommandBase;
 
 public class ReflectionScanner {
 

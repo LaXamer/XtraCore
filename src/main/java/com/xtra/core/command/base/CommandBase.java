@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command;
+package com.xtra.core.command.base;
 
 import java.lang.reflect.Method;
 
@@ -37,6 +37,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
+
+import com.xtra.core.command.Command;
 
 public abstract class CommandBase<T extends CommandSource> implements Command {
     

@@ -30,8 +30,8 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.entity.living.player.Player;
 
-import com.xtra.core.command.CommandBase;
-import com.xtra.core.command.RegisterCommand;
+import com.xtra.core.command.annotation.RegisterCommand;
+import com.xtra.core.command.base.CommandBase;
 
 @RegisterCommand
 public class TestCommand extends CommandBase<Player> {

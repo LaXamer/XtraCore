@@ -32,7 +32,11 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
+import com.xtra.core.command.annotation.RegisterCommand;
+import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.command.base.EmptyCommand;
 import com.xtra.core.util.ReflectionScanner;
+import com.xtra.core.util.store.CommandStore;
 
 /**
  * A simple utility class for automatically retrieving, building and registering
