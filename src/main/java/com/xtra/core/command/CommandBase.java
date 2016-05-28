@@ -25,7 +25,63 @@
 
 package com.xtra.core.command;
 
+import java.lang.reflect.Method;
+
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.source.CommandBlockSource;
+import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.TextMessageException;
 
 public abstract class CommandBase<T extends CommandSource> implements Command {
+    
+    public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
+    
+    @Override
+    public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
+        // Iterate through the methods to find executeCommand()
+        Class<?> type = null;
+        for (Method method : this.getClass().getMethods()) {
+            // Find our executeCommand method
+            if (method.getName().equals("executeCommand")) {
+                // Find one without type erasure :S
+                if (!method.getParameterTypes()[0].equals(CommandSource.class)) {
+                    type = method.getParameterTypes()[0];
+                    break;
+                }
+            }
+        }
+        // It is possible that CommandSource was specified, so if we didn't find one,
+        // then use CommandSource as a default.
+        if (type == null) {
+            type = CommandSource.class;
+        }
+        
+        if (type.equals(Player.class) && !(source instanceof Player)) {
+            source.sendMessage(Text.of(TextColors.RED, "You must be a player to execute this command!"));
+            return CommandResult.empty();
+        } else if (type.equals(ConsoleSource.class) && !(source instanceof ConsoleSource)) {
+            source.sendMessage(Text.of(TextColors.RED, "You must be the console to execute this command!"));
+            return CommandResult.empty();
+        } else if (type.equals(CommandBlockSource.class) && !(source instanceof CommandBlockSource)) {
+            source.sendMessage(Text.of(TextColors.RED, "Only a command block may execute this command!"));
+            return CommandResult.empty();
+        }
+        
+        @SuppressWarnings("unchecked")
+        T src = (T) source;
+        try {
+            return executeCommand(src, args);
+        } catch (TextMessageException e) {
+            src.sendMessage(e.getText());
+        } catch (Exception e2) {
+            e2.printStackTrace();
+        }
+        return CommandResult.empty();
+    }
 }

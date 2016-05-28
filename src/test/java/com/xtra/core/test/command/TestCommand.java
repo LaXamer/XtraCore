@@ -25,9 +25,7 @@
 
 package com.xtra.core.test.command;
 
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.entity.living.player.Player;
@@ -59,7 +57,7 @@ public class TestCommand extends CommandBase<Player> {
     }
 
     @Override
-    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+    public CommandResult executeCommand(Player src, CommandContext args) throws Exception {
         return CommandResult.success();
     }
 }
