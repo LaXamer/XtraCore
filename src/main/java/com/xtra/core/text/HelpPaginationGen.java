@@ -156,17 +156,6 @@ public class HelpPaginationGen {
     }
 
     /**
-     * Returns a list of the commands if more custom handling of the contents of
-     * the pagination list is desired. Using these, you may retrieve information
-     * about the commands, such as their aliases or descriptions.
-     * 
-     * @return The commands
-     */
-    public Set<CommandBase<?>> commands() {
-        return commands;
-    }
-
-    /**
      * Returns the pagination builder for more custom handling if desired.
      * 
      * @return The pagination builder
