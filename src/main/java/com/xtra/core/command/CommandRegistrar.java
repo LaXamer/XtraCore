@@ -68,13 +68,21 @@ public class CommandRegistrar {
     private void initializeCommandSpec(CommandBase<?> command) {
         // Create the initial CommandSpec builder
         CommandSpec.Builder specBuilder = CommandSpec.builder()
-                .permission(command.permission())
-                .description(Text.of(command.description()))
                 .executor(command);
-        // If empty array, no args
-        if (command.args().length != 0) {
-            specBuilder.arguments(command.args());
+
+        // In case null, do not use
+        if (command.permission() != null) {
+            specBuilder.permission(command.permission());
         }
+        if (command.description() != null) {
+            specBuilder.description(Text.of(command.description()));
+        }
+        if (command.args() != null) {
+            if (command.args().length != 0) {
+                specBuilder.arguments(command.args());
+            }
+        }
+
         try {
             // Get the parent command specified in the annotation. If no parent
             // command, then it will return EmptyCommand.

@@ -25,6 +25,8 @@
 
 package com.xtra.core.command;
 
+import javax.annotation.Nullable;
+
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 
@@ -42,19 +44,19 @@ public interface Command extends CommandExecutor {
      * 
      * @return The permission for the command
      */
-    String permission();
+    @Nullable String permission();
 
     /**
      * The description of the command.
      * 
      * @return The command description
      */
-    String description();
+    @Nullable String description();
 
     /**
      * The arguments for the command. Specify an empty array for no arguments.
      * 
      * @return The command arguments
      */
-    CommandElement[] args();
+    @Nullable CommandElement[] args();
 }
