@@ -34,6 +34,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
+import com.xtra.core.Core;
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
@@ -60,8 +61,8 @@ public class HelpPaginationGen {
      * 
      * @param plugin The plugin
      */
-    public HelpPaginationGen(Object plugin) {
-        this.plugin = plugin;
+    public HelpPaginationGen() {
+        this.plugin = Core.plugin();
     }
 
     /**
@@ -70,8 +71,8 @@ public class HelpPaginationGen {
      * @param plugin The plugin
      * @param title The title
      */
-    public HelpPaginationGen(Object plugin, Text title) {
-        this.plugin = plugin;
+    public HelpPaginationGen(Text title) {
+        this.plugin = Core.plugin();
         this.title = title;
     }
 
@@ -82,8 +83,8 @@ public class HelpPaginationGen {
      * @param title The title
      * @param padding The padding
      */
-    public HelpPaginationGen(Object plugin, Text title, Text padding) {
-        this.plugin = plugin;
+    public HelpPaginationGen(Text title, Text padding) {
+        this.plugin = Core.plugin();
         this.title = title;
         this.padding = padding;
     }

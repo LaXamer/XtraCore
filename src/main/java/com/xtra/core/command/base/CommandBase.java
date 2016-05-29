@@ -27,6 +27,7 @@ package com.xtra.core.command.base;
 
 import java.lang.reflect.Method;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -38,9 +39,14 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 
+import com.xtra.core.Core;
 import com.xtra.core.command.Command;
+import com.xtra.core.command.annotation.RegisterCommand;
 
 public abstract class CommandBase<T extends CommandSource> implements Command {
+
+    // For async(), due to anonymous inner class
+    public static CommandResult result;
 
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
 
@@ -77,6 +83,25 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
 
         @SuppressWarnings("unchecked")
         T src = (T) source;
+
+        boolean isAsync = this.getClass().getAnnotation(RegisterCommand.class).async();
+
+        if (isAsync) {
+            Sponge.getScheduler().createTaskBuilder().execute(
+                    task -> {
+                        try {
+                            CommandBase.result = executeCommand(src, args);
+                        } catch (TextMessageException e) {
+                            src.sendMessage(e.getText());
+                            CommandBase.result = CommandResult.empty();
+                        } catch (Exception e2) {
+                            e2.printStackTrace();
+                            CommandBase.result = CommandResult.empty();
+                        }
+                    }).async().submit(Core.plugin());
+            return result;
+        }
+        
         try {
             return executeCommand(src, args);
         } catch (TextMessageException e) {
@@ -84,6 +109,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
         } catch (Exception e2) {
             e2.printStackTrace();
         }
+        // If errored
         return CommandResult.empty();
     }
 }

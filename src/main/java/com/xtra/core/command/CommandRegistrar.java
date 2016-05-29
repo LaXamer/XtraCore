@@ -32,6 +32,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
+import com.xtra.core.Core;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
@@ -48,8 +49,8 @@ public class CommandRegistrar {
     private Set<CommandStore> commandStores = new HashSet<>();
     private Set<CommandBase<?>> commands;
 
-    public CommandRegistrar(Object plugin) {
-        this.plugin = plugin;
+    public CommandRegistrar() {
+        this.plugin = Core.plugin();
     }
 
     public void initialize() {
