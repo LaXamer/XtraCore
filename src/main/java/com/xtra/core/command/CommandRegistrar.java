@@ -36,7 +36,6 @@ import com.xtra.core.Core;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
-import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -55,7 +54,7 @@ public class CommandRegistrar {
 
     public void initialize() {
         // Get the commands for the plugin
-        commands = ReflectionScanner.getCommands(plugin);
+        commands = Core.commands();
         for (CommandBase<?> command : commands) {
             initializeCommandSpec(command);
         }

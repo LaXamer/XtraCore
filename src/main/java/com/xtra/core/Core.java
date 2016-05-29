@@ -25,15 +25,27 @@
 
 package com.xtra.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.util.ReflectionScanner;
+
 public class Core {
 
     private static Object plugin;
+    private static Set<CommandBase<?>> commands = new HashSet<>();
 
     public static void initialize(Object plugin) {
         Core.plugin = plugin;
+        commands = ReflectionScanner.getCommands(plugin);
     }
 
     public static Object plugin() {
         return plugin;
+    }
+    
+    public static Set<CommandBase<?>> commands() {
+        return commands;
     }
 }

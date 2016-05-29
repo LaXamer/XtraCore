@@ -39,7 +39,6 @@ import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
-import com.xtra.core.util.ReflectionScanner;
 
 /**
  * A base class for creating {@link PaginationList}s for the commands of the
@@ -47,7 +46,6 @@ import com.xtra.core.util.ReflectionScanner;
  */
 public class HelpPaginationGen {
 
-    private Object plugin;
     private PaginationList.Builder paginationBuilder;
     private Text title;
     private Text padding;
@@ -58,11 +56,8 @@ public class HelpPaginationGen {
      * Creates a basis class for generating a {@link PaginationList} for the
      * plugin's commands help list. Further configuration is provided through
      * {@link HelpPaginationGen#paginationBuilder()}.
-     * 
-     * @param plugin The plugin
      */
     public HelpPaginationGen() {
-        this.plugin = Core.plugin();
     }
 
     /**
@@ -72,7 +67,6 @@ public class HelpPaginationGen {
      * @param title The title
      */
     public HelpPaginationGen(Text title) {
-        this.plugin = Core.plugin();
         this.title = title;
     }
 
@@ -84,7 +78,6 @@ public class HelpPaginationGen {
      * @param padding The padding
      */
     public HelpPaginationGen(Text title, Text padding) {
-        this.plugin = Core.plugin();
         this.title = title;
         this.padding = padding;
     }
@@ -94,7 +87,7 @@ public class HelpPaginationGen {
      * method before any others in {@link HelpPaginationGen}.
      */
     public void initializeList() {
-        commands = ReflectionScanner.getCommands(plugin);
+        commands = Core.commands();
         paginationBuilder = PaginationList.builder();
         generateContents();
     }
