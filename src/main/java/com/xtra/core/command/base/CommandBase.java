@@ -101,7 +101,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
                     }).async().submit(Core.plugin());
             return result;
         }
-        
+
         try {
             return executeCommand(src, args);
         } catch (TextMessageException e) {
