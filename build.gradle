@@ -1,9 +1,7 @@
 plugins {
     id 'java'
-    id 'eclipse'
     id 'maven'
     id 'net.minecrell.licenser' version '0.2'
-    id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
 
 sourceCompatibility = '1.8'
@@ -23,13 +21,14 @@ repositories {
     }
 }
 
-dependencies {
-    compile "org.spongepowered:spongeapi:4.1.0-SNAPSHOT"
-    shadow "org.reflections:reflections:0.9.10"
+configurations {
+    shade
+    compile.extendsFrom shade
 }
 
-configurations {
-    compile.extendsFrom shadow
+dependencies {
+    compile "org.spongepowered:spongeapi:4.1.0-SNAPSHOT"
+    shade "org.reflections:reflections:0.9.10"
 }
 
 license {
@@ -43,17 +42,10 @@ license {
     style.java = 'JAVADOC'
 }
 
-tasks.getByPath(':jar').enabled = false
-shadowJar {
-    dependencies {
-        include(dependency('com.github.XtraStudio:XtraCore:-SNAPSHOT'))
+jar {
+    configurations.shade.copyRecursive().setTransitive(false).each {artifact ->
+        from(zipTree(artifact))
     }
-    configurations = [project.configurations.shadow]
-    classifier = ''
-}
-
-artifacts {
-    archives shadowJar
 }
 
 task wrapper(type: Wrapper) {
