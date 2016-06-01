@@ -28,7 +28,11 @@ package com.xtra.core;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.spongepowered.api.text.Text;
+
+import com.xtra.core.command.CommandRegistrar;
 import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.text.HelpPaginationGen;
 import com.xtra.core.util.ReflectionScanner;
 
 public class Core {
@@ -36,15 +40,78 @@ public class Core {
     private static Object plugin;
     private static Set<CommandBase<?>> commands = new HashSet<>();
 
-    public static void initialize(Object plugin) {
+    /**
+     * Initializes the base core class for function.
+     * 
+     * <p>CALL THIS BEFORE ATTEMPTING TO DO ANYTHING ELSE WITH XTRACORE OR
+     * EVERYTHING WILL BREAK.</p>
+     * 
+     * @param plugin The plugin class
+     * @return The core class
+     */
+    public static Core initialize(Object plugin) {
         Core.plugin = plugin;
-        commands = ReflectionScanner.getCommands(plugin);
+        Core.commands = ReflectionScanner.getCommands(plugin);
+        return new Core();
     }
 
+    /**
+     * Initializes the {@link CommandRegistrar}.
+     * 
+     * @return A command registrar
+     * @see CommandRegistrar#create(Object)
+     */
+    public CommandRegistrar initializeCommandRegistrar() {
+        return CommandRegistrar.create(this);
+    }
+
+    /**
+     * Initializes the {@link HelpPaginationGen}.
+     * 
+     * @return A help pagination gen
+     * @see HelpPaginationGen#create(Object)
+     */
+    public HelpPaginationGen initializeHelpPaginationGen() {
+        return HelpPaginationGen.create(this);
+    }
+
+    /**
+     * Initializes the {@link HelpPaginationGen}.
+     * 
+     * @param title The title of the pagination list
+     * @return A help pagination gen
+     * @see HelpPaginationGen#create(Object, Text)
+     */
+    public HelpPaginationGen initializeHelpPaginationGen(Text title) {
+        return HelpPaginationGen.create(this);
+    }
+
+    /**
+     * Initializes the {@link HelpPaginationGen}.
+     * 
+     * @param title The title of the pagination list
+     * @param padding The padding of the pagination list
+     * @return A help pagination gen
+     * @see HelpPaginationGen#create(Object, Text, Text)
+     */
+    public HelpPaginationGen initializeHelpPaginationGen(Text title, Text padding) {
+        return HelpPaginationGen.create(this);
+    }
+
+    /**
+     * Gets the stored plugin object from the Core.
+     * 
+     * @return The plugin object
+     */
     public static Object plugin() {
         return plugin;
     }
 
+    /**
+     * Gets the commands for this instance.
+     * 
+     * @return The commands
+     */
     public static Set<CommandBase<?>> commands() {
         return commands;
     }

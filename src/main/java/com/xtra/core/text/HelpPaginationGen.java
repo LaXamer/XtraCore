@@ -58,12 +58,16 @@ public class HelpPaginationGen {
     private ChildBehavior childBehavior;
     private CommandOrdering commandOrdering;
 
+    private HelpPaginationGen() {
+    }
+
     /**
      * Creates a basis class for generating a {@link PaginationList} for the
      * plugin's commands help list. Further configuration is provided through
      * {@link HelpPaginationGen#paginationBuilder()}.
      */
-    public HelpPaginationGen() {
+    public static HelpPaginationGen create(Object plugin) {
+        return new HelpPaginationGen().init();
     }
 
     /**
@@ -72,8 +76,10 @@ public class HelpPaginationGen {
      * @param plugin The plugin
      * @param title The title
      */
-    public HelpPaginationGen(Text title) {
-        this.title = title;
+    public static HelpPaginationGen create(Object plugin, Text title) {
+        HelpPaginationGen gen = new HelpPaginationGen();
+        gen.title = title;
+        return gen.init();
     }
 
     /**
@@ -83,22 +89,25 @@ public class HelpPaginationGen {
      * @param title The title
      * @param padding The padding
      */
-    public HelpPaginationGen(Text title, Text padding) {
-        this.title = title;
-        this.padding = padding;
+    public static HelpPaginationGen create(Object plugin, Text title, Text padding) {
+        HelpPaginationGen gen = new HelpPaginationGen();
+        gen.title = title;
+        gen.padding = padding;
+        return gen.init();
     }
 
     /**
      * Initializes the basis for creation of a {@link PaginationList}. Call this
      * method before any others in {@link HelpPaginationGen}.
      */
-    public void initializeList() {
+    private HelpPaginationGen init() {
         commands = new ArrayList<>();
         for (CommandBase<?> command : Core.commands()) {
             commands.add(new HelpContentsStore(command, false));
         }
         paginationBuilder = PaginationList.builder();
         setDefaults();
+        return this;
     }
 
     /**
@@ -136,9 +145,11 @@ public class HelpPaginationGen {
      * green.</p>
      * 
      * @param color The color to set this to
+     * @return The object, for chaining
      */
-    public void setCommandColor(TextColor color) {
+    public HelpPaginationGen setCommandColor(TextColor color) {
         this.commandColor = color;
+        return this;
     }
 
     /**
@@ -153,9 +164,94 @@ public class HelpPaginationGen {
      * gold.</p>
      * 
      * @param color The color to set this to
+     * @return The object, for chaining
      */
-    public void setDescriptionColor(TextColor color) {
+    public HelpPaginationGen setDescriptionColor(TextColor color) {
         this.descriptionColor = color;
+        return this;
+    }
+
+    /**
+     * Specifies if a specific command should be ignored in the help list. Use
+     * this if you want better control over what goes into the help list besides
+     * what {@link ChildBehavior} can offer.
+     * 
+     * @param cmd The command to be ignored in the help list
+     * @return The object, for chaining
+     */
+    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T> cmd) {
+        for (HelpContentsStore store : commands) {
+            if (cmd.isInstance(store.command())) {
+                store.setIgnore(true);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Specifies if a group of commands should be ignored in the help list. Use
+     * this if you want better control over what goes into the help list besides
+     * what {@link ChildBehavior} can offer.
+     * 
+     * @param cmds The commands to be ignored
+     * @return The object, for chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T>... cmds) {
+        for (Class<T> cmd : cmds) {
+            try {
+                // We check for type safety here (note the suppress warnings).
+                if (cmd.newInstance() instanceof Command) {
+                    specifyCommandShouldBeIgnored(cmd);
+                }
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Specifies the behavior of child commands in the help list. See
+     * {@link ChildBehavior} for more information.
+     * 
+     * @param childBehavior The child behavior
+     * @return The object, for chaining
+     */
+    public HelpPaginationGen specifyChildBehavior(ChildBehavior childBehavior) {
+        this.childBehavior = childBehavior;
+        return this;
+    }
+
+    /**
+     * Specifies how commands should be ordered in the help list. See
+     * {@link CommandOrdering} for more information.
+     * 
+     * @param commandOrdering The command ordering
+     * @return The object, for chaining
+     */
+    public HelpPaginationGen specifyCommandOrdering(CommandOrdering commandOrdering) {
+        this.commandOrdering = commandOrdering;
+        return this;
+    }
+
+    /**
+     * Returns the pagination builder for more custom handling if desired.
+     * 
+     * @return The pagination builder
+     */
+    public PaginationList.Builder paginationBuilder() {
+        return paginationBuilder;
+    }
+
+    /**
+     * Gets the default list of contents for this pagination list. Use this for
+     * modification of the contents if necessary.
+     * 
+     * @return The default contents
+     */
+    public List<Text> contents() {
+        return contents;
     }
 
     /**
@@ -166,8 +262,10 @@ public class HelpPaginationGen {
      * <p>This method is called by XtraCore automatically, however you may call
      * it yourself if you wish to refresh the contents after making changes
      * later in the plugin cycle.</p>
+     * 
+     * @return The object, for chaining
      */
-    public void generateContents() {
+    public HelpPaginationGen generateContents() {
         contents = new ArrayList<>();
         if (childBehavior == null) {
             childBehavior = ChildBehavior.BOTH;
@@ -200,62 +298,7 @@ public class HelpPaginationGen {
             }
         }
         paginationBuilder.contents(contents);
-    }
-
-    /**
-     * Specifies if a specific command should be ignored in the help list. Use
-     * this if you want better control over what goes into the help list besides
-     * what {@link ChildBehavior} can offer.
-     * 
-     * @param cmd The command to be ignored in the help list
-     */
-    public <T extends Command> void specifyCommandShouldBeIgnored(Class<T> cmd) {
-        for (HelpContentsStore store : commands) {
-            if (cmd.isInstance(store.command())) {
-                store.setIgnore(true);
-            }
-        }
-    }
-
-    /**
-     * Specifies if a group of commands should be ignored in the help list. Use
-     * this if you want better control over what goes into the help list besides
-     * what {@link ChildBehavior} can offer.
-     * 
-     * @param cmds The commands to be ignored
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Command> void specifyCommandShouldBeIgnored(Class<T>... cmds) {
-        for (Class<T> cmd : cmds) {
-            try {
-                // We check for type safety here (note the suppress warnings).
-                if (cmd.newInstance() instanceof Command) {
-                    specifyCommandShouldBeIgnored(cmd);
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Specifies the behavior of child commands in the help list. See
-     * {@link ChildBehavior} for more information.
-     * 
-     * @param childBehavior The child behavior
-     */
-    public void specifyChildBehavior(ChildBehavior childBehavior) {
-        this.childBehavior = childBehavior;
-    }
-
-    /**
-     * Specifies how commands should be ordered in the help list. See
-     * {@link CommandOrdering} for more information.
-     * 
-     * @param commandOrdering The command ordering
-     */
-    public void specifyCommandOrdering(CommandOrdering commandOrdering) {
-        this.commandOrdering = commandOrdering;
+        return this;
     }
 
     /**
@@ -274,25 +317,6 @@ public class HelpPaginationGen {
         } else {
             paginationBuilder.padding(Text.of("-="));
         }
-    }
-
-    /**
-     * Returns the pagination builder for more custom handling if desired.
-     * 
-     * @return The pagination builder
-     */
-    public PaginationList.Builder paginationBuilder() {
-        return paginationBuilder;
-    }
-
-    /**
-     * Gets the default list of contents for this pagination list. Use this for
-     * modification of the contents if necessary.
-     * 
-     * @return The default contents
-     */
-    public List<Text> contents() {
-        return contents;
     }
 
     /**

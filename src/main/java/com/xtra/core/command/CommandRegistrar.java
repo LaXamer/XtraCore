@@ -46,22 +46,30 @@ public class CommandRegistrar {
 
     private Object plugin;
     private Set<CommandStore> commandStores = new HashSet<>();
-    private Set<CommandBase<?>> commands;
 
-    public CommandRegistrar() {
-        this.plugin = Core.plugin();
+    private CommandRegistrar() {
     }
 
-    public void initialize() {
-        // Get the commands for the plugin
-        commands = Core.commands();
-        for (CommandBase<?> command : commands) {
+    /**
+     * Creates and initializes a {@link CommandRegistrar}.
+     * 
+     * @param plugin The plugin
+     * @return The new command registrar
+     */
+    public static CommandRegistrar create(Object plugin) {
+        return new CommandRegistrar().init(plugin);
+    }
+
+    private CommandRegistrar init(Object plugin) {
+        this.plugin = plugin;
+        for (CommandBase<?> command : Core.commands()) {
             initializeCommandSpec(command);
         }
         addChildCommands();
         for (CommandStore command : this.commandStores) {
             buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
         }
+        return this;
     }
 
     private void initializeCommandSpec(CommandBase<?> command) {
