@@ -36,9 +36,8 @@ import org.spongepowered.api.text.format.TextColors;
 
 import com.xtra.core.Core;
 import com.xtra.core.command.Command;
-import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
-import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.store.HelpContentsStore;
 
@@ -170,20 +169,31 @@ public class HelpPaginationGen {
      */
     public void generateContents() {
         contents = new ArrayList<>();
+        if (childBehavior == null) {
+            childBehavior = ChildBehavior.BOTH;
+        }
         for (HelpContentsStore command : commands) {
             if (!command.ignore()) {
                 Command cmd = command.command();
-                String parentCommandAlias = null;
-                try {
-                    Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
-                    Command parentCommand2 = parentCommand.newInstance();
-                    if (!(parentCommand2 instanceof EmptyCommand)) {
-                        parentCommandAlias = parentCommand2.aliases()[0];
-                    }
-                } catch (InstantiationException | IllegalAccessException e) {
-                    e.printStackTrace();
+                Command parentCommand = CommandHelper.getParentCommand(cmd);
+                String commandString = null;
+                switch (childBehavior) {
+                    case IGNORE_PARENT:
+                        // If the child commands is empty, then this is not a
+                        // parent command
+                        if (CommandHelper.getChildCommands(command.command()).isEmpty()) {
+                            commandString = "/" + cmd.aliases()[0];
+                        }
+                    case IGNORE_CHILD:
+                        // If the parent is null, then there is no parent
+                        // command. Therefore this command is not a child.
+                        if (parentCommand == null) {
+                            commandString = "/" + cmd.aliases()[0];
+                        }
+                    case BOTH:
+                        // Don't ignore anything
+                        commandString = parentCommand != null ? "/" + parentCommand.aliases()[0] + " " + cmd.aliases()[0] : "/" + cmd.aliases()[0];
                 }
-                String commandString = parentCommandAlias != null ? "/" + parentCommandAlias + " " + cmd.aliases()[0] : "/" + cmd.aliases()[0];
                 TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
                 TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
                 contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));

@@ -44,7 +44,7 @@ public class Core {
     public static Object plugin() {
         return plugin;
     }
-    
+
     public static Set<CommandBase<?>> commands() {
         return commands;
     }
