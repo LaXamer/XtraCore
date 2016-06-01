@@ -25,6 +25,7 @@
 
 package com.xtra.core.command;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -88,16 +89,9 @@ public class CommandRegistrar {
             Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
             Command parentCommand2 = parentCommand.newInstance();
             if (!(parentCommand2 instanceof EmptyCommand)) {
-                // newInstance() isn't reliable for checking equals() later, so
-                // get the command from a for loop on this.commands
-                for (CommandBase<?> command2 : commands) {
-                    // Attempt to match aliases
-                    // TODO: better solution than matching aliases, could have
-                    // bugs
-                    if (parentCommand2.aliases()[0].equals(command2.aliases()[0])) {
-                        commandStores.add(new CommandStore(command, specBuilder, command2));
-                        break;
-                    }
+                Command equivalentCommand = getEquivalentCommand(parentCommand2);
+                if (equivalentCommand != null) {
+                    commandStores.add(new CommandStore(command, specBuilder, equivalentCommand));
                 }
             } else {
                 commandStores.add(new CommandStore(command, specBuilder, null));
@@ -105,6 +99,24 @@ public class CommandRegistrar {
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Since calling {@link Class#newInstance()} isn't reliable for a proper
+     * equals check, we need to match up the command properties such as the
+     * aliases, description, etc. This way we can get a proper {@link Command}.
+     * 
+     * @param command The command to get the equivalent of
+     * @return The correct command for an equals check
+     */
+    private Command getEquivalentCommand(Command command) {
+        for (CommandBase<?> command2 : commands) {
+            if (Arrays.equals(command.aliases(), command2.aliases()) && command.permission().equals(command2.permission())
+                    && command.description().equals(command2.description()) && Arrays.equals(command.args(), command2.args())) {
+                return command2;
+            }
+        }
+        return null;
     }
 
     private void addChildCommands() {
