@@ -27,11 +27,11 @@ package com.xtra.core.text;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.xtra.core.Core;
@@ -39,18 +39,25 @@ import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.util.ReflectionScanner;
+import com.xtra.core.util.store.HelpContentsStore;
 
 /**
  * A base class for creating {@link PaginationList}s for the commands of the
- * plugin.
+ * plugin. Use of this class is optional, however it is recommended if creating
+ * a help list for your plugin.
  */
 public class HelpPaginationGen {
 
     private PaginationList.Builder paginationBuilder;
     private Text title;
     private Text padding;
-    private Set<CommandBase<?>> commands;
+    private List<HelpContentsStore> commands;
     private List<Text> contents;
+    private TextColor commandColor;
+    private TextColor descriptionColor;
+    private ChildBehavior childBehavior;
+    private CommandOrdering commandOrdering;
 
     /**
      * Creates a basis class for generating a {@link PaginationList} for the
@@ -87,9 +94,12 @@ public class HelpPaginationGen {
      * method before any others in {@link HelpPaginationGen}.
      */
     public void initializeList() {
-        commands = Core.commands();
+        commands = new ArrayList<>();
+        for (CommandBase<?> command : Core.commands()) {
+            commands.add(new HelpContentsStore(command, false));
+        }
         paginationBuilder = PaginationList.builder();
-        generateContents();
+        setDefaults();
     }
 
     /**
@@ -98,7 +108,9 @@ public class HelpPaginationGen {
      * @return The pagination list
      */
     public PaginationList generateList() {
-        setDefaults();
+        if (contents == null) {
+            generateContents();
+        }
         return paginationBuilder.build();
     }
 
@@ -108,49 +120,148 @@ public class HelpPaginationGen {
      * @param receiver The receiver to send this list to
      */
     public void generateList(MessageReceiver receiver) {
-        setDefaults();
+        if (contents == null) {
+            generateContents();
+        }
         paginationBuilder.sendTo(receiver);
+    }
+
+    /**
+     * Sets it so that, when the contents are generated, the color part of the
+     * content of a command comes out this specified {@link TextColor}.
+     * 
+     * <p>Ex: /my-command along with the dash (-) after it in the pagination
+     * list will come out yellow if {@code TextColors.YELLOW} is specified.</p>
+     * 
+     * <p>If this method is not called, then the command will default to
+     * green.</p>
+     * 
+     * @param color The color to set this to
+     */
+    public void setCommandColor(TextColor color) {
+        this.commandColor = color;
+    }
+
+    /**
+     * Sets it so that, when the contents are generated, the color part of the
+     * content of a description comes out this specified {@link TextColor}.
+     * 
+     * <p>Ex: If the description states 'My command description', then the color
+     * specified here will come out in the description of a command in the help
+     * pagination list.</p>
+     * 
+     * <p>If this method is not called, then the description will default to
+     * gold.</p>
+     * 
+     * @param color The color to set this to
+     */
+    public void setDescriptionColor(TextColor color) {
+        this.descriptionColor = color;
     }
 
     /**
      * A default implementation of generating the contents for the pagination
      * list. This method should usually suffice most plugins, unless custom
      * handling over the contents is desired.
+     * 
+     * <p>This method is called by XtraCore automatically, however you may call
+     * it yourself if you wish to refresh the contents after making changes
+     * later in the plugin cycle.</p>
      */
-    private void generateContents() {
+    public void generateContents() {
         contents = new ArrayList<>();
-        for (CommandBase<?> command : commands) {
-            String parentCommandAlias = null;
-            try {
-                Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
-                Command parentCommand2 = parentCommand.newInstance();
-                if (!(parentCommand2 instanceof EmptyCommand)) {
-                    parentCommandAlias = parentCommand2.aliases()[0];
+        for (HelpContentsStore command : commands) {
+            if (!command.ignore()) {
+                Command cmd = command.command();
+                String parentCommandAlias = null;
+                try {
+                    Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
+                    Command parentCommand2 = parentCommand.newInstance();
+                    if (!(parentCommand2 instanceof EmptyCommand)) {
+                        parentCommandAlias = parentCommand2.aliases()[0];
+                    }
+                } catch (InstantiationException | IllegalAccessException e) {
+                    e.printStackTrace();
                 }
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                String commandString = parentCommandAlias != null ? "/" + parentCommandAlias + " " + cmd.aliases()[0] : "/" + cmd.aliases()[0];
+                TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
+                TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
+                contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
             }
-            String commandString = parentCommandAlias != null ? "/" + parentCommandAlias + " " + command.aliases()[0] : "/" + command.aliases()[0];
-            contents.add(Text.of(TextColors.GREEN, commandString, " - ", TextColors.GOLD, command.description()));
         }
         paginationBuilder.contents(contents);
     }
 
     /**
+     * Specifies if a specific command should be ignored in the help list. Use
+     * this if you want better control over what goes into the help list besides
+     * what {@link ChildBehavior} can offer.
+     * 
+     * @param cmd The command to be ignored in the help list
+     */
+    public <T extends Command> void specifyCommandShouldBeIgnored(Class<T> cmd) {
+        for (HelpContentsStore store : commands) {
+            if (cmd.isInstance(store.command())) {
+                store.setIgnore(true);
+            }
+        }
+    }
+
+    /**
+     * Specifies if a group of commands should be ignored in the help list. Use
+     * this if you want better control over what goes into the help list besides
+     * what {@link ChildBehavior} can offer.
+     * 
+     * @param cmds The commands to be ignored
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends Command> void specifyCommandShouldBeIgnored(Class<T>... cmds) {
+        for (Class<T> cmd : cmds) {
+            try {
+                // We check for type safety here (note the suppress warnings).
+                if (cmd.newInstance() instanceof Command) {
+                    specifyCommandShouldBeIgnored(cmd);
+                }
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Specifies the behavior of child commands in the help list. See
+     * {@link ChildBehavior} for more information.
+     * 
+     * @param childBehavior The child behavior
+     */
+    public void specifyChildBehavior(ChildBehavior childBehavior) {
+        this.childBehavior = childBehavior;
+    }
+
+    /**
+     * Specifies how commands should be ordered in the help list. See
+     * {@link CommandOrdering} for more information.
+     * 
+     * @param commandOrdering The command ordering
+     */
+    public void specifyCommandOrdering(CommandOrdering commandOrdering) {
+        this.commandOrdering = commandOrdering;
+    }
+
+    /**
      * Set the defaults if ones were not provided, or use the ones that were
-     * provided.
+     * provided. These can be overridden through the pagination builder itself
+     * {@link HelpPaginationGen#paginationBuilder()}.
      */
     private void setDefaults() {
         if (title != null) {
             paginationBuilder.title(title);
         } else {
-            // Default, dev was too lazy to set their own
             paginationBuilder.title(Text.of(TextColors.GOLD, "Command List"));
         }
         if (padding != null) {
             paginationBuilder.padding(padding);
         } else {
-            // Same here
             paginationBuilder.padding(Text.of("-="));
         }
     }
@@ -172,5 +283,74 @@ public class HelpPaginationGen {
      */
     public List<Text> contents() {
         return contents;
+    }
+
+    /**
+     * How the pagination list should treat child commands when registering
+     * commands to the help list.
+     */
+    public enum ChildBehavior {
+
+        /*
+         * If child commands should be ignored in the help list.
+         */
+        IGNORE_CHILD,
+
+        /**
+         * If parent commands should be ignored in the help list.
+         */
+        IGNORE_PARENT,
+
+        /**
+         * If both should exist in the help list.
+         */
+        BOTH;
+    }
+
+    /**
+     * How commands should be ordered in the help list.
+     */
+    public enum CommandOrdering {
+
+        /**
+         * Commands will be ordered alphabetically (a-z) in the help list.
+         */
+        A_Z,
+
+        /**
+         * Commands will be ordered alphabetically backwards (z-a) in the help
+         * list.
+         */
+        Z_A,
+
+        /**
+         * Commands will be ordered with parent commands coming first and then
+         * ordered alphabetically (a-z) in the help list.
+         */
+        PARENT_COMMANDS_FIRST_A_Z,
+
+        /**
+         * Commands will be ordered with parent commands coming first and then
+         * ordered alphabetically backwards (z-a) in the help list.
+         */
+        PARENT_COMMANDS_FIRST_Z_A,
+
+        /**
+         * Commands will be ordered with child commands coming first and then
+         * ordered alphabetically (a-z) in the help list.
+         */
+        CHILD_COMMANDS_FIRST_A_Z,
+
+        /**
+         * Commands will be ordered with child commands coming first and then
+         * ordered alphabetically backwards (z-a) in the help list.
+         */
+        CHILD_COMMANDS_FIRST_Z_A,
+
+        /**
+         * Commands will be ordered by how the {@link ReflectionScanner} reads
+         * them.
+         */
+        DEFAULT;
     }
 }

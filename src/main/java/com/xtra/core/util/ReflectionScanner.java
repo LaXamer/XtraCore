@@ -35,6 +35,10 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 
+/**
+ * A class that uses reflection to scan a plugin for information, such as the
+ * plugin's commands.
+ */
 public class ReflectionScanner {
 
     /**
