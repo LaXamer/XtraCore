@@ -47,14 +47,14 @@ public class CommandStore {
     }
 
     public Command command() {
-        return command;
+        return this.command;
     }
 
     public CommandSpec.Builder commandSpecBuilder() {
-        return commandSpecBuilder;
+        return this.commandSpecBuilder;
     }
 
     public Command childOf() {
-        return childOf;
+        return this.childOf;
     }
 }

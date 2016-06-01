@@ -63,19 +63,18 @@ public class CommandRegistrar {
     private CommandRegistrar init(Object plugin) {
         this.plugin = plugin;
         for (CommandBase<?> command : Core.commands()) {
-            initializeCommandSpec(command);
+            this.initializeCommandSpec(command);
         }
-        addChildCommands();
+        this.addChildCommands();
         for (CommandStore command : this.commandStores) {
-            buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
+            this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
         }
         return this;
     }
 
     private void initializeCommandSpec(CommandBase<?> command) {
         // Create the initial CommandSpec builder
-        CommandSpec.Builder specBuilder = CommandSpec.builder()
-                .executor(command);
+        CommandSpec.Builder specBuilder = CommandSpec.builder().executor(command);
 
         // In case null, do not use
         if (command.permission() != null) {
@@ -92,19 +91,19 @@ public class CommandRegistrar {
 
         Command parentCommand = CommandHelper.getParentCommand(command);
         if (parentCommand != null) {
-            commandStores.add(new CommandStore(command, specBuilder, parentCommand));
+            this.commandStores.add(new CommandStore(command, specBuilder, parentCommand));
         } else {
-            commandStores.add(new CommandStore(command, specBuilder, null));
+            this.commandStores.add(new CommandStore(command, specBuilder, null));
         }
     }
 
     private void addChildCommands() {
         // Go through the commands to find any child commands
-        for (CommandStore commandStore : commandStores) {
+        for (CommandStore commandStore : this.commandStores) {
             if (commandStore.childOf() != null) {
                 if (!(commandStore.childOf() instanceof EmptyCommand)) {
                     // Iterate through to find the parent
-                    for (CommandStore commandStore2 : commandStores) {
+                    for (CommandStore commandStore2 : this.commandStores) {
                         if (commandStore2.command().equals(commandStore.childOf())) {
                             commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
@@ -121,6 +120,6 @@ public class CommandRegistrar {
      * @param command The command
      */
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
-        Sponge.getCommandManager().register(plugin, commandSpec.build(), command.aliases());
+        Sponge.getCommandManager().register(this.plugin, commandSpec.build(), command.aliases());
     }
 }

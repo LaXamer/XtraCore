@@ -101,12 +101,12 @@ public class HelpPaginationGen {
      * method before any others in {@link HelpPaginationGen}.
      */
     private HelpPaginationGen init() {
-        commands = new ArrayList<>();
+        this.commands = new ArrayList<>();
         for (CommandBase<?> command : Core.commands()) {
-            commands.add(new HelpContentsStore(command, false));
+            this.commands.add(new HelpContentsStore(command, false));
         }
-        paginationBuilder = PaginationList.builder();
-        setDefaults();
+        this.paginationBuilder = PaginationList.builder();
+        this.setDefaults();
         return this;
     }
 
@@ -116,10 +116,10 @@ public class HelpPaginationGen {
      * @return The pagination list
      */
     public PaginationList generateList() {
-        if (contents == null) {
-            generateContents();
+        if (this.contents == null) {
+            this.generateContents();
         }
-        return paginationBuilder.build();
+        return this.paginationBuilder.build();
     }
 
     /**
@@ -128,10 +128,10 @@ public class HelpPaginationGen {
      * @param receiver The receiver to send this list to
      */
     public void generateList(MessageReceiver receiver) {
-        if (contents == null) {
-            generateContents();
+        if (this.contents == null) {
+            this.generateContents();
         }
-        paginationBuilder.sendTo(receiver);
+        this.paginationBuilder.sendTo(receiver);
     }
 
     /**
@@ -180,7 +180,7 @@ public class HelpPaginationGen {
      * @return The object, for chaining
      */
     public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T> cmd) {
-        for (HelpContentsStore store : commands) {
+        for (HelpContentsStore store : this.commands) {
             if (cmd.isInstance(store.command())) {
                 store.setIgnore(true);
             }
@@ -202,7 +202,7 @@ public class HelpPaginationGen {
             try {
                 // We check for type safety here (note the suppress warnings).
                 if (cmd.newInstance() instanceof Command) {
-                    specifyCommandShouldBeIgnored(cmd);
+                    this.specifyCommandShouldBeIgnored(cmd);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
@@ -241,7 +241,7 @@ public class HelpPaginationGen {
      * @return The pagination builder
      */
     public PaginationList.Builder paginationBuilder() {
-        return paginationBuilder;
+        return this.paginationBuilder;
     }
 
     /**
@@ -251,7 +251,7 @@ public class HelpPaginationGen {
      * @return The default contents
      */
     public List<Text> contents() {
-        return contents;
+        return this.contents;
     }
 
     /**
@@ -266,16 +266,16 @@ public class HelpPaginationGen {
      * @return The object, for chaining
      */
     public HelpPaginationGen generateContents() {
-        contents = new ArrayList<>();
-        if (childBehavior == null) {
-            childBehavior = ChildBehavior.BOTH;
+        this.contents = new ArrayList<>();
+        if (this.childBehavior == null) {
+            this.childBehavior = ChildBehavior.BOTH;
         }
-        for (HelpContentsStore command : commands) {
+        for (HelpContentsStore command : this.commands) {
             if (!command.ignore()) {
                 Command cmd = command.command();
                 Command parentCommand = CommandHelper.getParentCommand(cmd);
                 String commandString = null;
-                switch (childBehavior) {
+                switch (this.childBehavior) {
                     case IGNORE_PARENT:
                         // If the child commands is empty, then this is not a
                         // parent command
@@ -294,10 +294,10 @@ public class HelpPaginationGen {
                 }
                 TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
                 TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
-                contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
+                this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
             }
         }
-        paginationBuilder.contents(contents);
+        this.paginationBuilder.contents(contents);
         return this;
     }
 
@@ -307,15 +307,15 @@ public class HelpPaginationGen {
      * {@link HelpPaginationGen#paginationBuilder()}.
      */
     private void setDefaults() {
-        if (title != null) {
-            paginationBuilder.title(title);
+        if (this.title != null) {
+            this.paginationBuilder.title(this.title);
         } else {
-            paginationBuilder.title(Text.of(TextColors.GOLD, "Command List"));
+            this.paginationBuilder.title(Text.of(TextColors.GOLD, "Command List"));
         }
-        if (padding != null) {
-            paginationBuilder.padding(padding);
+        if (this.padding != null) {
+            this.paginationBuilder.padding(padding);
         } else {
-            paginationBuilder.padding(Text.of("-="));
+            this.paginationBuilder.padding(Text.of("-="));
         }
     }
 

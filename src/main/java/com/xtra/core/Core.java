@@ -104,7 +104,7 @@ public class Core {
      * @return The plugin object
      */
     public static Object plugin() {
-        return plugin;
+        return Core.plugin;
     }
 
     /**
@@ -113,6 +113,6 @@ public class Core {
      * @return The commands
      */
     public static Set<CommandBase<?>> commands() {
-        return commands;
+        return Core.commands;
     }
 }

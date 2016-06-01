@@ -90,7 +90,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
                         try {
-                            CommandBase.result = executeCommand(src, args);
+                            CommandBase.result = this.executeCommand(src, args);
                         } catch (TextMessageException e) {
                             src.sendMessage(e.getText());
                             CommandBase.result = CommandResult.empty();
@@ -99,11 +99,11 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
                             CommandBase.result = CommandResult.empty();
                         }
                     }).async().submit(Core.plugin());
-            return result;
+            return CommandBase.result;
         }
 
         try {
-            return executeCommand(src, args);
+            return this.executeCommand(src, args);
         } catch (TextMessageException e) {
             src.sendMessage(e.getText());
         } catch (Exception e2) {
