@@ -65,6 +65,12 @@ public class CommandHelper {
         return childCommands;
     }
 
+    /**
+     * Gets the parent command of this command, or null if one isn't specified.
+     * 
+     * @param command The child command to get the parent of
+     * @return The parent command
+     */
     public static Command getParentCommand(Command command) {
         try {
             Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();

@@ -25,7 +25,6 @@
 
 package com.xtra.core.command;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,9 +33,9 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
 import com.xtra.core.Core;
-import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -83,40 +82,12 @@ public class CommandRegistrar {
             }
         }
 
-        try {
-            // Get the parent command specified in the annotation. If no parent
-            // command, then it will return EmptyCommand.
-            Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
-            Command parentCommand2 = parentCommand.newInstance();
-            if (!(parentCommand2 instanceof EmptyCommand)) {
-                Command equivalentCommand = getEquivalentCommand(parentCommand2);
-                if (equivalentCommand != null) {
-                    commandStores.add(new CommandStore(command, specBuilder, equivalentCommand));
-                }
-            } else {
-                commandStores.add(new CommandStore(command, specBuilder, null));
-            }
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+        Command parentCommand = CommandHelper.getParentCommand(command);
+        if (parentCommand != null) {
+            commandStores.add(new CommandStore(command, specBuilder, parentCommand));
+        } else {
+            commandStores.add(new CommandStore(command, specBuilder, null));
         }
-    }
-
-    /**
-     * Since calling {@link Class#newInstance()} isn't reliable for a proper
-     * equals check, we need to match up the command properties such as the
-     * aliases, description, etc. This way we can get a proper {@link Command}.
-     * 
-     * @param command The command to get the equivalent of
-     * @return The correct command for an equals check
-     */
-    private Command getEquivalentCommand(Command command) {
-        for (CommandBase<?> command2 : commands) {
-            if (Arrays.equals(command.aliases(), command2.aliases()) && command.permission().equals(command2.permission())
-                    && command.description().equals(command2.description()) && Arrays.equals(command.args(), command2.args())) {
-                return command2;
-            }
-        }
-        return null;
     }
 
     private void addChildCommands() {
