@@ -46,7 +46,7 @@ import com.xtra.core.command.annotation.RegisterCommand;
 public abstract class CommandBase<T extends CommandSource> implements Command {
 
     // For async(), due to anonymous inner class
-    public static CommandResult result;
+    private static CommandResult result;
 
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
 
