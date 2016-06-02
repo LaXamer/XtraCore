@@ -25,15 +25,22 @@
 
 package com.xtra.core.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.spongepowered.api.text.Text;
 
 import com.xtra.core.Core;
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.text.HelpPaginationGen;
+import com.xtra.core.util.store.HelpContentsStore;
 
 /**
  * A class that contains utility methods about commands.
@@ -101,5 +108,109 @@ public class CommandHelper {
             }
         }
         return null;
+    }
+
+    public static List<Text> orderContents(List<Text> contents, List<HelpContentsStore> contentsStore, HelpPaginationGen.CommandOrdering ordering) {
+        switch (ordering) {
+            case A_Z:
+                Collections.sort(contents);
+                return contents;
+            case Z_A:
+                Collections.sort(contents);
+                Collections.reverse(contents);
+                return contents;
+            case PARENT_COMMANDS_FIRST_A_Z:
+                return sortParentTypes(contentsStore, true);
+            case PARENT_COMMANDS_FIRST_Z_A:
+                return sortParentTypes(contentsStore, false);
+            case CHILD_COMMANDS_FIRST_A_Z:
+                return sortChildTypes(contentsStore, true);
+            case CHILD_COMMANDS_FIRST_Z_A:
+                return sortChildTypes(contentsStore, false);
+            case DEFAULT:
+                return contents;
+        }
+        return null;
+    }
+
+    /**
+     * Sorts the parent command types either a-z or z-a. Then appends the
+     * non-parent commands.
+     * 
+     * @param contentsStore The contents store
+     * @param a_z If these should be sorted a-z, or z-a
+     * @return The sorted help list
+     */
+    private static List<Text> sortParentTypes(List<HelpContentsStore> contentsStore, boolean a_z) {
+        // HashSet in case we get duplication with these methods
+        Set<Text> parentCommands = new HashSet<>();
+        Set<HelpContentsStore> nonParentCommands = new HashSet<>();
+        // Add these as we remove the parent commands later
+        nonParentCommands.addAll(contentsStore);
+        for (HelpContentsStore contentStore : contentsStore) {
+            Command cmd = getParentCommand(contentStore.command());
+            if (cmd != null) {
+                parentCommands.add(Text.of(cmd.aliases()[0]));
+                nonParentCommands.remove(cmd);
+            }
+        }
+
+        // Convert back to list to be sorted
+        List<Text> parentCmds = new ArrayList<>();
+        List<Text> nonParentCmds = new ArrayList<>();
+        parentCmds.addAll(parentCommands);
+
+        // Get the aliases for the non parent commands
+        for (HelpContentsStore nonParentCommand : nonParentCommands) {
+            nonParentCmds.add(Text.of(nonParentCommand.command().aliases()[0]));
+        }
+        Collections.sort(parentCmds);
+        Collections.sort(nonParentCmds);
+        if (!a_z) {
+            Collections.reverse(parentCmds);
+            Collections.reverse(nonParentCmds);
+        }
+        // Append these to the end now
+        parentCmds.addAll(nonParentCmds);
+        return parentCmds;
+    }
+
+    /**
+     * Sorts the child command types either a-z or z-a. Then appends the
+     * non-child commands.
+     * 
+     * @param contentsStore The contents store
+     * @param a_z If these should be sorted a-z, or z-a
+     * @return The sorted help list
+     */
+    private static List<Text> sortChildTypes(List<HelpContentsStore> contentsStore, boolean a_z) {
+        // HashSet in case we get duplication with these methods
+        Set<Text> childCommands = new HashSet<>();
+        Set<HelpContentsStore> nonChildCommands = new HashSet<>();
+        nonChildCommands.addAll(contentsStore);
+        for (HelpContentsStore contentStore : contentsStore) {
+            Set<Command> cmds = getChildCommands(contentStore.command());
+            for (Command command : cmds) {
+                childCommands.add(Text.of(command.aliases()[0]));
+                // We can ignore commands that already have been removed
+                nonChildCommands.removeAll(cmds);
+            }
+        }
+
+        List<Text> childCmds = new ArrayList<>();
+        List<Text> nonChildCmds = new ArrayList<>();
+        childCmds.addAll(childCommands);
+
+        for (HelpContentsStore nonChildCommand : nonChildCommands) {
+            nonChildCmds.add(Text.of(nonChildCommand.command().aliases()[0]));
+        }
+        Collections.sort(childCmds);
+        Collections.sort(nonChildCmds);
+        if (!a_z) {
+            Collections.reverse(childCmds);
+            Collections.reverse(nonChildCmds);
+        }
+        childCmds.addAll(nonChildCmds);
+        return childCmds;
     }
 }

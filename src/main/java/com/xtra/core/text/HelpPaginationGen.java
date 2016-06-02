@@ -282,22 +282,26 @@ public class HelpPaginationGen {
                         if (CommandHelper.getChildCommands(command.command()).isEmpty()) {
                             commandString = "/" + cmd.aliases()[0];
                         }
+                        break;
                     case IGNORE_CHILD:
                         // If the parent is null, then there is no parent
                         // command. Therefore this command is not a child.
                         if (parentCommand == null) {
                             commandString = "/" + cmd.aliases()[0];
                         }
+                        break;
                     case BOTH:
                         // Don't ignore anything
                         commandString = parentCommand != null ? "/" + parentCommand.aliases()[0] + " " + cmd.aliases()[0] : "/" + cmd.aliases()[0];
+                        break;
                 }
                 TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
                 TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
                 this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
             }
         }
-        this.paginationBuilder.contents(contents);
+        this.contents = CommandHelper.orderContents(this.contents, this.commands, this.commandOrdering);
+        this.paginationBuilder.contents(this.contents);
         return this;
     }
 
@@ -383,7 +387,8 @@ public class HelpPaginationGen {
 
         /**
          * Commands will be ordered by how the {@link ReflectionScanner} reads
-         * them.
+         * them. Note that this ordering might not be the same every time the
+         * commands are read.
          */
         DEFAULT;
     }
