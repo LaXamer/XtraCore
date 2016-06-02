@@ -62,7 +62,7 @@ public class Core {
      * @see CommandRegistrar#create(Object)
      */
     public CommandRegistrar initializeCommandRegistrar() {
-        return CommandRegistrar.create(this);
+        return CommandRegistrar.create(Core.plugin);
     }
 
     /**
@@ -72,7 +72,7 @@ public class Core {
      * @see HelpPaginationGen#create(Object)
      */
     public HelpPaginationGen initializeHelpPaginationGen() {
-        return HelpPaginationGen.create(this);
+        return HelpPaginationGen.create(Core.plugin);
     }
 
     /**
@@ -83,7 +83,7 @@ public class Core {
      * @see HelpPaginationGen#create(Object, Text)
      */
     public HelpPaginationGen initializeHelpPaginationGen(Text title) {
-        return HelpPaginationGen.create(this);
+        return HelpPaginationGen.create(Core.plugin);
     }
 
     /**
@@ -95,7 +95,7 @@ public class Core {
      * @see HelpPaginationGen#create(Object, Text, Text)
      */
     public HelpPaginationGen initializeHelpPaginationGen(Text title, Text padding) {
-        return HelpPaginationGen.create(this);
+        return HelpPaginationGen.create(Core.plugin);
     }
 
     /**

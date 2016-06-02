@@ -127,6 +127,10 @@ public class CommandHelper {
                 return sortChildTypes(contentsStore, true);
             case CHILD_COMMANDS_FIRST_Z_A:
                 return sortChildTypes(contentsStore, false);
+            case PARENT_AND_CHILD_FIRST_NON_LAST_A_Z:
+                return sortParentAndChildThenNonTypes(contentsStore, true);
+            case PARENT_AND_CHILD_FIRST_NON_LAST_Z_A:
+                return sortParentAndChildThenNonTypes(contentsStore, false);
             case DEFAULT:
                 return contents;
         }
@@ -212,5 +216,57 @@ public class CommandHelper {
         }
         childCmds.addAll(nonChildCmds);
         return childCmds;
+    }
+
+    /**
+     * Sort the commands with parent commands and their children first in the
+     * list, followed by other parent commands and their children. At the end,
+     * is a sorted (a-z, or z-a) list of non-parent and non-child commands.
+     * 
+     * @param contentsStore The contents store
+     * @param a_z If these should be sorted a-z, or z-a
+     * @return The sorted help list
+     */
+    private static List<Text> sortParentAndChildThenNonTypes(List<HelpContentsStore> contentsStore, boolean a_z) {
+        Set<Text> parentAndChildCommands = new HashSet<>();
+        Set<HelpContentsStore> nonParentAndChildCommands = new HashSet<>();
+        nonParentAndChildCommands.addAll(contentsStore);
+
+        for (HelpContentsStore contentStore : contentsStore) {
+            // If the command is already in there, don't bother with it
+            if (!parentAndChildCommands.contains(contentStore.command().aliases()[0])) {
+                Command parentCommand = getParentCommand(contentStore.command());
+
+                if (parentCommand != null) {
+                    // Same here
+                    if (!parentAndChildCommands.contains(parentCommand.aliases()[0])) {
+                        parentAndChildCommands.add(Text.of(parentCommand.aliases()[0]));
+                        nonParentAndChildCommands.remove(parentCommand);
+                        // Get all of the child commands for this parent command
+                        // then
+                        for (Command childCommand : getChildCommands(parentCommand)) {
+                            parentAndChildCommands.add(Text.of(childCommand.aliases()[0]));
+                            nonParentAndChildCommands.remove(childCommand);
+                        }
+                    }
+                }
+            }
+        }
+
+        List<Text> parentAndChildCmds = new ArrayList<>();
+        List<Text> nonParentAndChildCmds = new ArrayList<>();
+        parentAndChildCmds.addAll(parentAndChildCommands);
+
+        for (HelpContentsStore nonParentAndChildCommand : nonParentAndChildCommands) {
+            nonParentAndChildCmds.add(Text.of(nonParentAndChildCommand.command().aliases()[0]));
+        }
+        Collections.sort(parentAndChildCmds);
+        Collections.sort(nonParentAndChildCmds);
+        if (!a_z) {
+            Collections.reverse(parentAndChildCmds);
+            Collections.reverse(nonParentAndChildCmds);
+        }
+        parentAndChildCmds.addAll(nonParentAndChildCmds);
+        return parentAndChildCmds;
     }
 }

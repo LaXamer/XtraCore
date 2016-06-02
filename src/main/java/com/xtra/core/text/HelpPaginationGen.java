@@ -270,6 +270,9 @@ public class HelpPaginationGen {
         if (this.childBehavior == null) {
             this.childBehavior = ChildBehavior.BOTH;
         }
+        if (this.commandOrdering == null) {
+            this.commandOrdering = CommandOrdering.A_Z;
+        }
         for (HelpContentsStore command : this.commands) {
             if (!command.ignore()) {
                 Command cmd = command.command();
@@ -384,6 +387,22 @@ public class HelpPaginationGen {
          * ordered alphabetically backwards (z-a) in the help list.
          */
         CHILD_COMMANDS_FIRST_Z_A,
+
+        /**
+         * The parent and their child commands will be grouped together first,
+         * followed by other parent commands and their children. At the end is
+         * an alphabetically sorted (a-z) list of non-parent and non-child
+         * commands.
+         */
+        PARENT_AND_CHILD_FIRST_NON_LAST_A_Z,
+
+        /**
+         * The parent and their child commands will be grouped together first,
+         * followed by other parent commands and their children. At the end is
+         * an alphabetically backwards sorted (z-a) list of non-parent and
+         * non-child commands.
+         */
+        PARENT_AND_CHILD_FIRST_NON_LAST_Z_A,
 
         /**
          * Commands will be ordered by how the {@link ReflectionScanner} reads
