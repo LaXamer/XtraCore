@@ -28,7 +28,7 @@ package com.xtra.core.internal;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.command.Command;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -39,6 +39,6 @@ import com.xtra.core.util.store.CommandStore;
 public class Internals {
 
     public static Object plugin;
-    public static Set<CommandBase<?>> commands = new HashSet<>();
+    public static Set<Command> commands = new HashSet<>();
     public static Set<CommandStore> commandStores = new HashSet<>();
 }

@@ -34,7 +34,6 @@ import java.util.Set;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.text.HelpPaginationGen;
@@ -99,7 +98,7 @@ public class CommandHelper {
      * @return The correct command for an equals check
      */
     private static Command getEquivalentCommand(Command command) {
-        for (CommandBase<?> cmd : Internals.commands) {
+        for (Command cmd : Internals.commands) {
             if (Arrays.equals(command.aliases(), cmd.aliases()) && command.permission().equals(cmd.permission())
                     && command.description().equals(cmd.description()) && Arrays.equals(command.args(), cmd.args())) {
                 return cmd;

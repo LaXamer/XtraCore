@@ -29,7 +29,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
-import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.util.CommandHelper;
@@ -55,7 +54,7 @@ public class CommandRegistrar {
     }
 
     private CommandRegistrar init() {
-        for (CommandBase<?> command : Internals.commands) {
+        for (Command command : Internals.commands) {
             this.initializeCommandSpec(command);
         }
         this.addChildCommands();
@@ -65,7 +64,7 @@ public class CommandRegistrar {
         return this;
     }
 
-    private void initializeCommandSpec(CommandBase<?> command) {
+    private void initializeCommandSpec(Command command) {
         // Create the initial CommandSpec builder
         CommandSpec.Builder specBuilder = CommandSpec.builder().executor(command);
 

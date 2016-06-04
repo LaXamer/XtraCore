@@ -32,6 +32,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
+import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.CommandBase;
 
@@ -47,10 +48,10 @@ public class ReflectionScanner {
      * @param plugin The plugin
      * @return A set of the commands
      */
-    public static Set<CommandBase<?>> getCommands(Object plugin) {
+    public static Set<Command> getCommands(Object plugin) {
         Reflections reflections = new Reflections(plugin.getClass().getPackage().getName(), new SubTypesScanner(false), new TypeAnnotationsScanner());
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterCommand.class);
-        Set<CommandBase<?>> commands = new HashSet<>();
+        Set<Command> commands = new HashSet<>();
         for (Class<?> oneClass : classes) {
             try {
                 Object o = oneClass.newInstance();
