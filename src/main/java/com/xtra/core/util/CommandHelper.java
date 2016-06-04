@@ -26,7 +26,6 @@
 package com.xtra.core.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,6 @@ import java.util.Set;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.command.base.EmptyCommand;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.text.HelpPaginationGen;
 import com.xtra.core.util.store.CommandStore;
@@ -54,16 +52,9 @@ public class CommandHelper {
     public static Set<Command> getChildCommands(Command command) {
         Set<Command> childCommands = new HashSet<>();
         for (Command cmd : Internals.commands) {
-            try {
-                Class<? extends Command> parentCommand = cmd.getClass().getAnnotation(RegisterCommand.class).childOf();
-                Command parentCommand2 = parentCommand.newInstance();
-                if (!(parentCommand2 instanceof EmptyCommand)) {
-                    if (command.equals(getEquivalentCommand(parentCommand2))) {
-                        childCommands.add(cmd);
-                    }
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+            Command parentCommand = getParentCommand(cmd);
+            if (parentCommand != null && parentCommand.equals(command)) {
+                childCommands.add(cmd);
             }
         }
         return childCommands;
@@ -76,31 +67,21 @@ public class CommandHelper {
      * @return The parent command
      */
     public static Command getParentCommand(Command command) {
-        try {
-            Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
-            Command parentCommand2 = parentCommand.newInstance();
-            if (!(parentCommand2 instanceof EmptyCommand)) {
-                return getEquivalentCommand(parentCommand2);
-            }
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
+        Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
+        Command parentCommand2 = getEquivalentCommand(parentCommand);
+        return parentCommand2;
     }
 
     /**
-     * Since calling {@link Class#newInstance()} isn't reliable for a proper
-     * equals check, we need to match up the command properties such as the
-     * aliases, description, etc. This way we can get the correct
-     * {@link Command}.
+     * Gets the 'equivalent' command of this class. This is useful to prevent
+     * many instances of the same object being passed around XtraCore.
      * 
-     * @param command The command to get the equivalent of
-     * @return The correct command for an equals check
+     * @param clazz The class
+     * @return The command object for the specified class
      */
-    private static Command getEquivalentCommand(Command command) {
+    public static Command getEquivalentCommand(Class<? extends Command> clazz) {
         for (Command cmd : Internals.commands) {
-            if (Arrays.equals(command.aliases(), cmd.aliases()) && command.permission().equals(cmd.permission())
-                    && command.description().equals(cmd.description()) && Arrays.equals(command.args(), cmd.args())) {
+            if (clazz.isInstance(cmd)) {
                 return cmd;
             }
         }

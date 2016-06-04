@@ -173,9 +173,11 @@ public class HelpPaginationGen {
      * @param cmd The command to be ignored in the help list
      * @return The object, for chaining
      */
-    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T> cmd) {
+    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T> clazz) {
+        // We still need the command store, so don't bother calling
+        // CommandHelper#getEquivalentCommand
         for (CommandStore store : Internals.commandStores) {
-            if (cmd.isInstance(store.command())) {
+            if (clazz.isInstance(store.command())) {
                 store.setIgnore(true);
             }
         }
@@ -191,15 +193,11 @@ public class HelpPaginationGen {
      * @return The object, for chaining
      */
     @SuppressWarnings("unchecked")
-    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T>... cmds) {
-        for (Class<T> cmd : cmds) {
-            try {
-                // We check for type safety here (note the suppress warnings).
-                if (cmd.newInstance() instanceof Command) {
-                    this.specifyCommandShouldBeIgnored(cmd);
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T>... clazz) {
+        for (Class<T> cmd : clazz) {
+            // As long as this cmd class is a real command
+            if (CommandHelper.getEquivalentCommand(cmd) != null) {
+                this.specifyCommandShouldBeIgnored(cmd);
             }
         }
         return this;
