@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'maven'
     id 'net.minecrell.licenser' version '0.2'
+    id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
 
 sourceCompatibility = '1.8'
@@ -15,20 +16,12 @@ repositories {
         name 'Sponge maven repo'
         url 'http://repo.spongepowered.org/maven/'
     }
-    maven {
-        name 'minecrell-releases'
-        url 'http://repo.minecrell.net/releases'
-    }
-}
-
-configurations {
-    shade
-    compile.extendsFrom shade
 }
 
 dependencies {
     compile "org.spongepowered:spongeapi:4.1.0-SNAPSHOT"
-    shade "org.reflections:reflections:0.9.10"
+    compile "org.reflections:reflections:0.9.10"
+    compile "org.javassist:javassist:3.20.0-GA"
 }
 
 license {
@@ -42,10 +35,19 @@ license {
     style.java = 'JAVADOC'
 }
 
-jar {
-    configurations.shade.copyRecursive().setTransitive(false).each {artifact ->
-        from(zipTree(artifact))
+tasks.getByPath(':jar').enabled = false
+shadowJar {
+    dependencies {
+        include(dependency('org.reflections:reflections'))
+        include(dependency('org.javassist:javassist'))
     }
+    relocate 'org.reflections', 'com.xtra.core.core-dependencies.reflections'
+    relocate 'javassist', 'com.xtra.core.core-dependencies.javassist'
+    classifier = ''
+}
+
+artifacts {
+    archives shadowJar
 }
 
 task wrapper(type: Wrapper) {
