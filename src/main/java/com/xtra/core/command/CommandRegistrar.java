@@ -25,16 +25,13 @@
 
 package com.xtra.core.command;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
-import com.xtra.core.Core;
 import com.xtra.core.command.base.CommandBase;
 import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.internal.Internals;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.store.CommandStore;
 
@@ -43,9 +40,6 @@ import com.xtra.core.util.store.CommandStore;
  * the commands within a plugin.
  */
 public class CommandRegistrar {
-
-    private Object plugin;
-    private Set<CommandStore> commandStores = new HashSet<>();
 
     private CommandRegistrar() {
     }
@@ -56,17 +50,16 @@ public class CommandRegistrar {
      * @param plugin The plugin
      * @return The new command registrar
      */
-    public static CommandRegistrar create(Object plugin) {
-        return new CommandRegistrar().init(plugin);
+    public static CommandRegistrar create() {
+        return new CommandRegistrar().init();
     }
 
-    private CommandRegistrar init(Object plugin) {
-        this.plugin = plugin;
-        for (CommandBase<?> command : Core.commands()) {
+    private CommandRegistrar init() {
+        for (CommandBase<?> command : Internals.commands) {
             this.initializeCommandSpec(command);
         }
         this.addChildCommands();
-        for (CommandStore command : this.commandStores) {
+        for (CommandStore command : Internals.commandStores) {
             this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
         }
         return this;
@@ -91,19 +84,19 @@ public class CommandRegistrar {
 
         Command parentCommand = CommandHelper.getParentCommand(command);
         if (parentCommand != null) {
-            this.commandStores.add(new CommandStore(command, specBuilder, parentCommand));
+            Internals.commandStores.add(new CommandStore(command, specBuilder, parentCommand));
         } else {
-            this.commandStores.add(new CommandStore(command, specBuilder, null));
+            Internals.commandStores.add(new CommandStore(command, specBuilder, null));
         }
     }
 
     private void addChildCommands() {
         // Go through the commands to find any child commands
-        for (CommandStore commandStore : this.commandStores) {
+        for (CommandStore commandStore : Internals.commandStores) {
             if (commandStore.childOf() != null) {
                 if (!(commandStore.childOf() instanceof EmptyCommand)) {
                     // Iterate through to find the parent
-                    for (CommandStore commandStore2 : this.commandStores) {
+                    for (CommandStore commandStore2 : Internals.commandStores) {
                         if (commandStore2.command().equals(commandStore.childOf())) {
                             commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
@@ -120,6 +113,6 @@ public class CommandRegistrar {
      * @param command The command
      */
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
-        Sponge.getCommandManager().register(this.plugin, commandSpec.build(), command.aliases());
+        Sponge.getCommandManager().register(Internals.plugin, commandSpec.build(), command.aliases());
     }
 }

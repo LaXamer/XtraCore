@@ -23,29 +23,22 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.util.store;
+package com.xtra.core.internal;
 
-import com.xtra.core.command.Command;
+import java.util.HashSet;
+import java.util.Set;
 
-public class HelpContentsStore {
+import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.util.store.CommandStore;
 
-    private Command command;
-    private boolean ignore;
+/**
+ * This is an internal class for storing various information that should only
+ * ever be accessed by XtraCore. It is recommended to NOT touch or access these
+ * values directly.
+ */
+public class Internals {
 
-    public HelpContentsStore(Command command, boolean ignore) {
-        this.command = command;
-        this.ignore = ignore;
-    }
-
-    public Command command() {
-        return this.command;
-    }
-
-    public boolean ignore() {
-        return this.ignore;
-    }
-
-    public void setIgnore(boolean ignore) {
-        this.ignore = ignore;
-    }
+    public static Object plugin;
+    public static Set<CommandBase<?>> commands = new HashSet<>();
+    public static Set<CommandStore> commandStores = new HashSet<>();
 }

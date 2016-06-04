@@ -39,9 +39,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 
-import com.xtra.core.Core;
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
+import com.xtra.core.internal.Internals;
 
 public abstract class CommandBase<T extends CommandSource> implements Command {
 
@@ -98,7 +98,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
                             e2.printStackTrace();
                             CommandBase.result = CommandResult.empty();
                         }
-                    }).async().submit(Core.plugin());
+                    }).async().submit(Internals.plugin);
             return CommandBase.result;
         }
 

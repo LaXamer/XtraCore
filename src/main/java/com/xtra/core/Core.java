@@ -25,20 +25,14 @@
 
 package com.xtra.core;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.spongepowered.api.text.Text;
 
 import com.xtra.core.command.CommandRegistrar;
-import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.internal.Internals;
 import com.xtra.core.text.HelpPaginationGen;
 import com.xtra.core.util.ReflectionScanner;
 
 public class Core {
-
-    private static Object plugin;
-    private static Set<CommandBase<?>> commands = new HashSet<>();
 
     /**
      * Initializes the base core class for function.
@@ -50,8 +44,8 @@ public class Core {
      * @return The core class
      */
     public static Core initialize(Object plugin) {
-        Core.plugin = plugin;
-        Core.commands = ReflectionScanner.getCommands(plugin);
+        Internals.plugin = plugin;
+        Internals.commands = ReflectionScanner.getCommands(plugin);
         return new Core();
     }
 
@@ -62,7 +56,7 @@ public class Core {
      * @see CommandRegistrar#create(Object)
      */
     public CommandRegistrar initializeCommandRegistrar() {
-        return CommandRegistrar.create(Core.plugin);
+        return CommandRegistrar.create();
     }
 
     /**
@@ -72,7 +66,7 @@ public class Core {
      * @see HelpPaginationGen#create(Object)
      */
     public HelpPaginationGen initializeHelpPaginationGen() {
-        return HelpPaginationGen.create(Core.plugin);
+        return HelpPaginationGen.create();
     }
 
     /**
@@ -83,7 +77,7 @@ public class Core {
      * @see HelpPaginationGen#create(Object, Text)
      */
     public HelpPaginationGen initializeHelpPaginationGen(Text title) {
-        return HelpPaginationGen.create(Core.plugin);
+        return HelpPaginationGen.create(title);
     }
 
     /**
@@ -95,24 +89,6 @@ public class Core {
      * @see HelpPaginationGen#create(Object, Text, Text)
      */
     public HelpPaginationGen initializeHelpPaginationGen(Text title, Text padding) {
-        return HelpPaginationGen.create(Core.plugin);
-    }
-
-    /**
-     * Gets the stored plugin object from the Core.
-     * 
-     * @return The plugin object
-     */
-    public static Object plugin() {
-        return Core.plugin;
-    }
-
-    /**
-     * Gets the commands for this instance.
-     * 
-     * @return The commands
-     */
-    public static Set<CommandBase<?>> commands() {
-        return Core.commands;
+        return HelpPaginationGen.create(title, padding);
     }
 }

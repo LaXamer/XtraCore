@@ -34,12 +34,11 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
-import com.xtra.core.Core;
 import com.xtra.core.command.Command;
-import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.internal.Internals;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.ReflectionScanner;
-import com.xtra.core.util.store.HelpContentsStore;
+import com.xtra.core.util.store.CommandStore;
 
 /**
  * A base class for creating {@link PaginationList}s for the commands of the
@@ -51,7 +50,6 @@ public class HelpPaginationGen {
     private PaginationList.Builder paginationBuilder;
     private Text title;
     private Text padding;
-    private List<HelpContentsStore> commands;
     private List<Text> contents;
     private TextColor commandColor;
     private TextColor descriptionColor;
@@ -66,7 +64,7 @@ public class HelpPaginationGen {
      * plugin's commands help list. Further configuration is provided through
      * {@link HelpPaginationGen#paginationBuilder()}.
      */
-    public static HelpPaginationGen create(Object plugin) {
+    public static HelpPaginationGen create() {
         return new HelpPaginationGen().init();
     }
 
@@ -76,7 +74,7 @@ public class HelpPaginationGen {
      * @param plugin The plugin
      * @param title The title
      */
-    public static HelpPaginationGen create(Object plugin, Text title) {
+    public static HelpPaginationGen create(Text title) {
         HelpPaginationGen gen = new HelpPaginationGen();
         gen.title = title;
         return gen.init();
@@ -89,7 +87,7 @@ public class HelpPaginationGen {
      * @param title The title
      * @param padding The padding
      */
-    public static HelpPaginationGen create(Object plugin, Text title, Text padding) {
+    public static HelpPaginationGen create(Text title, Text padding) {
         HelpPaginationGen gen = new HelpPaginationGen();
         gen.title = title;
         gen.padding = padding;
@@ -101,10 +99,6 @@ public class HelpPaginationGen {
      * method before any others in {@link HelpPaginationGen}.
      */
     private HelpPaginationGen init() {
-        this.commands = new ArrayList<>();
-        for (CommandBase<?> command : Core.commands()) {
-            this.commands.add(new HelpContentsStore(command, false));
-        }
         this.paginationBuilder = PaginationList.builder();
         this.setDefaults();
         return this;
@@ -180,7 +174,7 @@ public class HelpPaginationGen {
      * @return The object, for chaining
      */
     public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T> cmd) {
-        for (HelpContentsStore store : this.commands) {
+        for (CommandStore store : Internals.commandStores) {
             if (cmd.isInstance(store.command())) {
                 store.setIgnore(true);
             }
@@ -273,7 +267,9 @@ public class HelpPaginationGen {
         if (this.commandOrdering == null) {
             this.commandOrdering = CommandOrdering.A_Z;
         }
-        for (HelpContentsStore command : this.commands) {
+        // Don't override the commands in Internals, just store our own
+        List<CommandStore> commandStores = CommandHelper.orderContents(Internals.commandStores, this.commandOrdering);
+        for (CommandStore command : commandStores) {
             if (!command.ignore()) {
                 Command cmd = command.command();
                 Command parentCommand = CommandHelper.getParentCommand(cmd);
@@ -303,7 +299,6 @@ public class HelpPaginationGen {
                 this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
             }
         }
-        this.contents = CommandHelper.orderContents(this.contents, this.commands, this.commandOrdering);
         this.paginationBuilder.contents(this.contents);
         return this;
     }

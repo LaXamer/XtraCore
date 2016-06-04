@@ -34,11 +34,12 @@ import com.xtra.core.command.Command;
 /**
  * Ties together a command and its appropriate command spec builder.
  */
-public class CommandStore {
+public class CommandStore implements Comparable<CommandStore> {
 
     private Command command;
     private CommandSpec.Builder commandSpecBuilder;
     private Command childOf;
+    private boolean ignore = false;
 
     public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder, @Nullable Command childOf) {
         this.command = commandBase;
@@ -56,5 +57,18 @@ public class CommandStore {
 
     public Command childOf() {
         return this.childOf;
+    }
+
+    public boolean ignore() {
+        return this.ignore;
+    }
+
+    public void setIgnore(boolean ignore) {
+        this.ignore = ignore;
+    }
+
+    @Override
+    public int compareTo(CommandStore other) {
+        return this.command.aliases()[0].compareTo(other.command.aliases()[0]);
     }
 }
