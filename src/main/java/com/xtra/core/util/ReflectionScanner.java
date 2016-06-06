@@ -29,12 +29,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.config.Config;
+import com.xtra.core.config.annotation.RegisterConfig;
+import com.xtra.core.internal.Internals;
 
 /**
  * A class that uses reflection to scan a plugin for information, such as the
@@ -45,23 +45,46 @@ public class ReflectionScanner {
     /**
      * Uses reflection to get the commands of the plugin.
      * 
-     * @param plugin The plugin
      * @return A set of the commands
      */
-    public static Set<Command> getCommands(Object plugin) {
-        Reflections reflections = new Reflections(plugin.getClass().getPackage().getName(), new SubTypesScanner(false), new TypeAnnotationsScanner());
+    public static Set<Command> getCommands() {
+        Reflections reflections = new Reflections(Internals.plugin.getClass().getPackage().getName());
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterCommand.class);
         Set<Command> commands = new HashSet<>();
+
         for (Class<?> oneClass : classes) {
             try {
                 Object o = oneClass.newInstance();
-                if (o instanceof CommandBase<?>) {
-                    commands.add((CommandBase<?>) o);
+                if (o instanceof Command) {
+                    commands.add((Command) o);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
         return commands;
+    }
+
+    /**
+     * Uses reflection to get the configs of a plugin.
+     * 
+     * @return A set of configs
+     */
+    public static Set<Config> getConfigs() {
+        Reflections reflections = new Reflections(Internals.plugin.getClass().getPackage().getName());
+        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterConfig.class);
+        Set<Config> configs = new HashSet<>();
+
+        for (Class<?> oneClass : classes) {
+            try {
+                Object o = oneClass.newInstance();
+                if (o instanceof Config) {
+                    configs.add((Config) o);
+                }
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return configs;
     }
 }

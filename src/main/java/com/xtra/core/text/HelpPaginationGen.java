@@ -94,10 +94,6 @@ public class HelpPaginationGen {
         return gen.init();
     }
 
-    /**
-     * Initializes the basis for creation of a {@link PaginationList}. Call this
-     * method before any others in {@link HelpPaginationGen}.
-     */
     private HelpPaginationGen init() {
         this.paginationBuilder = PaginationList.builder();
         this.setDefaults();

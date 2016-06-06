@@ -23,36 +23,23 @@
  * SOFTWARE.
  */
 
-package com.xtra.core;
+package com.xtra.core.internal.config;
 
-import java.util.Optional;
+import com.xtra.core.config.Config;
+import com.xtra.core.config.base.ConfigBase;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.plugin.PluginContainer;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import com.xtra.core.internal.Internals;
-import com.xtra.core.util.ReflectionScanner;
+/**
+ * Because {@link ConfigBase} needs to provide a way to access the configuration
+ * loader and the root node for plugins extending it, without getting in the way
+ * of plugins implementing their own {@link Config}s, this interface is made
+ * separate from {@link Config}
+ */
+public interface InternalConfig {
 
-public class Core {
+    ConfigurationLoader<CommentedConfigurationNode> loader();
 
-    /**
-     * Initializes the base core class for function.
-     * 
-     * <p>CALL THIS BEFORE ATTEMPTING TO DO ANYTHING ELSE WITH XTRACORE OR
-     * EVERYTHING WILL BREAK.</p>
-     * 
-     * @param plugin The plugin class
-     * @return The core class
-     */
-    public static Core initialize(Object plugin) {
-        Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
-        if (!optional.isPresent()) {
-            System.err.println("Cannot find plugin instance! Did you pass the wrong object?");
-            return null;
-        }
-        Internals.pluginContainer = optional.get();
-        Internals.plugin = plugin;
-        Internals.commands = ReflectionScanner.getCommands();
-        return new Core();
-    }
+    CommentedConfigurationNode rootNode();
 }

@@ -46,7 +46,6 @@ public class CommandRegistrar {
     /**
      * Creates and initializes a {@link CommandRegistrar}.
      * 
-     * @param plugin The plugin
      * @return The new command registrar
      */
     public static CommandRegistrar create() {

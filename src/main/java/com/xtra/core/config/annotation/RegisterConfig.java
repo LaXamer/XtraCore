@@ -23,36 +23,32 @@
  * SOFTWARE.
  */
 
-package com.xtra.core;
+package com.xtra.core.config.annotation;
 
-import java.util.Optional;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.plugin.PluginContainer;
-
-import com.xtra.core.internal.Internals;
-import com.xtra.core.util.ReflectionScanner;
-
-public class Core {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface RegisterConfig {
 
     /**
-     * Initializes the base core class for function.
+     * If this config should use the shared config root directory. This should
+     * still use {@link RegisterConfig#configName()} instead of using the
+     * plugin's id, unlike Sponge's default configuration.
      * 
-     * <p>CALL THIS BEFORE ATTEMPTING TO DO ANYTHING ELSE WITH XTRACORE OR
-     * EVERYTHING WILL BREAK.</p>
-     * 
-     * @param plugin The plugin class
-     * @return The core class
+     * @return If the config should use the shared root directory
      */
-    public static Core initialize(Object plugin) {
-        Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
-        if (!optional.isPresent()) {
-            System.err.println("Cannot find plugin instance! Did you pass the wrong object?");
-            return null;
-        }
-        Internals.pluginContainer = optional.get();
-        Internals.plugin = plugin;
-        Internals.commands = ReflectionScanner.getCommands();
-        return new Core();
-    }
+    boolean sharedRoot() default false;
+
+    /**
+     * The name of the config file. Ex. specifying "my-config" will result in a
+     * "my-config.conf" file being generated in plugin's configuration folder.
+     * Do NOT suffix '.conf' to the end of the string.
+     * 
+     * @return The config file name
+     */
+    String configName();
 }

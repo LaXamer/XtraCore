@@ -23,36 +23,15 @@
  * SOFTWARE.
  */
 
-package com.xtra.core;
+package com.xtra.core.config;
 
-import java.util.Optional;
+public interface Config {
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.plugin.PluginContainer;
+    void init();
 
-import com.xtra.core.internal.Internals;
-import com.xtra.core.util.ReflectionScanner;
+    void load();
 
-public class Core {
+    void save();
 
-    /**
-     * Initializes the base core class for function.
-     * 
-     * <p>CALL THIS BEFORE ATTEMPTING TO DO ANYTHING ELSE WITH XTRACORE OR
-     * EVERYTHING WILL BREAK.</p>
-     * 
-     * @param plugin The plugin class
-     * @return The core class
-     */
-    public static Core initialize(Object plugin) {
-        Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
-        if (!optional.isPresent()) {
-            System.err.println("Cannot find plugin instance! Did you pass the wrong object?");
-            return null;
-        }
-        Internals.pluginContainer = optional.get();
-        Internals.plugin = plugin;
-        Internals.commands = ReflectionScanner.getCommands();
-        return new Core();
-    }
+    void populate();
 }

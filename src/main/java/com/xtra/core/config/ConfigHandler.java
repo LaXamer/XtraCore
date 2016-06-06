@@ -23,36 +23,50 @@
  * SOFTWARE.
  */
 
-package com.xtra.core;
+package com.xtra.core.config;
 
-import java.util.Optional;
+import java.util.Set;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.plugin.PluginContainer;
-
-import com.xtra.core.internal.Internals;
 import com.xtra.core.util.ReflectionScanner;
 
-public class Core {
+public class ConfigHandler {
+
+    private Set<Config> configs;
+
+    private ConfigHandler() {
+    }
 
     /**
-     * Initializes the base core class for function.
+     * Creates and initializes a {@link ConfigHandler}.
      * 
-     * <p>CALL THIS BEFORE ATTEMPTING TO DO ANYTHING ELSE WITH XTRACORE OR
-     * EVERYTHING WILL BREAK.</p>
-     * 
-     * @param plugin The plugin class
-     * @return The core class
+     * @return The new config handler
      */
-    public static Core initialize(Object plugin) {
-        Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
-        if (!optional.isPresent()) {
-            System.err.println("Cannot find plugin instance! Did you pass the wrong object?");
-            return null;
+    public static ConfigHandler create() {
+        return new ConfigHandler().init();
+    }
+
+    private ConfigHandler init() {
+        this.configs = ReflectionScanner.getConfigs();
+        for (Config config : configs) {
+            config.init();
+            // TODO: is this what we want ?
+            // config.populate();
         }
-        Internals.pluginContainer = optional.get();
-        Internals.plugin = plugin;
-        Internals.commands = ReflectionScanner.getCommands();
-        return new Core();
+        return this;
+    }
+
+    /**
+     * Gets the specified config object.
+     * 
+     * @param clazz The class of the config
+     * @return The config object
+     */
+    public Config getConfig(Class<? extends Config> clazz) {
+        for (Config config : configs) {
+            if (clazz.isInstance(config)) {
+                return config;
+            }
+        }
+        return null;
     }
 }

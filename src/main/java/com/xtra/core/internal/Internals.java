@@ -28,6 +28,8 @@ package com.xtra.core.internal;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.spongepowered.api.plugin.PluginContainer;
+
 import com.xtra.core.command.Command;
 import com.xtra.core.util.store.CommandStore;
 
@@ -39,6 +41,7 @@ import com.xtra.core.util.store.CommandStore;
 public class Internals {
 
     public static Object plugin;
+    public static PluginContainer pluginContainer;
     public static Set<Command> commands = new HashSet<>();
     public static Set<CommandStore> commandStores = new HashSet<>();
 }
