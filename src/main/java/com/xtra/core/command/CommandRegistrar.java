@@ -113,4 +113,19 @@ public class CommandRegistrar {
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
         Sponge.getCommandManager().register(Internals.plugin, commandSpec.build(), command.aliases());
     }
+
+    /**
+     * Gets the specified command object.
+     * 
+     * @param clazz The class of the command to get
+     * @return The command object
+     */
+    public static Command getCommand(Class<? extends Command> clazz) {
+        for (Command command : Internals.commands) {
+            if (clazz.isInstance(command)) {
+                return command;
+            }
+        }
+        return null;
+    }
 }

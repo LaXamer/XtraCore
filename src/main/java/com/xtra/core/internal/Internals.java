@@ -31,6 +31,7 @@ import java.util.Set;
 import org.spongepowered.api.plugin.PluginContainer;
 
 import com.xtra.core.command.Command;
+import com.xtra.core.config.Config;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -44,4 +45,5 @@ public class Internals {
     public static PluginContainer pluginContainer;
     public static Set<Command> commands = new HashSet<>();
     public static Set<CommandStore> commandStores = new HashSet<>();
+    public static Set<Config> configs;
 }

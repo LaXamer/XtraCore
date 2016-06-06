@@ -25,13 +25,10 @@
 
 package com.xtra.core.config;
 
-import java.util.Set;
-
+import com.xtra.core.internal.Internals;
 import com.xtra.core.util.ReflectionScanner;
 
 public class ConfigHandler {
-
-    private Set<Config> configs;
 
     private ConfigHandler() {
     }
@@ -46,8 +43,8 @@ public class ConfigHandler {
     }
 
     private ConfigHandler init() {
-        this.configs = ReflectionScanner.getConfigs();
-        for (Config config : configs) {
+        Internals.configs = ReflectionScanner.getConfigs();
+        for (Config config : Internals.configs) {
             config.init();
             // TODO: is this what we want ?
             // config.populate();
@@ -61,8 +58,8 @@ public class ConfigHandler {
      * @param clazz The class of the config
      * @return The config object
      */
-    public Config getConfig(Class<? extends Config> clazz) {
-        for (Config config : configs) {
+    public static Config getConfig(Class<? extends Config> clazz) {
+        for (Config config : Internals.configs) {
             if (clazz.isInstance(config)) {
                 return config;
             }
