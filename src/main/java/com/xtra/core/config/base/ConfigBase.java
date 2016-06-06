@@ -25,6 +25,7 @@
 
 package com.xtra.core.config.base;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -59,6 +60,24 @@ public abstract class ConfigBase implements Config, InternalConfig {
         }
         loader = loaderBuilder.build();
         rootNode = loader.createEmptyNode();
+    }
+
+    @Override
+    public void load() {
+        try {
+            rootNode = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void save() {
+        try {
+            loader.save(rootNode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
