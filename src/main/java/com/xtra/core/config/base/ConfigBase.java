@@ -50,16 +50,21 @@ public abstract class ConfigBase implements Config {
         RegisterConfig rc = this.getClass().getAnnotation(RegisterConfig.class);
         HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
         Path path;
+        // The file is created automatically, however we need to know if we need
+        // to populate it or not
+        boolean exists;
         if (rc.sharedRoot()) {
             path = Paths.get("config/" + rc.configName() + ".conf");
-            loaderBuilder.setPath(path);
         } else {
             path = Paths.get("config/" + Internals.pluginContainer.getId() + "/" + rc.configName() + ".conf");
-            loaderBuilder.setPath(path);
         }
+        exists = path.toFile().exists();
+        loaderBuilder.setPath(path);
         this.loader = loaderBuilder.build();
         this.rootNode = loader.createEmptyNode();
-        this.populate();
+        if (!exists) {
+            this.populate();
+        }
         this.save();
         this.load();
     }
