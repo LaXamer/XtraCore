@@ -47,9 +47,6 @@ public class Core {
      * @return The core class
      */
     public static Core initialize(Object plugin) {
-        Internals.logger = new Logger();
-        Internals.logger.log("Initializing XtraCore!");
-
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
             Internals.logger.log(new XtraCoreException("Cannot find the plugin instance! Did you pass the wrong object?"));
@@ -57,6 +54,8 @@ public class Core {
         }
         Internals.pluginContainer = optional.get();
         Internals.plugin = plugin;
+        Internals.logger = new Logger();
+        Internals.logger.log("Initializing XtraCore!");
         Internals.commands = ReflectionScanner.getCommands();
         Internals.configs = ReflectionScanner.getConfigs();
         Internals.initialized = true;
