@@ -37,7 +37,7 @@ import com.xtra.core.util.store.CommandStore;
 /**
  * This is an internal class for storing various information that should only
  * ever be accessed by XtraCore. It is recommended to NOT touch or access these
- * values directly.
+ * values directly (unless you're XtraCore itself)!
  */
 public class Internals {
 
@@ -46,4 +46,5 @@ public class Internals {
     public static Set<Command> commands = new HashSet<>();
     public static Set<CommandStore> commandStores = new HashSet<>();
     public static Set<Config> configs;
+    public static boolean initialized = false;
 }

@@ -23,46 +23,27 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.config;
+package com.xtra.core.internal;
 
-import com.xtra.core.internal.InternalModule;
-import com.xtra.core.internal.Internals;
+import com.xtra.core.util.exceptions.XtraCoreException;
 
-public class ConfigHandler extends InternalModule {
-
-    private ConfigHandler() {
-    }
-
-    /**
-     * Creates and initializes a {@link ConfigHandler}.
-     * 
-     * @return The new config handler
-     */
-    public static ConfigHandler create() {
-        return new ConfigHandler().init();
-    }
-
-    private ConfigHandler init() {
-        this.checkHasCoreInitialized();
-
-        for (Config config : Internals.configs) {
-            config.init();
-        }
-        return this;
-    }
+/**
+ * Similarities between XtraCore 'modules'. Note that they are not referred to
+ * as modules in the code-base (save for this class) and do not quite act like
+ * 'modules'. This class is purely to centralize common methods.
+ */
+public class InternalModule {
 
     /**
-     * Gets the specified config object.
-     * 
-     * @param clazz The class of the config
-     * @return The config object
+     * Checks if Core has been initialized. If not, then everything will fail!
      */
-    public static Config getConfig(Class<? extends Config> clazz) {
-        for (Config config : Internals.configs) {
-            if (clazz.isInstance(config)) {
-                return config;
+    public void checkHasCoreInitialized() {
+        if (!Internals.initialized) {
+            try {
+                throw new XtraCoreException("com.xtra.core.Core has not been initialized yet!");
+            } catch (XtraCoreException e) {
+                e.printStackTrace();
             }
         }
-        return null;
     }
 }

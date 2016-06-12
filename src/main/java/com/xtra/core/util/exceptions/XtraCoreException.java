@@ -23,46 +23,28 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.config;
+package com.xtra.core.util.exceptions;
 
-import com.xtra.core.internal.InternalModule;
-import com.xtra.core.internal.Internals;
+/**
+ * Signifies an exception from within the internal parts of XtraCore.
+ */
+public class XtraCoreException extends Exception {
 
-public class ConfigHandler extends InternalModule {
+    private static final long serialVersionUID = 2174757385274241151L;
 
-    private ConfigHandler() {
+    public XtraCoreException() {
+        super();
     }
 
-    /**
-     * Creates and initializes a {@link ConfigHandler}.
-     * 
-     * @return The new config handler
-     */
-    public static ConfigHandler create() {
-        return new ConfigHandler().init();
+    public XtraCoreException(String message) {
+        super(message);
     }
 
-    private ConfigHandler init() {
-        this.checkHasCoreInitialized();
-
-        for (Config config : Internals.configs) {
-            config.init();
-        }
-        return this;
+    public XtraCoreException(Throwable cause) {
+        super(cause);
     }
 
-    /**
-     * Gets the specified config object.
-     * 
-     * @param clazz The class of the config
-     * @return The config object
-     */
-    public static Config getConfig(Class<? extends Config> clazz) {
-        for (Config config : Internals.configs) {
-            if (clazz.isInstance(config)) {
-                return config;
-            }
-        }
-        return null;
+    public XtraCoreException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

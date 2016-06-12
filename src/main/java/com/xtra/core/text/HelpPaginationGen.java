@@ -35,6 +35,7 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.xtra.core.command.Command;
+import com.xtra.core.internal.InternalModule;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.ReflectionScanner;
@@ -45,7 +46,7 @@ import com.xtra.core.util.store.CommandStore;
  * plugin. Use of this class is optional, however it is recommended if creating
  * a help list for your plugin.
  */
-public class HelpPaginationGen {
+public class HelpPaginationGen extends InternalModule {
 
     private PaginationList.Builder paginationBuilder;
     private Text title;
@@ -95,6 +96,8 @@ public class HelpPaginationGen {
     }
 
     private HelpPaginationGen init() {
+        this.checkHasCoreInitialized();
+
         this.paginationBuilder = PaginationList.builder();
         this.setDefaults();
         return this;

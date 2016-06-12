@@ -60,6 +60,8 @@ public abstract class ConfigBase implements Config {
         this.loader = loaderBuilder.build();
         this.rootNode = loader.createEmptyNode();
         this.populate();
+        this.save();
+        this.load();
     }
 
     @Override

@@ -47,12 +47,14 @@ public class Core {
     public static Core initialize(Object plugin) {
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
-            System.err.println("Cannot find plugin instance! Did you pass the wrong object?");
+            System.err.println("Cannot find the plugin instance! Did you pass the wrong object?");
             return null;
         }
         Internals.pluginContainer = optional.get();
         Internals.plugin = plugin;
         Internals.commands = ReflectionScanner.getCommands();
+        Internals.configs = ReflectionScanner.getConfigs();
+        Internals.initialized = true;
         return new Core();
     }
 }

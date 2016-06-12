@@ -42,14 +42,15 @@ import com.xtra.core.internal.Internals;
  */
 public class ReflectionScanner {
 
+    private static final Reflections REFLECTIONS = new Reflections(Internals.plugin.getClass().getPackage().getName());
+
     /**
      * Uses reflection to get the commands of the plugin.
      * 
      * @return A set of the commands
      */
     public static Set<Command> getCommands() {
-        Reflections reflections = new Reflections(Internals.plugin.getClass().getPackage().getName());
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterCommand.class);
+        Set<Class<?>> classes = REFLECTIONS.getTypesAnnotatedWith(RegisterCommand.class);
         Set<Command> commands = new HashSet<>();
 
         for (Class<?> oneClass : classes) {
@@ -71,8 +72,7 @@ public class ReflectionScanner {
      * @return A set of configs
      */
     public static Set<Config> getConfigs() {
-        Reflections reflections = new Reflections(Internals.plugin.getClass().getPackage().getName());
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterConfig.class);
+        Set<Class<?>> classes = REFLECTIONS.getTypesAnnotatedWith(RegisterConfig.class);
         Set<Config> configs = new HashSet<>();
 
         for (Class<?> oneClass : classes) {
