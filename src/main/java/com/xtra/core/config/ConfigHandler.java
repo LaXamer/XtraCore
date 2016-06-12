@@ -46,8 +46,6 @@ public class ConfigHandler {
         Internals.configs = ReflectionScanner.getConfigs();
         for (Config config : Internals.configs) {
             config.init();
-            // TODO: is this what we want ?
-            // config.populate();
         }
         return this;
     }
