@@ -32,6 +32,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 
 import com.xtra.core.internal.Internals;
 import com.xtra.core.util.ReflectionScanner;
+import com.xtra.core.util.exceptions.XtraCoreException;
 
 public class Core {
 
@@ -47,8 +48,11 @@ public class Core {
     public static Core initialize(Object plugin) {
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
-            System.err.println("Cannot find the plugin instance! Did you pass the wrong object?");
-            return null;
+            try {
+                throw new XtraCoreException("Cannot find the plugin instance! Did you pass the wrong object?");
+            } catch (XtraCoreException e) {
+                e.printStackTrace();
+            }
         }
         Internals.pluginContainer = optional.get();
         Internals.plugin = plugin;
