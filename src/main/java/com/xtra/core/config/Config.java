@@ -25,13 +25,43 @@
 
 package com.xtra.core.config;
 
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+
 public interface Config {
 
+    /**
+     * Initializes this config. This method should create and load the file as
+     * well as set up the loader and root node.
+     */
     void init();
 
+    /**
+     * Loads the root node.
+     */
     void load();
 
+    /**
+     * Saves the root node.
+     */
     void save();
 
+    /**
+     * Populates this config with all of the default values.
+     */
     void populate();
+
+    /**
+     * Gets the configuration loader.
+     * 
+     * @return The config loader
+     */
+    ConfigurationLoader<CommentedConfigurationNode> loader();
+
+    /**
+     * Gets the root node.
+     * 
+     * @return The root node
+     */
+    CommentedConfigurationNode rootNode();
 }

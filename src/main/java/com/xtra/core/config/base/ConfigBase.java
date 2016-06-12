@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 import com.xtra.core.config.Config;
 import com.xtra.core.config.annotation.RegisterConfig;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.internal.config.InternalConfig;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -41,7 +40,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 /**
  * A base class for a config implementation.
  */
-public abstract class ConfigBase implements Config, InternalConfig {
+public abstract class ConfigBase implements Config {
 
     private ConfigurationLoader<CommentedConfigurationNode> loader;
     private CommentedConfigurationNode rootNode;
@@ -58,8 +57,8 @@ public abstract class ConfigBase implements Config, InternalConfig {
             path = Paths.get("config/" + Internals.pluginContainer.getId() + "/" + rc.configName() + ".conf");
             loaderBuilder.setPath(path);
         }
-        loader = loaderBuilder.build();
-        rootNode = loader.createEmptyNode();
+        this.loader = loaderBuilder.build();
+        this.rootNode = loader.createEmptyNode();
         this.populate();
     }
 
@@ -83,11 +82,11 @@ public abstract class ConfigBase implements Config, InternalConfig {
 
     @Override
     public ConfigurationLoader<CommentedConfigurationNode> loader() {
-        return loader;
+        return this.loader;
     }
 
     @Override
     public CommentedConfigurationNode rootNode() {
-        return rootNode;
+        return this.rootNode;
     }
 }
