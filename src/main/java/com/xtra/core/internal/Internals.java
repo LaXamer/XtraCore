@@ -32,6 +32,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.config.Config;
+import com.xtra.core.util.log.Logger;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -47,4 +48,5 @@ public class Internals {
     public static Set<CommandStore> commandStores = new HashSet<>();
     public static Set<Config> configs;
     public static boolean initialized = false;
+    public static Logger logger;
 }

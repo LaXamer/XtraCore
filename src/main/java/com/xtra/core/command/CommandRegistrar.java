@@ -56,10 +56,15 @@ public class CommandRegistrar extends InternalModule {
     private CommandRegistrar init() {
         this.checkHasCoreInitialized();
 
+        Internals.logger.log("Initializing the command registrar!");
+        Internals.logger.log("Initializing the command specs for the commands...");
+
         for (Command command : Internals.commands) {
             this.initializeCommandSpec(command);
         }
+        Internals.logger.log("Adding the necessary child commands to the command specs!");
         this.addChildCommands();
+        Internals.logger.log("Building and registering the commands!");
         for (CommandStore command : Internals.commandStores) {
             this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
         }
@@ -70,23 +75,30 @@ public class CommandRegistrar extends InternalModule {
         // Create the initial CommandSpec builder
         CommandSpec.Builder specBuilder = CommandSpec.builder().executor(command);
 
+        Internals.logger.log("Initializing the command spec for the command: " + command.aliases()[0]);
+
         // In case null, do not use
         if (command.permission() != null) {
             specBuilder.permission(command.permission());
+            Internals.logger.log("Command permission: " + command.permission());
         }
         if (command.description() != null) {
             specBuilder.description(Text.of(command.description()));
+            Internals.logger.log("Command description: " + command.description());
         }
         if (command.args() != null) {
             if (command.args().length != 0) {
                 specBuilder.arguments(command.args());
+                Internals.logger.log("Command has " + command.args().length + " arguments.");
             }
         }
 
         Command parentCommand = CommandHelper.getParentCommand(command);
         if (parentCommand != null) {
+            Internals.logger.log("Adding the command and its parent command to the command stores.");
             Internals.commandStores.add(new CommandStore(command, specBuilder, parentCommand));
         } else {
+            Internals.logger.log("Parent command not found. Presuming command does not have one.");
             Internals.commandStores.add(new CommandStore(command, specBuilder, null));
         }
     }
@@ -99,6 +111,8 @@ public class CommandRegistrar extends InternalModule {
                     // Iterate through to find the parent
                     for (CommandStore commandStore2 : Internals.commandStores) {
                         if (commandStore2.command().equals(commandStore.childOf())) {
+                            Internals.logger.log("Adding " + commandStore.command().aliases()[0] + " as a child command of "
+                                    + commandStore2.command().aliases()[0]);
                             commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
                     }
@@ -114,6 +128,7 @@ public class CommandRegistrar extends InternalModule {
      * @param command The command
      */
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
+        Internals.logger.log("Building and registering the command: " + command.aliases()[0]);
         Sponge.getCommandManager().register(Internals.plugin, commandSpec.build(), command.aliases());
     }
 

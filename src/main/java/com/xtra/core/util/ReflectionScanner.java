@@ -50,6 +50,7 @@ public class ReflectionScanner {
      * @return A set of the commands
      */
     public static Set<Command> getCommands() {
+        Internals.logger.log("Using reflection to access the registered commands...");
         Set<Class<?>> classes = REFLECTIONS.getTypesAnnotatedWith(RegisterCommand.class);
         Set<Command> commands = new HashSet<>();
 
@@ -57,12 +58,15 @@ public class ReflectionScanner {
             try {
                 Object o = oneClass.newInstance();
                 if (o instanceof Command) {
-                    commands.add((Command) o);
+                    Command c = (Command) o;
+                    Internals.logger.log("Recognized command " + c.aliases()[0] + "! Adding to command list...");
+                    commands.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                Internals.logger.log(e);
             }
         }
+        Internals.logger.log("Commands added.");
         return commands;
     }
 
@@ -72,6 +76,7 @@ public class ReflectionScanner {
      * @return A set of configs
      */
     public static Set<Config> getConfigs() {
+        Internals.logger.log("Using reflection to access the registered configs...");
         Set<Class<?>> classes = REFLECTIONS.getTypesAnnotatedWith(RegisterConfig.class);
         Set<Config> configs = new HashSet<>();
 
@@ -79,12 +84,16 @@ public class ReflectionScanner {
             try {
                 Object o = oneClass.newInstance();
                 if (o instanceof Config) {
-                    configs.add((Config) o);
+                    Config c = (Config) o;
+                    Internals.logger
+                            .log("Recognized config " + c.getClass().getAnnotation(RegisterConfig.class).configName() + "! Adding to config list...");
+                    configs.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                Internals.logger.log(e);
             }
         }
+        Internals.logger.log("Configs added.");
         return configs;
     }
 }

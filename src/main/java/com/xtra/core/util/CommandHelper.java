@@ -50,10 +50,12 @@ public class CommandHelper {
      * @return The child commands of the specified command
      */
     public static Set<Command> getChildCommands(Command command) {
+        Internals.logger.log("Getting the child commands for the command: " + command.aliases()[0]);
         Set<Command> childCommands = new HashSet<>();
         for (Command cmd : Internals.commands) {
             Command parentCommand = getParentCommand(cmd);
             if (parentCommand != null && parentCommand.equals(command)) {
+                Internals.logger.log("Child command found! Child command is: " + cmd.aliases()[0]);
                 childCommands.add(cmd);
             }
         }
@@ -67,6 +69,7 @@ public class CommandHelper {
      * @return The parent command
      */
     public static Command getParentCommand(Command command) {
+        Internals.logger.log("Getting the parent command for the command: " + command.aliases()[0]);
         Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
         Command parentCommand2 = getEquivalentCommand(parentCommand);
         return parentCommand2;

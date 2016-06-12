@@ -90,12 +90,13 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
                         try {
+                            Internals.logger.log("Executing command " + this.aliases()[0] + " asynchronously!");
                             CommandBase.result = this.executeCommand(src, args);
                         } catch (TextMessageException e) {
                             src.sendMessage(e.getText());
                             CommandBase.result = CommandResult.empty();
                         } catch (Exception e2) {
-                            e2.printStackTrace();
+                            Internals.logger.log(e2);
                             CommandBase.result = CommandResult.empty();
                         }
                     }).async().submit(Internals.plugin);
@@ -103,11 +104,12 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
         }
 
         try {
+            Internals.logger.log("Executing command " + this.aliases()[0]);
             return this.executeCommand(src, args);
         } catch (TextMessageException e) {
             src.sendMessage(e.getText());
         } catch (Exception e2) {
-            e2.printStackTrace();
+            Internals.logger.log(e2);
         }
         // If errored
         return CommandResult.empty();

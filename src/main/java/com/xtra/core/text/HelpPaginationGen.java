@@ -98,6 +98,7 @@ public class HelpPaginationGen extends InternalModule {
     private HelpPaginationGen init() {
         this.checkHasCoreInitialized();
 
+        Internals.logger.log("Initializing the help pagination generation!");
         this.paginationBuilder = PaginationList.builder();
         this.setDefaults();
         return this;
@@ -177,6 +178,7 @@ public class HelpPaginationGen extends InternalModule {
         // CommandHelper#getEquivalentCommand
         for (CommandStore store : Internals.commandStores) {
             if (clazz.isInstance(store.command())) {
+                Internals.logger.log("Command " + store.command().aliases()[0] + " will be ignored!");
                 store.setIgnore(true);
             }
         }
@@ -257,6 +259,7 @@ public class HelpPaginationGen extends InternalModule {
      * @return The object, for chaining
      */
     public HelpPaginationGen generateContents() {
+        Internals.logger.log("Generating the contents for the help pagination list!");
         this.contents = new ArrayList<>();
         if (this.childBehavior == null) {
             this.childBehavior = ChildBehavior.BOTH;
@@ -264,6 +267,11 @@ public class HelpPaginationGen extends InternalModule {
         if (this.commandOrdering == null) {
             this.commandOrdering = CommandOrdering.A_Z;
         }
+        Internals.logger.log("Using settings:");
+        Internals.logger.log("Child behavior: " + this.childBehavior);
+        Internals.logger.log("Command ordering: " + this.commandOrdering);
+        Internals.logger.log("Command color: " + this.commandColor.getName());
+        Internals.logger.log("Description color: " + this.descriptionColor.getName());
         // Don't override the commands in Internals, just store our own
         List<CommandStore> commandStores = CommandHelper.orderContents(Internals.commandStores, this.commandOrdering);
         for (CommandStore command : commandStores) {
@@ -293,10 +301,13 @@ public class HelpPaginationGen extends InternalModule {
                 }
                 TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
                 TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
+                Internals.logger.log("Adding command string: " + commandString);
+                Internals.logger.log("Adding command description: " + cmd.description());
                 this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
             }
         }
         this.paginationBuilder.contents(this.contents);
+        Internals.logger.log("Help pagination list contents generated!");
         return this;
     }
 
@@ -306,6 +317,7 @@ public class HelpPaginationGen extends InternalModule {
      * {@link HelpPaginationGen#paginationBuilder()}.
      */
     private void setDefaults() {
+        Internals.logger.log("Setting the help pagination gen default values.");
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {

@@ -16,12 +16,16 @@ repositories {
         name 'Sponge maven repo'
         url 'http://repo.spongepowered.org/maven/'
     }
+    maven {
+        url 'https://jitpack.io'
+    }
 }
 
 dependencies {
     compile "org.spongepowered:spongeapi:4.1.0-SNAPSHOT"
     compile "org.reflections:reflections:0.9.10"
     compile "org.javassist:javassist:3.20.0-GA"
+    compile "com.github.Laxamer:LaxFile:2.0.1"
 }
 
 license {
@@ -40,9 +44,11 @@ shadowJar {
     dependencies {
         include(dependency('org.reflections:reflections'))
         include(dependency('org.javassist:javassist'))
+        include(dependency('com.github.Laxamer:Laxamer'))
     }
     relocate 'org.reflections', 'com.xtra.core.core-dependencies.reflections'
     relocate 'javassist', 'com.xtra.core.core-dependencies.javassist'
+    relocate 'com.laxamer.file', 'com.xtra.core.core-dependencies.laxfile'
     classifier = ''
 }
 

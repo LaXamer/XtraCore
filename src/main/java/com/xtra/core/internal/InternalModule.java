@@ -26,6 +26,7 @@
 package com.xtra.core.internal;
 
 import com.xtra.core.util.exceptions.XtraCoreException;
+import com.xtra.core.util.log.Logger.Level;
 
 /**
  * Similarities between XtraCore 'modules'. Note that they are not referred to
@@ -39,11 +40,7 @@ public class InternalModule {
      */
     public void checkHasCoreInitialized() {
         if (!Internals.initialized) {
-            try {
-                throw new XtraCoreException("com.xtra.core.Core has not been initialized yet!");
-            } catch (XtraCoreException e) {
-                e.printStackTrace();
-            }
+            Internals.logger.log(Level.CRITICAL, new XtraCoreException("com.xtra.core.Core has not been initialized yet!"));
         }
     }
 }

@@ -45,6 +45,7 @@ public class ConfigHandler extends InternalModule {
     private ConfigHandler init() {
         this.checkHasCoreInitialized();
 
+        Internals.logger.log("Initializing the configs!");
         for (Config config : Internals.configs) {
             config.init();
         }
