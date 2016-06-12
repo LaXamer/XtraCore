@@ -61,11 +61,11 @@ public abstract class ConfigBase implements Config {
         exists = path.toFile().exists();
         loaderBuilder.setPath(path);
         this.loader = loaderBuilder.build();
-        this.rootNode = loader.createEmptyNode();
         if (!exists) {
+            this.rootNode = loader.createEmptyNode();
             this.populate();
+            this.save();
         }
-        this.save();
         this.load();
     }
 
