@@ -94,147 +94,57 @@ public class CommandHelper {
     public static List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationGen.CommandOrdering ordering) {
         List<CommandStore> commandStore = new ArrayList<>();
         commandStore.addAll(contentsStore);
-        switch (ordering) {
-            case A_Z:
-                Collections.sort(commandStore);
-                return commandStore;
-            case Z_A:
-                Collections.sort(commandStore);
-                Collections.reverse(commandStore);
-                return commandStore;
-            case PARENT_COMMANDS_FIRST_A_Z:
-                return sortParentTypes(commandStore, true);
-            case PARENT_COMMANDS_FIRST_Z_A:
-                return sortParentTypes(commandStore, false);
-            case CHILD_COMMANDS_FIRST_A_Z:
-                return sortChildTypes(commandStore, true);
-            case CHILD_COMMANDS_FIRST_Z_A:
-                return sortChildTypes(commandStore, false);
-            case PARENT_AND_CHILD_FIRST_NON_LAST_A_Z:
-                return sortParentAndChildThenNonTypes(commandStore, true);
-            case PARENT_AND_CHILD_FIRST_NON_LAST_Z_A:
-                return sortParentAndChildThenNonTypes(commandStore, false);
-            case DEFAULT:
-                return commandStore;
+        if (ordering.equals(HelpPaginationGen.CommandOrdering.A_Z)) {
+            Collections.sort(commandStore);
+            return commandStore;
         }
-        return null;
-    }
+        if (ordering.equals(HelpPaginationGen.CommandOrdering.Z_A)) {
+            Collections.sort(commandStore);
+            Collections.reverse(commandStore);
+            return commandStore;
+        }
 
-    /**
-     * Sorts the parent command types either a-z or z-a. Then appends the
-     * non-parent commands.
-     * 
-     * @param contentsStore The contents store
-     * @param a_z If these should be sorted a-z, or z-a
-     * @return The sorted help list
-     */
-    private static List<CommandStore> sortParentTypes(List<CommandStore> contentsStore, boolean a_z) {
-        Set<Command> parentCommands = new HashSet<>();
-        for (CommandStore commandStore : contentsStore) {
-            if (commandStore.childOf() != null) {
-                parentCommands.add(commandStore.childOf());
-            }
-        }
-        // Get the command stores for these parent commands
-        List<CommandStore> parentCmds = new ArrayList<>();
-        for (Command command : parentCommands) {
-            for (CommandStore commandStore : contentsStore) {
-                if (commandStore.command().equals(command)) {
-                    parentCmds.add(commandStore);
+        Set<Command> topCommands = new HashSet<>();
+        for (CommandStore commandStore2 : commandStore) {
+            if (commandStore2.childOf() != null) {
+                if (ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                    topCommands.add(commandStore2.childOf());
+                } else if (ordering.equals(HelpPaginationGen.CommandOrdering.CHILD_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                    topCommands.add(commandStore2.command());
+                } else {
+                    topCommands.add(commandStore2.childOf());
+                    topCommands.add(commandStore2.command());
                 }
             }
         }
-        // Remove the parent commands, so they will be at the top of the list
-        contentsStore.removeAll(parentCommands);
-
-        Collections.sort(parentCmds);
-        Collections.sort(contentsStore);
-        if (!a_z) {
-            Collections.reverse(parentCmds);
-            Collections.reverse(contentsStore);
-        }
-        // Append these to the end now
-        parentCmds.addAll(contentsStore);
-        return parentCmds;
-    }
-
-    /**
-     * Sorts the child command types either a-z or z-a. Then appends the
-     * non-child commands.
-     * 
-     * @param contentsStore The contents store
-     * @param a_z If these should be sorted a-z, or z-a
-     * @return The sorted help list
-     */
-    private static List<CommandStore> sortChildTypes(List<CommandStore> contentsStore, boolean a_z) {
-        Set<Command> childCommands = new HashSet<>();
-        for (CommandStore commandStore : contentsStore) {
-            if (commandStore.childOf() != null) {
-                childCommands.add(commandStore.command());
-            }
-        }
-        // Get the command stores for these child commands
-        List<CommandStore> childCmds = new ArrayList<>();
-        for (Command command : childCommands) {
-            for (CommandStore commandStore : contentsStore) {
-                if (commandStore.command().equals(command)) {
-                    childCmds.add(commandStore);
+        // Get the command stores for these commands
+        List<CommandStore> topCmds = new ArrayList<>();
+        for (Command command : topCommands) {
+            for (CommandStore commandStore2 : commandStore) {
+                if (commandStore2.command().equals(command)) {
+                    topCmds.add(commandStore2);
                 }
             }
         }
-        // Remove the child commands, so they will be at the top of the list
-        contentsStore.removeAll(childCmds);
+        // Remove the top commands, we will append the contents store without
+        // the top commands to the list later, as the top commands are to come
+        // first in the list
+        commandStore.removeAll(topCommands);
 
-        Collections.sort(childCmds);
-        Collections.sort(contentsStore);
-        if (!a_z) {
-            Collections.reverse(childCmds);
-            Collections.reverse(contentsStore);
+        // Sort them
+        Collections.sort(topCmds);
+        Collections.sort(commandStore);
+        // If z-a, reverse the sorting
+        if (ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)
+                || ordering.equals(HelpPaginationGen.CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)
+                || ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
+            Collections.reverse(topCmds);
+            Collections.reverse(commandStore);
         }
         // Append these to the end now
-        childCmds.addAll(contentsStore);
-        return childCmds;
-    }
-
-    /**
-     * Sort the commands with parent commands and their children first in the
-     * list, followed by other parent commands and their children. At the end,
-     * is a sorted (a-z, or z-a) list of non-parent and non-child commands.
-     * 
-     * @param contentsStore The contents store
-     * @param a_z If these should be sorted a-z, or z-a
-     * @return The sorted help list
-     */
-    private static List<CommandStore> sortParentAndChildThenNonTypes(List<CommandStore> contentsStore, boolean a_z) {
-        Set<Command> parentAndChildCommands = new HashSet<>();
-        for (CommandStore commandStore : contentsStore) {
-            if (commandStore.childOf() != null) {
-                // These will automatically sort anyway once we call
-                // Collections#sort later on
-                parentAndChildCommands.add(commandStore.command());
-                parentAndChildCommands.add(commandStore.childOf());
-            }
-        }
-        // Get the command stores for these child commands
-        List<CommandStore> parentAndChildCmds = new ArrayList<>();
-        for (Command command : parentAndChildCommands) {
-            for (CommandStore commandStore : contentsStore) {
-                if (commandStore.command().equals(command)) {
-                    parentAndChildCmds.add(commandStore);
-                }
-            }
-        }
-        // Remove the child commands, so they will be at the top of the list
-        contentsStore.removeAll(parentAndChildCmds);
-
-        Collections.sort(parentAndChildCmds);
-        Collections.sort(contentsStore);
-        if (!a_z) {
-            Collections.reverse(parentAndChildCmds);
-            Collections.reverse(contentsStore);
-        }
-        // Append these to the end now
-        parentAndChildCmds.addAll(contentsStore);
-        return parentAndChildCmds;
+        topCmds.addAll(commandStore);
+        return topCmds;
     }
 }
