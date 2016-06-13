@@ -321,7 +321,8 @@ public class HelpPaginationGen extends InternalModule {
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {
-            this.paginationBuilder.title(Text.of(TextColors.GOLD, "Command List"));
+            // Default to plugin name
+            this.paginationBuilder.title(Text.of(TextColors.GOLD, Internals.pluginContainer.getName()));
         }
         if (this.padding != null) {
             this.paginationBuilder.padding(padding);
