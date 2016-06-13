@@ -40,21 +40,25 @@ import com.xtra.core.internal.Internals;
 public class Logger {
 
     private File logFile;
+    private boolean log;
 
-    public Logger() {
-        File directory = new File(Sponge.getGame().getSavesDirectory() + "/logs/xtracore-logs");
-        this.logFile = new File(directory + "/" + Internals.pluginContainer.getId() + ".log");
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        if (!logFile.exists()) {
-            try {
-                logFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+    public Logger(boolean log) {
+        this.log = log;
+        if (log) {
+            File directory = new File(Sponge.getGame().getSavesDirectory() + "/logs/xtracore-logs");
+            this.logFile = new File(directory + "/" + Internals.pluginContainer.getId() + ".log");
+            if (!directory.exists()) {
+                directory.mkdirs();
             }
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            FileUtils.wipeFile(logFile);
         }
-        FileUtils.wipeFile(logFile);
     }
 
     public void log(String message) {
@@ -66,20 +70,24 @@ public class Logger {
     }
 
     public void log(Level level, String message) {
-        FileUtils.writeToFile(logFile,
-                "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
+        if (log) {
+            FileUtils.writeToFile(logFile,
+                    "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
+        }
     }
 
     public void log(Level level, Throwable cause) {
-        FileUtils.writeToFile(logFile,
-                "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + cause.toString() + FileUtils.lineSeparator);
-        try {
-            // Need a print writer for stack traces
-            PrintWriter w = new PrintWriter(logFile);
-            cause.printStackTrace(w);
-            w.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        if (log) {
+            FileUtils.writeToFile(logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + cause.toString()
+                    + FileUtils.lineSeparator);
+            try {
+                // Need a print writer for stack traces
+                PrintWriter w = new PrintWriter(logFile);
+                cause.printStackTrace(w);
+                w.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 

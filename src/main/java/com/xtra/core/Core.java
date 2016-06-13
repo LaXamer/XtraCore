@@ -47,6 +47,20 @@ public class Core {
      * @return The core class
      */
     public static Core initialize(Object plugin) {
+        return initialize(plugin, true);
+    }
+
+    /**
+     * Initializes the base core class for function.
+     * 
+     * <p>CALL THIS BEFORE ATTEMPTING TO DO ANYTHING ELSE WITH XTRACORE OR
+     * EVERYTHING WILL BREAK.</p>
+     * 
+     * @param plugin The plugin class
+     * @param log Whether or not to create a log of various XtraCore actions
+     * @return The core class
+     */
+    public static Core initialize(Object plugin, boolean log) {
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
             Internals.logger.log(new XtraCoreException("Cannot find the plugin instance! Did you pass the wrong object?"));
@@ -55,7 +69,7 @@ public class Core {
         Internals.pluginContainer = optional.get();
         Internals.plugin = plugin;
 
-        Internals.logger = new Logger();
+        Internals.logger = new Logger(log);
         Internals.logger.log("======================================================");
         Internals.logger.log("Initializing XtraCore version " + Internals.VERSION + "!");
         Internals.logger.log("======================================================");

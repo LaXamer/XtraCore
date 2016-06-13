@@ -41,8 +41,9 @@ public class InternalModule {
      */
     public void checkHasCoreInitialized() {
         if (!Internals.initialized) {
-            Internals.logger = new Logger();
-            Internals.logger.log(Level.CRITICAL, new XtraCoreException("com.xtra.core.Core has not been initialized yet!"));
+            Internals.logger = new Logger(true);
+            Internals.logger.log(Level.CRITICAL,
+                    new XtraCoreException("com.xtra.core.Core has not been initialized yet! XtraCore cannot function properly!"));
         }
     }
 }
