@@ -45,7 +45,7 @@ public class Internals {
     public static final String VERSION = "@project.version@";
     public static Object plugin;
     public static PluginContainer pluginContainer;
-    public static Set<Command> commands = new HashSet<>();
+    public static Set<Command> commands;
     public static Set<CommandStore> commandStores = new HashSet<>();
     public static Set<Config> configs;
     public static boolean initialized = false;

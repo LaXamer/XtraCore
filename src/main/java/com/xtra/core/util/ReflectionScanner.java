@@ -86,9 +86,8 @@ public class ReflectionScanner {
                 Object o = oneClass.newInstance();
                 if (o instanceof Config) {
                     Config c = (Config) o;
-                    Internals.logger
-                            .log("Recognized config '" + c.getClass().getAnnotation(RegisterConfig.class).configName()
-                                    + "'! Adding to config list...");
+                    Internals.logger.log("Recognized config '" + c.getClass().getAnnotation(RegisterConfig.class).configName()
+                            + "'! Adding to config list...");
                     configs.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {

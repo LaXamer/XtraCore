@@ -63,8 +63,11 @@ public class Core {
     public static Core initialize(Object plugin, boolean log) {
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
-            Internals.logger.log(new XtraCoreException("Cannot find the plugin instance! Did you pass the wrong object?"));
-            return null;
+            try {
+                throw new XtraCoreException("Cannot find the plugin instance! Did you pass the wrong object?");
+            } catch (XtraCoreException e) {
+                e.printStackTrace();
+            }
         }
         Internals.pluginContainer = optional.get();
         Internals.plugin = plugin;
