@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.spongepowered.api.Sponge;
 
@@ -40,7 +42,7 @@ public class Logger {
     private File logFile;
 
     public Logger() {
-        File directory = new File(Sponge.getGame().getSavesDirectory() + "/logs/xtra-core");
+        File directory = new File(Sponge.getGame().getSavesDirectory() + "/logs/xtracore-logs");
         this.logFile = new File(directory + "/" + Internals.pluginContainer.getId() + ".log");
         if (!directory.exists()) {
             directory.mkdirs();
@@ -64,11 +66,13 @@ public class Logger {
     }
 
     public void log(Level level, String message) {
-        FileUtils.writeToFile(logFile, message);
+        FileUtils.writeToFile(logFile,
+                "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
     }
 
     public void log(Level level, Throwable cause) {
-        FileUtils.writeToFile(logFile, cause.toString());
+        FileUtils.writeToFile(logFile,
+                "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + cause.toString() + FileUtils.lineSeparator);
         try {
             // Need a print writer for stack traces
             PrintWriter w = new PrintWriter(logFile);
