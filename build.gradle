@@ -39,12 +39,11 @@ license {
     style.java = 'JAVADOC'
 }
 
-tasks.getByPath(':jar').enabled = false
 shadowJar {
     dependencies {
         include(dependency('org.reflections:reflections'))
         include(dependency('org.javassist:javassist'))
-        include(dependency('com.github.Laxamer:Laxamer'))
+        include(dependency('com.github.Laxamer:LaxFile'))
     }
     relocate 'org.reflections', 'com.xtra.core.core-dependencies.reflections'
     relocate 'javassist', 'com.xtra.core.core-dependencies.javassist'
