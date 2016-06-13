@@ -49,7 +49,7 @@ public abstract class ConfigBase implements Config {
     public void init() {
         RegisterConfig rc = this.getClass().getAnnotation(RegisterConfig.class);
 
-        Internals.logger.log("Initializing configuration for " + rc.configName() + ".conf");
+        Internals.logger.log("Initializing configuration for '" + rc.configName() + ".conf'.");
 
         HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
         Path path;
@@ -65,7 +65,7 @@ public abstract class ConfigBase implements Config {
         loaderBuilder.setPath(path);
         this.loader = loaderBuilder.build();
         if (!exists) {
-            Internals.logger.log("Configuration does not currently exist. Creating...");
+            Internals.logger.log("Configuration currently does not exist. Creating...");
             this.rootNode = loader.createEmptyNode();
             this.populate();
             this.save();

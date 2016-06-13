@@ -59,7 +59,7 @@ public class ReflectionScanner {
                 Object o = oneClass.newInstance();
                 if (o instanceof Command) {
                     Command c = (Command) o;
-                    Internals.logger.log("Recognized command " + c.aliases()[0] + "! Adding to command list...");
+                    Internals.logger.log("Recognized command '" + c.aliases()[0] + "'! Adding to command list...");
                     commands.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
@@ -67,6 +67,7 @@ public class ReflectionScanner {
             }
         }
         Internals.logger.log("Commands added.");
+        Internals.logger.log("======================================================");
         return commands;
     }
 
@@ -86,7 +87,8 @@ public class ReflectionScanner {
                 if (o instanceof Config) {
                     Config c = (Config) o;
                     Internals.logger
-                            .log("Recognized config " + c.getClass().getAnnotation(RegisterConfig.class).configName() + "! Adding to config list...");
+                            .log("Recognized config '" + c.getClass().getAnnotation(RegisterConfig.class).configName()
+                                    + "'! Adding to config list...");
                     configs.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
@@ -94,6 +96,7 @@ public class ReflectionScanner {
             }
         }
         Internals.logger.log("Configs added.");
+        Internals.logger.log("======================================================");
         return configs;
     }
 }

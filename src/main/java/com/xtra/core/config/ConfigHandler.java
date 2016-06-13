@@ -49,6 +49,7 @@ public class ConfigHandler extends InternalModule {
         for (Config config : Internals.configs) {
             config.init();
         }
+        Internals.logger.log("======================================================");
         return this;
     }
 

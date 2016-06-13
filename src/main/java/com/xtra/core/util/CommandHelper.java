@@ -69,7 +69,7 @@ public class CommandHelper {
      * @return The parent command
      */
     public static Command getParentCommand(Command command) {
-        Internals.logger.log("Getting the parent command for the command: " + command.aliases()[0]);
+        Internals.logger.log("Getting the parent command for the command: '" + command.aliases()[0] + "'.");
         Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
         Command parentCommand2 = getEquivalentCommand(parentCommand);
         return parentCommand2;

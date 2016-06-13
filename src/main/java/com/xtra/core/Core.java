@@ -54,8 +54,12 @@ public class Core {
         }
         Internals.pluginContainer = optional.get();
         Internals.plugin = plugin;
+
         Internals.logger = new Logger();
-        Internals.logger.log("Initializing XtraCore!");
+        Internals.logger.log("======================================================");
+        Internals.logger.log("Initializing XtraCore version " + Internals.VERSION + "!");
+        Internals.logger.log("======================================================");
+
         Internals.commands = ReflectionScanner.getCommands();
         Internals.configs = ReflectionScanner.getConfigs();
         Internals.initialized = true;

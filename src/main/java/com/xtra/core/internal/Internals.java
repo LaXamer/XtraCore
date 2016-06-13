@@ -42,6 +42,7 @@ import com.xtra.core.util.store.CommandStore;
  */
 public class Internals {
 
+    public static final String VERSION = "@project.version@";
     public static Object plugin;
     public static PluginContainer pluginContainer;
     public static Set<Command> commands = new HashSet<>();

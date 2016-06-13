@@ -62,12 +62,15 @@ public class CommandRegistrar extends InternalModule {
         for (Command command : Internals.commands) {
             this.initializeCommandSpec(command);
         }
-        Internals.logger.log("Adding the necessary child commands to the command specs!");
+        Internals.logger.log("======================================================");
+        Internals.logger.log("Adding any necessary child commands to the command specs!");
         this.addChildCommands();
+        Internals.logger.log("======================================================");
         Internals.logger.log("Building and registering the commands!");
         for (CommandStore command : Internals.commandStores) {
             this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
         }
+        Internals.logger.log("======================================================");
         return this;
     }
 
@@ -75,21 +78,22 @@ public class CommandRegistrar extends InternalModule {
         // Create the initial CommandSpec builder
         CommandSpec.Builder specBuilder = CommandSpec.builder().executor(command);
 
-        Internals.logger.log("Initializing the command spec for the command: " + command.aliases()[0]);
+        Internals.logger.log("======================================================");
+        Internals.logger.log("Initializing the command spec for the command '" + command.aliases()[0] + "'.");
 
         // In case null, do not use
         if (command.permission() != null) {
             specBuilder.permission(command.permission());
-            Internals.logger.log("Command permission: " + command.permission());
+            Internals.logger.log("Command permission: '" + command.permission() + "'");
         }
         if (command.description() != null) {
             specBuilder.description(Text.of(command.description()));
-            Internals.logger.log("Command description: " + command.description());
+            Internals.logger.log("Command description: '" + command.description() + "'");
         }
         if (command.args() != null) {
             if (command.args().length != 0) {
                 specBuilder.arguments(command.args());
-                Internals.logger.log("Command has " + command.args().length + " arguments.");
+                Internals.logger.log("Command has " + command.args().length + " argument(s).");
             }
         }
 
@@ -128,7 +132,7 @@ public class CommandRegistrar extends InternalModule {
      * @param command The command
      */
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
-        Internals.logger.log("Building and registering the command: " + command.aliases()[0]);
+        Internals.logger.log("Building and registering the command: '" + command.aliases()[0] + "'");
         Sponge.getCommandManager().register(Internals.plugin, commandSpec.build(), command.aliases());
     }
 

@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'maven'
     id 'net.minecrell.licenser' version '0.2'
+    id 'net.ellune.blossom' version '1.0.1'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
 
@@ -26,6 +27,10 @@ dependencies {
     compile "org.reflections:reflections:0.9.10"
     compile "org.javassist:javassist:3.20.0-GA"
     compile "com.github.Laxamer:LaxFile:2.0.1"
+}
+
+blossom {
+    replaceToken '@project.version@', project.version, 'src/main/java/com/xtra/core/internal/Internals.java'
 }
 
 license {
