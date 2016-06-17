@@ -25,8 +25,8 @@
 
 package com.xtra.core.config;
 
-import com.xtra.core.internal.InternalModule;
 import com.xtra.core.internal.Internals;
+import com.xtra.core.internal.module.InternalModule;
 
 public class ConfigHandler extends InternalModule {
 

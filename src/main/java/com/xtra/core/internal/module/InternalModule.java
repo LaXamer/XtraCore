@@ -23,8 +23,9 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.internal;
+package com.xtra.core.internal.module;
 
+import com.xtra.core.internal.Internals;
 import com.xtra.core.util.exceptions.XtraCoreException;
 import com.xtra.core.util.log.Logger;
 import com.xtra.core.util.log.Logger.Level;
@@ -39,7 +40,7 @@ public class InternalModule {
     /**
      * Checks if Core has been initialized. If not, then everything will fail!
      */
-    public void checkHasCoreInitialized() {
+    protected void checkHasCoreInitialized() {
         if (!Internals.initialized) {
             Internals.logger = new Logger(true);
             Internals.logger.log(Level.CRITICAL,

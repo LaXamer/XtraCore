@@ -30,8 +30,8 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
 import com.xtra.core.command.base.EmptyCommand;
-import com.xtra.core.internal.InternalModule;
 import com.xtra.core.internal.Internals;
+import com.xtra.core.internal.module.InternalModule;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.store.CommandStore;
 

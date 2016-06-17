@@ -25,10 +25,12 @@
 
 package com.xtra.core.util;
 
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.reflections.Reflections;
+import org.spongepowered.api.event.Listener;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
@@ -97,5 +99,21 @@ public class ReflectionScanner {
         Internals.logger.log("Configs added.");
         Internals.logger.log("======================================================");
         return configs;
+    }
+
+    public static Set<Object> getPluginListeners() {
+        Internals.logger.log("Using reflection to access and register the listeners...");
+        Set<Method> methods = REFLECTIONS.getMethodsAnnotatedWith(Listener.class);
+        Set<Object> listenerClasses = new HashSet<>();
+        for (Method method : methods) {
+            try {
+                listenerClasses.add(method.getDeclaringClass().newInstance());
+            } catch (InstantiationException | IllegalAccessException e) {
+                Internals.logger.log(e);
+            }
+        }
+        Internals.logger.log("Listeners added.");
+        Internals.logger.log("======================================================");
+        return listenerClasses;
     }
 }
