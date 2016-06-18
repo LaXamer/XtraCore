@@ -329,6 +329,8 @@ public class HelpPaginationGen extends InternalModule {
         } else {
             this.paginationBuilder.padding(Text.of("-="));
         }
+        this.commandColor = TextColors.GREEN;
+        this.descriptionColor = TextColors.GOLD;
     }
 
     /**
