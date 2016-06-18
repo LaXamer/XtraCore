@@ -41,6 +41,8 @@ import com.xtra.core.util.store.CommandStore;
  */
 public class CommandHandler extends InternalHandler {
 
+    private static CommandHandler instance;
+
     private CommandHandler() {
     }
 
@@ -54,7 +56,8 @@ public class CommandHandler extends InternalHandler {
     }
 
     private CommandHandler init() {
-        this.checkHasCoreInitialized();
+        super.checkHasCoreInitialized();
+        instance = this;
 
         Internals.logger.log("Initializing the command handler!");
         Internals.logger.log("Initializing the command specs for the commands...");
@@ -149,5 +152,9 @@ public class CommandHandler extends InternalHandler {
             }
         }
         return null;
+    }
+
+    public static CommandHandler get() {
+        return instance;
     }
 }

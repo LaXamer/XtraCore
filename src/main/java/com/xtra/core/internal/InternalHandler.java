@@ -26,8 +26,6 @@
 package com.xtra.core.internal;
 
 import com.xtra.core.util.exceptions.XtraCoreException;
-import com.xtra.core.util.log.Logger;
-import com.xtra.core.util.log.Logger.Level;
 
 /**
  * A base class for any checks shared by multiple handlers.
@@ -39,9 +37,11 @@ public class InternalHandler {
      */
     protected void checkHasCoreInitialized() {
         if (!Internals.initialized) {
-            Internals.logger = new Logger(true);
-            Internals.logger.log(Level.ERROR,
-                    new XtraCoreException("com.xtra.core.Core has not been initialized yet! XtraCore cannot function properly!"));
+            try {
+                throw new XtraCoreException("com.xtra.core.Core has not been initialized yet! XtraCore cannot function properly!");
+            } catch (XtraCoreException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

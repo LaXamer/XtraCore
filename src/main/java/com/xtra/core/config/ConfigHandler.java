@@ -30,6 +30,8 @@ import com.xtra.core.internal.Internals;
 
 public class ConfigHandler extends InternalHandler {
 
+    private static ConfigHandler instance;
+
     private ConfigHandler() {
     }
 
@@ -44,6 +46,7 @@ public class ConfigHandler extends InternalHandler {
 
     private ConfigHandler init() {
         this.checkHasCoreInitialized();
+        instance = this;
 
         Internals.logger.log("Initializing the configs!");
         for (Config config : Internals.configs) {
@@ -66,5 +69,9 @@ public class ConfigHandler extends InternalHandler {
             }
         }
         return null;
+    }
+
+    public static ConfigHandler get() {
+        return instance;
     }
 }

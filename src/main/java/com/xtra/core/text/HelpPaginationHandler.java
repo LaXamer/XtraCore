@@ -48,6 +48,7 @@ import com.xtra.core.util.store.CommandStore;
  */
 public class HelpPaginationHandler extends InternalHandler {
 
+    private static HelpPaginationHandler instance;
     private PaginationList.Builder paginationBuilder;
     private Text title;
     private Text padding;
@@ -97,6 +98,7 @@ public class HelpPaginationHandler extends InternalHandler {
 
     private HelpPaginationHandler init() {
         this.checkHasCoreInitialized();
+        instance = this;
 
         Internals.logger.log("Initializing the help pagination generation!");
         this.paginationBuilder = PaginationList.builder();
@@ -331,6 +333,10 @@ public class HelpPaginationHandler extends InternalHandler {
         }
         this.commandColor = TextColors.GREEN;
         this.descriptionColor = TextColors.GOLD;
+    }
+
+    public static HelpPaginationHandler get() {
+        return HelpPaginationHandler.instance;
     }
 
     /**
