@@ -43,7 +43,7 @@ public class InternalModule {
     protected void checkHasCoreInitialized() {
         if (!Internals.initialized) {
             Internals.logger = new Logger(true);
-            Internals.logger.log(Level.CRITICAL,
+            Internals.logger.log(Level.ERROR,
                     new XtraCoreException("com.xtra.core.Core has not been initialized yet! XtraCore cannot function properly!"));
         }
     }

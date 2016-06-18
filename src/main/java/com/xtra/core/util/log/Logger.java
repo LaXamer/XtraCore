@@ -26,12 +26,11 @@
 package com.xtra.core.util.log;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.spongepowered.api.Sponge;
 
 import com.laxamer.file.FileUtils;
@@ -73,25 +72,30 @@ public class Logger {
         if (log) {
             FileUtils.writeToFile(logFile,
                     "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
+            if (level.equals(Level.WARNING)) {
+                Internals.pluginContainer.getLogger().warn(message);
+            } else if (level.equals(Level.ERROR)) {
+                Internals.pluginContainer.getLogger().error(message);
+            }
         }
     }
 
     public void log(Level level, Throwable cause) {
         if (log) {
-            FileUtils.writeToFile(logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + cause.toString()
+            FileUtils.writeToFile(logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + cause.getMessage()
                     + FileUtils.lineSeparator);
-            try {
-                // Need a print writer for stack traces
-                PrintWriter w = new PrintWriter(logFile);
-                cause.printStackTrace(w);
-                w.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            String stackTrace = ExceptionUtils.getStackTrace(cause);
+            FileUtils.writeToFile(logFile, stackTrace);
+
+            if (level.equals(Level.WARNING)) {
+                Internals.pluginContainer.getLogger().warn(cause.getMessage());
+            } else if (level.equals(Level.ERROR)) {
+                Internals.pluginContainer.getLogger().error(cause.getMessage());
             }
         }
     }
 
     public enum Level {
-        DEBUG, INFO, WARNING, ERROR, CRITICAL;
+        DEBUG, INFO, WARNING, ERROR;
     }
 }
