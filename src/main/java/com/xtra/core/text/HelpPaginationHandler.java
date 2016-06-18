@@ -35,8 +35,8 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.xtra.core.command.Command;
+import com.xtra.core.internal.InternalHandler;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.internal.module.InternalModule;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.store.CommandStore;
@@ -46,7 +46,7 @@ import com.xtra.core.util.store.CommandStore;
  * plugin. Use of this class is optional, however it is recommended if creating
  * a help list for your plugin.
  */
-public class HelpPaginationGen extends InternalModule {
+public class HelpPaginationHandler extends InternalHandler {
 
     private PaginationList.Builder paginationBuilder;
     private Text title;
@@ -57,16 +57,16 @@ public class HelpPaginationGen extends InternalModule {
     private ChildBehavior childBehavior;
     private CommandOrdering commandOrdering;
 
-    private HelpPaginationGen() {
+    private HelpPaginationHandler() {
     }
 
     /**
      * Creates a basis class for generating a {@link PaginationList} for the
      * plugin's commands help list. Further configuration is provided through
-     * {@link HelpPaginationGen#paginationBuilder()}.
+     * {@link HelpPaginationHandler#paginationBuilder()}.
      */
-    public static HelpPaginationGen create() {
-        return new HelpPaginationGen().init();
+    public static HelpPaginationHandler create() {
+        return new HelpPaginationHandler().init();
     }
 
     /**
@@ -75,8 +75,8 @@ public class HelpPaginationGen extends InternalModule {
      * @param plugin The plugin
      * @param title The title
      */
-    public static HelpPaginationGen create(Text title) {
-        HelpPaginationGen gen = new HelpPaginationGen();
+    public static HelpPaginationHandler create(Text title) {
+        HelpPaginationHandler gen = new HelpPaginationHandler();
         gen.title = title;
         return gen.init();
     }
@@ -88,14 +88,14 @@ public class HelpPaginationGen extends InternalModule {
      * @param title The title
      * @param padding The padding
      */
-    public static HelpPaginationGen create(Text title, Text padding) {
-        HelpPaginationGen gen = new HelpPaginationGen();
+    public static HelpPaginationHandler create(Text title, Text padding) {
+        HelpPaginationHandler gen = new HelpPaginationHandler();
         gen.title = title;
         gen.padding = padding;
         return gen.init();
     }
 
-    private HelpPaginationGen init() {
+    private HelpPaginationHandler init() {
         this.checkHasCoreInitialized();
 
         Internals.logger.log("Initializing the help pagination generation!");
@@ -141,7 +141,7 @@ public class HelpPaginationGen extends InternalModule {
      * @param color The color to set this to
      * @return The object, for chaining
      */
-    public HelpPaginationGen setCommandColor(TextColor color) {
+    public HelpPaginationHandler setCommandColor(TextColor color) {
         this.commandColor = color;
         return this;
     }
@@ -160,7 +160,7 @@ public class HelpPaginationGen extends InternalModule {
      * @param color The color to set this to
      * @return The object, for chaining
      */
-    public HelpPaginationGen setDescriptionColor(TextColor color) {
+    public HelpPaginationHandler setDescriptionColor(TextColor color) {
         this.descriptionColor = color;
         return this;
     }
@@ -173,7 +173,7 @@ public class HelpPaginationGen extends InternalModule {
      * @param cmd The command to be ignored in the help list
      * @return The object, for chaining
      */
-    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T> clazz) {
+    public <T extends Command> HelpPaginationHandler specifyCommandShouldBeIgnored(Class<T> clazz) {
         // We still need the command store, so don't bother calling
         // CommandHelper#getEquivalentCommand
         for (CommandStore store : Internals.commandStores) {
@@ -194,7 +194,7 @@ public class HelpPaginationGen extends InternalModule {
      * @return The object, for chaining
      */
     @SuppressWarnings("unchecked")
-    public <T extends Command> HelpPaginationGen specifyCommandShouldBeIgnored(Class<T>... clazz) {
+    public <T extends Command> HelpPaginationHandler specifyCommandShouldBeIgnored(Class<T>... clazz) {
         for (Class<T> cmd : clazz) {
             // As long as this cmd class is a real command
             if (CommandHelper.getEquivalentCommand(cmd) != null) {
@@ -211,7 +211,7 @@ public class HelpPaginationGen extends InternalModule {
      * @param childBehavior The child behavior
      * @return The object, for chaining
      */
-    public HelpPaginationGen specifyChildBehavior(ChildBehavior childBehavior) {
+    public HelpPaginationHandler specifyChildBehavior(ChildBehavior childBehavior) {
         this.childBehavior = childBehavior;
         return this;
     }
@@ -223,7 +223,7 @@ public class HelpPaginationGen extends InternalModule {
      * @param commandOrdering The command ordering
      * @return The object, for chaining
      */
-    public HelpPaginationGen specifyCommandOrdering(CommandOrdering commandOrdering) {
+    public HelpPaginationHandler specifyCommandOrdering(CommandOrdering commandOrdering) {
         this.commandOrdering = commandOrdering;
         return this;
     }
@@ -258,7 +258,7 @@ public class HelpPaginationGen extends InternalModule {
      * 
      * @return The object, for chaining
      */
-    public HelpPaginationGen generateContents() {
+    public HelpPaginationHandler generateContents() {
         Internals.logger.log("Generating the contents for the help pagination list!");
         this.contents = new ArrayList<>();
         if (this.childBehavior == null) {
@@ -314,7 +314,7 @@ public class HelpPaginationGen extends InternalModule {
     /**
      * Set the defaults if ones were not provided, or use the ones that were
      * provided. These can be overridden through the pagination builder itself
-     * {@link HelpPaginationGen#paginationBuilder()}.
+     * {@link HelpPaginationHandler#paginationBuilder()}.
      */
     private void setDefaults() {
         Internals.logger.log("Setting the help pagination gen default values.");

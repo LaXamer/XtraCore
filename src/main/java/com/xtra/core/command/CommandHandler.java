@@ -30,8 +30,8 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
 import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.internal.InternalHandler;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.internal.module.InternalModule;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.store.CommandStore;
 
@@ -39,24 +39,24 @@ import com.xtra.core.util.store.CommandStore;
  * A simple utility class for automatically retrieving, building and registering
  * the commands within a plugin.
  */
-public class CommandRegistrar extends InternalModule {
+public class CommandHandler extends InternalHandler {
 
-    private CommandRegistrar() {
+    private CommandHandler() {
     }
 
     /**
-     * Creates and initializes a {@link CommandRegistrar}.
+     * Creates and initializes a {@link CommandHandler}.
      * 
-     * @return The new command registrar
+     * @return The new command handler
      */
-    public static CommandRegistrar create() {
-        return new CommandRegistrar().init();
+    public static CommandHandler create() {
+        return new CommandHandler().init();
     }
 
-    private CommandRegistrar init() {
+    private CommandHandler init() {
         this.checkHasCoreInitialized();
 
-        Internals.logger.log("Initializing the command registrar!");
+        Internals.logger.log("Initializing the command handler!");
         Internals.logger.log("Initializing the command specs for the commands...");
 
         for (Command command : Internals.commands) {

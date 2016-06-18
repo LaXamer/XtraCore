@@ -23,19 +23,16 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.internal.module;
+package com.xtra.core.internal;
 
-import com.xtra.core.internal.Internals;
 import com.xtra.core.util.exceptions.XtraCoreException;
 import com.xtra.core.util.log.Logger;
 import com.xtra.core.util.log.Logger.Level;
 
 /**
- * Similarities between XtraCore 'modules'. Note that they are not referred to
- * as modules in the code-base (save for this class) and do not quite act like
- * 'modules'. This class is purely to centralize common methods.
+ * A base class for any checks shared by multiple handlers.
  */
-public class InternalModule {
+public class InternalHandler {
 
     /**
      * Checks if Core has been initialized. If not, then everything will fail!

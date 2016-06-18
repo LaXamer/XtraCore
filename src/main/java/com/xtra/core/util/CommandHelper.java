@@ -34,7 +34,7 @@ import java.util.Set;
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.text.HelpPaginationGen;
+import com.xtra.core.text.HelpPaginationHandler;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -91,14 +91,14 @@ public class CommandHelper {
         return null;
     }
 
-    public static List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationGen.CommandOrdering ordering) {
+    public static List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationHandler.CommandOrdering ordering) {
         List<CommandStore> commandStore = new ArrayList<>();
         commandStore.addAll(contentsStore);
-        if (ordering.equals(HelpPaginationGen.CommandOrdering.A_Z)) {
+        if (ordering.equals(HelpPaginationHandler.CommandOrdering.A_Z)) {
             Collections.sort(commandStore);
             return commandStore;
         }
-        if (ordering.equals(HelpPaginationGen.CommandOrdering.Z_A)) {
+        if (ordering.equals(HelpPaginationHandler.CommandOrdering.Z_A)) {
             Collections.sort(commandStore);
             Collections.reverse(commandStore);
             return commandStore;
@@ -107,11 +107,11 @@ public class CommandHelper {
         Set<Command> topCommands = new HashSet<>();
         for (CommandStore commandStore2 : commandStore) {
             if (commandStore2.childOf() != null) {
-                if (ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_A_Z)
-                        || ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                if (ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
                     topCommands.add(commandStore2.childOf());
-                } else if (ordering.equals(HelpPaginationGen.CommandOrdering.CHILD_COMMANDS_FIRST_A_Z)
-                        || ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                } else if (ordering.equals(HelpPaginationHandler.CommandOrdering.CHILD_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
                     topCommands.add(commandStore2.command());
                 } else {
                     topCommands.add(commandStore2.childOf());
@@ -137,9 +137,9 @@ public class CommandHelper {
         Collections.sort(topCmds);
         Collections.sort(commandStore);
         // If z-a, reverse the sorting
-        if (ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)
-                || ordering.equals(HelpPaginationGen.CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)
-                || ordering.equals(HelpPaginationGen.CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
+        if (ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)
+                || ordering.equals(HelpPaginationHandler.CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)
+                || ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
             Collections.reverse(topCmds);
             Collections.reverse(commandStore);
         }
