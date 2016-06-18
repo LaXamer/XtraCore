@@ -30,6 +30,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 import org.spongepowered.api.event.Listener;
 
 import com.xtra.core.command.Command;
@@ -44,7 +47,8 @@ import com.xtra.core.internal.Internals;
  */
 public class ReflectionScanner {
 
-    private static final Reflections REFLECTIONS = new Reflections(Internals.plugin.getClass().getPackage().getName());
+    private static final Reflections REFLECTIONS = new Reflections(Internals.plugin.getClass().getPackage().getName(), new SubTypesScanner(),
+            new TypeAnnotationsScanner(), new MethodAnnotationsScanner());
 
     /**
      * Uses reflection to get the commands of the plugin.
