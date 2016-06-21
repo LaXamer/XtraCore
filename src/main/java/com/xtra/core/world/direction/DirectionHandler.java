@@ -27,7 +27,7 @@ package com.xtra.core.world.direction;
 
 import org.spongepowered.api.util.Direction;
 
-public class DirectionManager {
+public class DirectionHandler {
 
     /**
      * Gets a cardinal direction from the specified yaw value.
