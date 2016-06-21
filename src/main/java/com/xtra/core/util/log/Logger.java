@@ -91,6 +91,7 @@ public class Logger {
                 Internals.pluginContainer.getLogger().warn(cause.getMessage());
             } else if (level.equals(Level.ERROR)) {
                 Internals.pluginContainer.getLogger().error(cause.getMessage());
+                Internals.pluginContainer.getLogger().error(stackTrace);
             }
         }
     }
