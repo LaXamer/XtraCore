@@ -36,13 +36,13 @@ public class DirectionHandler {
      * @return The cardinal direction for the specified yaw value
      */
     public static Direction getCardinalDirectionFromYaw(double yaw) {
-        if (yaw >= 135 || yaw <= -135) {
+        if ((yaw >= 135 && yaw <= 225) || (yaw <= -135 && yaw >= -225)) {
             return Direction.NORTH;
-        } else if (yaw >= -135 && yaw <= -45) {
+        } else if ((yaw >= -135 && yaw <= -45) || (yaw >= 225 && yaw <= 315)) {
             return Direction.EAST;
-        } else if (yaw >= -45 && yaw <= 45) {
+        } else if ((yaw >= -45 && yaw <= 45) || yaw >= 315 || yaw <= -315) {
             return Direction.SOUTH;
-        } else if (yaw >= 45 && yaw <= 135) {
+        } else if ((yaw >= 45 && yaw <= 135) || (yaw <= -225 && yaw >= -315)) {
             return Direction.WEST;
         }
         return Direction.NONE;
