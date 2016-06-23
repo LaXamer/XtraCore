@@ -304,8 +304,12 @@ public class HelpPaginationHandler extends InternalHandler {
                 TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
                 TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
                 Internals.logger.log("Adding command string: " + commandString);
-                Internals.logger.log("Adding command description: " + cmd.description());
-                this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
+                if (cmd.description() != null) {
+                    Internals.logger.log("Adding command description: " + cmd.description());
+                    this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
+                } else {
+                    this.contents.add(Text.of(commandColor, commandString));
+                }
             }
         }
         this.paginationBuilder.contents(this.contents);
