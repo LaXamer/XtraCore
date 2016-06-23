@@ -53,8 +53,6 @@ import com.xtra.core.internal.Internals;
 
 public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric {
 
-    private static CommandResult result;
-
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
 
     @Override
@@ -108,13 +106,11 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
                         try {
-                            CommandBase.result = this.executeCommand(src, args);
+                            this.executeCommand(src, args);
                         } catch (TextMessageException e) {
                             src.sendMessage(e.getText());
-                            CommandBase.result = CommandResult.empty();
                         } catch (Exception e2) {
                             Internals.logger.log(e2);
-                            CommandBase.result = CommandResult.empty();
                         }
                     }).async().submit(Internals.plugin);
             for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
@@ -122,17 +118,17 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
                     entry.getKey().run(src, args);
                 }
             }
-            return CommandBase.result;
+            return CommandResult.success();
         }
 
         try {
-            CommandBase.result = this.executeCommand(src, args);
+            CommandResult result = this.executeCommand(src, args);
             for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
                 if (entry.getValue().phase().equals(CommandPhase.POST)) {
                     entry.getKey().run(src, args);
                 }
             }
-            return CommandBase.result;
+            return result;
         } catch (TextMessageException e) {
             src.sendMessage(e.getText());
         } catch (Exception e2) {
