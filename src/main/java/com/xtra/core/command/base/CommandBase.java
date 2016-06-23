@@ -57,25 +57,23 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
 
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
-        Map<CommandRunnable, CommandPhase> map = new HashMap<>();
+        Map<CommandRunnable, RunAt> map = new HashMap<>();
         if (Internals.commandRunnables.keySet().contains(this.getClass())) {
             Collection<CommandRunnable> runnables = Internals.commandRunnables.get(this.getClass());
             try {
                 for (CommandRunnable runnable : runnables) {
-                    RunAt runAt = runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class);
-                    if (runAt != null) {
-                        map.put(runnable, runAt.phase());
-                    } else {
-                        map.put(runnable, CommandPhase.START);
-                    }
+                    map.put(runnable, runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class));
                 }
             } catch (NoSuchMethodException | SecurityException e) {
                 Internals.logger.log(e);
             }
         }
-        for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
-            if (entry.getValue().equals(CommandPhase.PRE)) {
+        for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
+            if (entry.getValue().phase().equals(CommandPhase.PRE)) {
                 entry.getKey().run(source, args);
+                if (!entry.getValue().continueRunning()) {
+                    return CommandResult.success();
+                }
             }
         }
 
@@ -111,9 +109,12 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
         @SuppressWarnings("unchecked")
         T src = (T) source;
 
-        for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
-            if (entry.getValue().equals(CommandPhase.START)) {
+        for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
+            if (entry.getValue().phase().equals(CommandPhase.START)) {
                 entry.getKey().run(source, args);
+                if (!entry.getValue().continueRunning()) {
+                    return CommandResult.success();
+                }
             }
         }
 
@@ -132,8 +133,8 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
                             CommandBase.result = CommandResult.empty();
                         }
                     }).async().submit(Internals.plugin);
-            for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
-                if (entry.getValue().equals(CommandPhase.POST)) {
+            for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
+                if (entry.getValue().phase().equals(CommandPhase.POST)) {
                     entry.getKey().run(source, args);
                 }
             }
@@ -142,8 +143,8 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
 
         try {
             CommandBase.result = this.executeCommand(src, args);
-            for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
-                if (entry.getValue().equals(CommandPhase.POST)) {
+            for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
+                if (entry.getValue().phase().equals(CommandPhase.POST)) {
                     entry.getKey().run(source, args);
                 }
             }

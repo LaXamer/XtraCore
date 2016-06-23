@@ -39,5 +39,13 @@ public @interface RunAt {
      * 
      * @return The phase at which this will run
      */
-    CommandPhase phase();
+    CommandPhase phase() default CommandPhase.START;
+
+    /**
+     * Specifies if the command should continue running after the
+     * {@link CommandRunnable} has finished execution.
+     * 
+     * @return
+     */
+    boolean continueRunning() default true;
 }
