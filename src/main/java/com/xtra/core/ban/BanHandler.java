@@ -28,82 +28,15 @@ package com.xtra.core.ban;
 import java.util.Optional;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanTypes;
 
 /**
  * Convenience class for banning players.
  */
 public class BanHandler {
-
-    /**
-     * Bans a specified profile.
-     * 
-     * @param profile The profile to ban
-     */
-    public static void banProfile(GameProfile profile) {
-        BanService service = Sponge.getServiceManager().provide(BanService.class).get();
-        service.addBan(Ban.of(profile));
-    }
-
-    /**
-     * Bans a specified profile with an inputed reason. The reason is
-     * automatically deserialized.
-     * 
-     * @param profile The profile to ban
-     * @param reason The raw reason for banning
-     */
-    public static void banProfile(GameProfile profile, String reason) {
-        banProfile(profile, TextSerializers.FORMATTING_CODE.deserialize(reason));
-    }
-
-    /**
-     * Bans a specified profile with a text reason.
-     * 
-     * @param profile The profile to ban
-     * @param reason The reason for banning
-     */
-    public static void banProfile(GameProfile profile, Text reason) {
-        BanService service = Sponge.getServiceManager().provide(BanService.class).get();
-        service.addBan(Ban.of(profile, reason));
-    }
-
-    /**
-     * Ip bans the specified player.
-     * 
-     * @param player The player to ip ban
-     */
-    public static void banPlayerIp(Player player) {
-        BanService service = Sponge.getServiceManager().provide(BanService.class).get();
-        service.addBan(Ban.builder().type(BanTypes.IP).address(player.getConnection().getAddress().getAddress()).build());
-    }
-
-    /**
-     * Ip bans a specified player with an inputed reason. The reason is
-     * automatically deserialized.
-     * 
-     * @param player The player to ip ban
-     * @param reason The raw reason for banning
-     */
-    public static void banPlayerIp(Player player, String reason) {
-        banPlayerIp(player, TextSerializers.FORMATTING_CODE.deserialize(reason));
-    }
-
-    /**
-     * Ip bans a specified player with a text reason.
-     * 
-     * @param player The player to ip ban
-     * @param reason The reason for banning
-     */
-    public static void banPlayerIp(Player player, Text reason) {
-        BanService service = Sponge.getServiceManager().provide(BanService.class).get();
-        service.addBan(Ban.builder().type(BanTypes.IP).address(player.getConnection().getAddress().getAddress()).reason(reason).build());
-    }
 
     /**
      * Gets the ban reason for the specified profile. Will return null if one
