@@ -104,9 +104,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
             }
         }
 
-        boolean isAsync = this.getClass().getAnnotation(RegisterCommand.class).async();
-
-        if (isAsync) {
+        if (this.getClass().getAnnotation(RegisterCommand.class).async()) {
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
                         try {

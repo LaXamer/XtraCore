@@ -34,6 +34,7 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.plugin.Plugin;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
@@ -111,7 +112,11 @@ public class ReflectionScanner {
         Set<Object> listenerClasses = new HashSet<>();
         for (Method method : methods) {
             try {
-                listenerClasses.add(method.getDeclaringClass().newInstance());
+                if (method.getDeclaringClass().getAnnotation(Plugin.class) == null) {
+                    Internals.logger.log("Registering method listener:");
+                    Internals.logger.log(method.toString());
+                    listenerClasses.add(method.getDeclaringClass().newInstance());
+                }
             } catch (InstantiationException | IllegalAccessException e) {
                 Internals.logger.log(e);
             }
