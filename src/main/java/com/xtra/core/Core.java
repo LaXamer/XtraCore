@@ -31,7 +31,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 
 import com.xtra.core.internal.Internals;
-import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.exceptions.XtraCoreException;
 import com.xtra.core.util.log.Logger;
 
@@ -76,10 +75,16 @@ public class Core {
         Internals.logger.log("======================================================");
         Internals.logger.log("Initializing XtraCore version " + Internals.VERSION + "!");
         Internals.logger.log("======================================================");
-
-        Internals.commands = ReflectionScanner.getCommands();
-        Internals.configs = ReflectionScanner.getConfigs();
         Internals.initialized = true;
         return new Core();
+    }
+
+    /**
+     * Gets the XtraCore version.
+     * 
+     * @return The XtraCore version
+     */
+    public static String version() {
+        return Internals.VERSION;
     }
 }

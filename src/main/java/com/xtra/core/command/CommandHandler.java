@@ -33,6 +33,7 @@ import com.xtra.core.command.base.EmptyCommand;
 import com.xtra.core.internal.InternalHandler;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.util.CommandHelper;
+import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -59,6 +60,7 @@ public class CommandHandler extends InternalHandler {
         super.checkHasCoreInitialized();
         instance = this;
 
+        Internals.commands = ReflectionScanner.getCommands();
         Internals.logger.log("Initializing the command handler!");
         Internals.logger.log("Initializing the command specs for the commands...");
 

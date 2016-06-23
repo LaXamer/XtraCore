@@ -27,6 +27,7 @@ package com.xtra.core.config;
 
 import com.xtra.core.internal.InternalHandler;
 import com.xtra.core.internal.Internals;
+import com.xtra.core.util.ReflectionScanner;
 
 public class ConfigHandler extends InternalHandler {
 
@@ -47,6 +48,7 @@ public class ConfigHandler extends InternalHandler {
     private ConfigHandler init() {
         this.checkHasCoreInitialized();
         instance = this;
+        Internals.configs = ReflectionScanner.getConfigs();
 
         Internals.logger.log("Initializing the configs!");
         for (Config config : Internals.configs) {

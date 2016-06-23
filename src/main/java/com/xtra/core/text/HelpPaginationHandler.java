@@ -320,6 +320,7 @@ public class HelpPaginationHandler extends InternalHandler {
      */
     private void setDefaults() {
         Internals.logger.log("Setting the help pagination handler default values.");
+        Internals.logger.log("======================================================");
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {
