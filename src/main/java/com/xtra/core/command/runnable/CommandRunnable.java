@@ -23,35 +23,16 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.internal;
+package com.xtra.core.command.runnable;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.spongepowered.api.plugin.PluginContainer;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.xtra.core.command.Command;
-import com.xtra.core.command.runnable.CommandRunnable;
-import com.xtra.core.config.Config;
-import com.xtra.core.util.log.Logger;
-import com.xtra.core.util.store.CommandStore;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
 
 /**
- * This is an internal class for storing various information that should only
- * ever be accessed by XtraCore. It is recommended to NOT touch or access these
- * values directly (unless you're XtraCore itself)!
+ * Indicates that something will be ran sometime during a commands execution,
+ * such as before or after execution.
  */
-public class Internals {
+public interface CommandRunnable {
 
-    public static final String VERSION = "@project.version@";
-    public static Object plugin;
-    public static PluginContainer pluginContainer;
-    public static Set<Command> commands;
-    public static Set<CommandStore> commandStores = new HashSet<>();
-    public static Set<Config> configs;
-    public static boolean initialized = false;
-    public static Logger logger;
-    public static Multimap<Class<? extends Command>, CommandRunnable> commandRunnables = ArrayListMultimap.create();
+    void run(CommandSource source, CommandContext args);
 }

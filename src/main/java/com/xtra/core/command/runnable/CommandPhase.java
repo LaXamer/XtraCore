@@ -23,35 +23,38 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.internal;
+package com.xtra.core.command.runnable;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.spongepowered.api.command.CommandSource;
 
-import org.spongepowered.api.plugin.PluginContainer;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.xtra.core.command.Command;
-import com.xtra.core.command.runnable.CommandRunnable;
-import com.xtra.core.config.Config;
-import com.xtra.core.util.log.Logger;
-import com.xtra.core.util.store.CommandStore;
+import com.xtra.core.command.base.CommandBase;
 
 /**
- * This is an internal class for storing various information that should only
- * ever be accessed by XtraCore. It is recommended to NOT touch or access these
- * values directly (unless you're XtraCore itself)!
+ * The phase at which a {@link CommandRunnable} will run.
  */
-public class Internals {
+public enum CommandPhase {
 
-    public static final String VERSION = "@project.version@";
-    public static Object plugin;
-    public static PluginContainer pluginContainer;
-    public static Set<Command> commands;
-    public static Set<CommandStore> commandStores = new HashSet<>();
-    public static Set<Config> configs;
-    public static boolean initialized = false;
-    public static Logger logger;
-    public static Multimap<Class<? extends Command>, CommandRunnable> commandRunnables = ArrayListMultimap.create();
+    /**
+     * Symbolizes that the {@link CommandRunnable} will be ran when the command
+     * is first executed. This is before any special checks are ran regarding
+     * the initialization of a {@link CommandBase} or something similar.
+     */
+    PRE,
+
+    /**
+     * Symbolizes that the {@link CommandRunnable} will be ran after basic
+     * initialization. In the default implementation of {@link CommandBase},
+     * this is various checks to determine the {@link CommandSource} and perform
+     * any necessary actions.
+     * 
+     * <p>Note that this is ran before the actual command has been
+     * processed.</p>
+     */
+    START,
+
+    /**
+     * Sumbolizes that the {@link CommandRunnable} will be ran after a command
+     * has been processed.
+     */
+    POST;
 }

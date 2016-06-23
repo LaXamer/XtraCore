@@ -26,6 +26,9 @@
 package com.xtra.core.command.base;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -41,17 +44,41 @@ import org.spongepowered.api.util.TextMessageException;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
+import com.xtra.core.command.runnable.CommandPhase;
+import com.xtra.core.command.runnable.CommandRunnable;
+import com.xtra.core.command.runnable.RunAt;
 import com.xtra.core.internal.Internals;
 
 public abstract class CommandBase<T extends CommandSource> implements Command {
 
-    // For async(), due to anonymous inner class
     private static CommandResult result;
 
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
 
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
+        Map<CommandRunnable, CommandPhase> map = new HashMap<>();
+        if (Internals.commandRunnables.keySet().contains(this.getClass())) {
+            Collection<CommandRunnable> runnables = Internals.commandRunnables.get(this.getClass());
+            try {
+                for (CommandRunnable runnable : runnables) {
+                    RunAt runAt = runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class);
+                    if (runAt != null) {
+                        map.put(runnable, runAt.phase());
+                    } else {
+                        map.put(runnable, CommandPhase.START);
+                    }
+                }
+            } catch (NoSuchMethodException | SecurityException e) {
+                Internals.logger.log(e);
+            }
+        }
+        for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
+            if (entry.getValue().equals(CommandPhase.PRE)) {
+                entry.getKey().run(source, args);
+            }
+        }
+
         // Iterate through the methods to find executeCommand()
         Class<?> type = null;
         for (Method method : this.getClass().getMethods()) {
@@ -84,6 +111,12 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
         @SuppressWarnings("unchecked")
         T src = (T) source;
 
+        for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
+            if (entry.getValue().equals(CommandPhase.START)) {
+                entry.getKey().run(source, args);
+            }
+        }
+
         boolean isAsync = this.getClass().getAnnotation(RegisterCommand.class).async();
 
         if (isAsync) {
@@ -99,11 +132,22 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
                             CommandBase.result = CommandResult.empty();
                         }
                     }).async().submit(Internals.plugin);
+            for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
+                if (entry.getValue().equals(CommandPhase.POST)) {
+                    entry.getKey().run(source, args);
+                }
+            }
             return CommandBase.result;
         }
 
         try {
-            return this.executeCommand(src, args);
+            CommandBase.result = this.executeCommand(src, args);
+            for (Map.Entry<CommandRunnable, CommandPhase> entry : map.entrySet()) {
+                if (entry.getValue().equals(CommandPhase.POST)) {
+                    entry.getKey().run(source, args);
+                }
+            }
+            return CommandBase.result;
         } catch (TextMessageException e) {
             src.sendMessage(e.getText());
         } catch (Exception e2) {
