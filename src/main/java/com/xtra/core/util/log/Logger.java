@@ -49,14 +49,15 @@ public class Logger {
             if (!directory.exists()) {
                 directory.mkdirs();
             }
-            if (!logFile.exists()) {
+            if (!this.logFile.exists()) {
                 try {
-                    logFile.createNewFile();
+                    this.logFile.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else {
+                FileUtils.wipeFile(this.logFile);
             }
-            FileUtils.wipeFile(logFile);
         }
     }
 
@@ -69,8 +70,8 @@ public class Logger {
     }
 
     public void log(Level level, String message) {
-        if (log) {
-            FileUtils.writeToFile(logFile,
+        if (this.log) {
+            FileUtils.writeToFile(this.logFile,
                     "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
             if (level.equals(Level.WARNING)) {
                 Internals.pluginContainer.getLogger().warn(message);
@@ -81,9 +82,9 @@ public class Logger {
     }
 
     public void log(Level level, Throwable cause) {
-        if (log) {
-            FileUtils.writeToFile(logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + cause.getMessage()
-                    + FileUtils.lineSeparator);
+        if (this.log) {
+            FileUtils.writeToFile(this.logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: "
+                    + cause.getMessage() + FileUtils.lineSeparator);
             String stackTrace = ExceptionUtils.getStackTrace(cause);
             FileUtils.writeToFile(logFile, stackTrace);
 
