@@ -54,4 +54,33 @@ public class Internals {
     public static boolean initialized = false;
     public static Logger logger;
     public static Multimap<Class<? extends Command>, CommandRunnable> commandRunnables = ArrayListMultimap.create();
+
+    /**
+     * Checks if the specified class has already been instantiated and if so
+     * then returns its object. If not, then this will instantiate a new object
+     * for the specified class.
+     * 
+     * @param clazz The class to check
+     * @return The object if it has already been instantiated, otherwise a new
+     *         instance of the specified class
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+    public static Object checkIfAlreadyExists(Class<?> clazz) throws InstantiationException, IllegalAccessException {
+        if (commands != null) {
+            for (Command command : commands) {
+                if (clazz.equals(command.getClass())) {
+                    return command;
+                }
+            }
+        }
+        if (configs != null) {
+            for (Config config : configs) {
+                if (clazz.equals(config.getClass())) {
+                    return config;
+                }
+            }
+        }
+        return clazz.newInstance();
+    }
 }

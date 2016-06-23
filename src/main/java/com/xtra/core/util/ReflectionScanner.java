@@ -115,7 +115,7 @@ public class ReflectionScanner {
                 if (method.getDeclaringClass().getAnnotation(Plugin.class) == null) {
                     Internals.logger.log("Registering method listener:");
                     Internals.logger.log(method.toString());
-                    listenerClasses.add(method.getDeclaringClass().newInstance());
+                    listenerClasses.add(Internals.checkIfAlreadyExists(method.getDeclaringClass()));
                 }
             } catch (InstantiationException | IllegalAccessException e) {
                 Internals.logger.log(e);
