@@ -100,7 +100,7 @@ public class HelpPaginationHandler extends InternalHandler {
         this.checkHasCoreInitialized();
         instance = this;
 
-        Internals.logger.log("Initializing the help pagination generation!");
+        Internals.logger.log("Initializing the help pagination handler!");
         this.paginationBuilder = PaginationList.builder();
         this.setDefaults();
         return this;
@@ -319,7 +319,7 @@ public class HelpPaginationHandler extends InternalHandler {
      * {@link HelpPaginationHandler#paginationBuilder()}.
      */
     private void setDefaults() {
-        Internals.logger.log("Setting the help pagination gen default values.");
+        Internals.logger.log("Setting the help pagination handler default values.");
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {

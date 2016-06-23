@@ -118,8 +118,8 @@ public class CommandHandler extends InternalHandler {
                     // Iterate through to find the parent
                     for (CommandStore commandStore2 : Internals.commandStores) {
                         if (commandStore2.command().equals(commandStore.childOf())) {
-                            Internals.logger.log("Adding " + commandStore.command().aliases()[0] + " as a child command of "
-                                    + commandStore2.command().aliases()[0]);
+                            Internals.logger.log("Adding '" + commandStore.command().aliases()[0] + "' as a child command of '"
+                                    + commandStore2.command().aliases()[0] + "'");
                             commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
                     }
