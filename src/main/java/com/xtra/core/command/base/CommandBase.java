@@ -43,6 +43,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 
 import com.xtra.core.command.Command;
+import com.xtra.core.command.CommandSourceGeneric;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.runnable.CommandPhase;
 import com.xtra.core.command.runnable.CommandRunnable;
@@ -50,7 +51,7 @@ import com.xtra.core.command.runnable.CommandRunnableResult;
 import com.xtra.core.command.runnable.RunAt;
 import com.xtra.core.internal.Internals;
 
-public abstract class CommandBase<T extends CommandSource> implements Command {
+public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric {
 
     private static CommandResult result;
 
@@ -78,23 +79,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
             }
         }
 
-        // Iterate through the methods to find executeCommand()
-        Class<?> type = null;
-        for (Method method : this.getClass().getMethods()) {
-            // Find our executeCommand method
-            if (method.getName().equals("executeCommand")) {
-                // Find one without type erasure :S
-                if (!method.getParameterTypes()[0].equals(CommandSource.class)) {
-                    type = method.getParameterTypes()[0];
-                    break;
-                }
-            }
-        }
-        // It is possible that CommandSource was specified, so if we didn't find
-        // one, then use CommandSource as a default.
-        if (type == null) {
-            type = CommandSource.class;
-        }
+        Class<?> type = this.getTargetCommandSource();
 
         if (type.equals(Player.class) && !(source instanceof Player)) {
             source.sendMessage(Text.of(TextColors.RED, "You must be a player to execute this command!"));
@@ -157,5 +142,27 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
         }
         // If errored
         return CommandResult.empty();
+    }
+
+    @Override
+    public Class<?> getTargetCommandSource() {
+        // Iterate through the methods to find executeCommand()
+        Class<?> type = null;
+        for (Method method : this.getClass().getMethods()) {
+            // Find our executeCommand method
+            if (method.getName().equals("executeCommand")) {
+                // Find one without type erasure :S
+                if (!method.getParameterTypes()[0].equals(CommandSource.class)) {
+                    type = method.getParameterTypes()[0];
+                    break;
+                }
+            }
+        }
+        // It is possible that CommandSource was specified, so if we didn't find
+        // one, then use CommandSource as a default.
+        if (type == null) {
+            type = CommandSource.class;
+        }
+        return type;
     }
 }
