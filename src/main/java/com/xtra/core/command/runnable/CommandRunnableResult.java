@@ -25,14 +25,20 @@
 
 package com.xtra.core.command.runnable;
 
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.CommandResult;
 
-/**
- * Indicates that something will be ran sometime during a commands execution,
- * such as before or after execution.
- */
-public interface CommandRunnable {
+public class CommandRunnableResult {
 
-    CommandRunnableResult run(CommandSource source, CommandContext args);
+    private CommandResult result;
+
+    public CommandRunnableResult() {
+    }
+
+    public CommandRunnableResult(CommandResult result) {
+        this.result = result;
+    }
+
+    public CommandResult result() {
+        return this.result;
+    }
 }

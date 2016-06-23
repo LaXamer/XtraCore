@@ -46,6 +46,7 @@ import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.runnable.CommandPhase;
 import com.xtra.core.command.runnable.CommandRunnable;
+import com.xtra.core.command.runnable.CommandRunnableResult;
 import com.xtra.core.command.runnable.RunAt;
 import com.xtra.core.internal.Internals;
 
@@ -70,9 +71,9 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
         }
         for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
             if (entry.getValue().phase().equals(CommandPhase.PRE)) {
-                entry.getKey().run(source, args);
-                if (!entry.getValue().continueRunning()) {
-                    return CommandResult.success();
+                CommandRunnableResult result = entry.getKey().run(source, args);
+                if (result.result() != null) {
+                    return result.result();
                 }
             }
         }
@@ -111,9 +112,9 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
 
         for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
             if (entry.getValue().phase().equals(CommandPhase.START)) {
-                entry.getKey().run(source, args);
-                if (!entry.getValue().continueRunning()) {
-                    return CommandResult.success();
+                CommandRunnableResult result = entry.getKey().run(src, args);
+                if (result.result() != null) {
+                    return result.result();
                 }
             }
         }
@@ -135,7 +136,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
                     }).async().submit(Internals.plugin);
             for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
                 if (entry.getValue().phase().equals(CommandPhase.POST)) {
-                    entry.getKey().run(source, args);
+                    entry.getKey().run(src, args);
                 }
             }
             return CommandBase.result;
@@ -145,7 +146,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command {
             CommandBase.result = this.executeCommand(src, args);
             for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
                 if (entry.getValue().phase().equals(CommandPhase.POST)) {
-                    entry.getKey().run(source, args);
+                    entry.getKey().run(src, args);
                 }
             }
             return CommandBase.result;
