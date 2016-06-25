@@ -25,57 +25,60 @@
 
 package com.xtra.core.command;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
 import com.xtra.core.command.base.EmptyCommand;
-import com.xtra.core.internal.InternalHandler;
-import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.plugin.XtraCorePluginHandler;
+import com.xtra.core.registry.CommandRegistry;
 import com.xtra.core.util.CommandHelper;
-import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.store.CommandStore;
 
 /**
  * A simple utility class for automatically retrieving, building and registering
  * the commands within a plugin.
  */
-public class CommandHandler extends InternalHandler {
+public class CommandHandler {
 
-    private static CommandHandler instance;
+    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
+    private CommandHelper helper;
+    private Set<Command> commands;
 
     private CommandHandler() {
     }
 
-    /**
-     * Creates and initializes a {@link CommandHandler}.
-     * 
-     * @return The new command handler
-     */
-    public static CommandHandler create() {
-        return new CommandHandler().init();
+    public static CommandHandler create(Object plugin) {
+        return new CommandHandler().init(XtraCorePluginHandler.getEntryContainerUnchecked(plugin));
     }
 
-    private CommandHandler init() {
-        super.checkHasCoreInitialized();
-        instance = this;
+    private CommandHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
+        this.entry = entry;
 
-        Internals.commands = ReflectionScanner.getCommands();
-        Internals.logger.log("Initializing the command handler!");
-        Internals.logger.log("Initializing the command specs for the commands...");
+        this.commands = this.entry.getValue().scanner.getCommands();
+        this.helper = new CommandHelper(this.entry);
+        this.entry.getKey().getLogger().log("Initializing the command handler!");
+        this.entry.getKey().getLogger().log("Initializing the command specs for the commands...");
 
-        for (Command command : Internals.commands) {
+        for (Command command : this.commands) {
             this.initializeCommandSpec(command);
         }
-        Internals.logger.log("======================================================");
-        Internals.logger.log("Adding any necessary child commands to the command specs!");
+        this.entry.getKey().getLogger().log("======================================================");
+        this.entry.getKey().getLogger().log("Adding any necessary child commands to the command specs!");
         this.addChildCommands();
-        Internals.logger.log("======================================================");
-        Internals.logger.log("Building and registering the commands!");
-        for (CommandStore command : Internals.commandStores) {
+        this.entry.getKey().getLogger().log("======================================================");
+        this.entry.getKey().getLogger().log("Building and registering the commands!");
+        for (CommandStore command : this.entry.getValue().commandStores) {
             this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
+            CommandRegistry.add(command.command(), this.entry.getKey());
         }
-        Internals.logger.log("======================================================");
+        this.entry.getKey().getLogger().log("======================================================");
+        this.entry.getValue().setCommandHandler(this);
         return this;
     }
 
@@ -83,44 +86,44 @@ public class CommandHandler extends InternalHandler {
         // Create the initial CommandSpec builder
         CommandSpec.Builder specBuilder = CommandSpec.builder().executor(command);
 
-        Internals.logger.log("======================================================");
-        Internals.logger.log("Initializing the command spec for the command '" + command.aliases()[0] + "'.");
+        this.entry.getKey().getLogger().log("======================================================");
+        this.entry.getKey().getLogger().log("Initializing the command spec for the command '" + command.aliases()[0] + "'.");
 
         // In case null, do not use
         if (command.permission() != null) {
             specBuilder.permission(command.permission());
-            Internals.logger.log("Command permission: '" + command.permission() + "'");
+            this.entry.getKey().getLogger().log("Command permission: '" + command.permission() + "'");
         }
         if (command.description() != null) {
             specBuilder.description(Text.of(command.description()));
-            Internals.logger.log("Command description: '" + command.description() + "'");
+            this.entry.getKey().getLogger().log("Command description: '" + command.description() + "'");
         }
         if (command.args() != null) {
             if (command.args().length != 0) {
                 specBuilder.arguments(command.args());
-                Internals.logger.log("Command has " + command.args().length + " argument(s).");
+                this.entry.getKey().getLogger().log("Command has " + command.args().length + " argument(s).");
             }
         }
 
-        Command parentCommand = CommandHelper.getParentCommand(command);
+        Command parentCommand = this.helper.getParentCommand(command);
         if (parentCommand != null) {
-            Internals.logger.log("Adding the command and its parent command to the command stores.");
-            Internals.commandStores.add(new CommandStore(command, specBuilder, parentCommand));
+            this.entry.getKey().getLogger().log("Adding the command and its parent command to the command stores.");
+            this.entry.getValue().commandStores.add(new CommandStore(command, specBuilder, parentCommand));
         } else {
-            Internals.logger.log("Parent command not found. Presuming command does not have one.");
-            Internals.commandStores.add(new CommandStore(command, specBuilder, null));
+            this.entry.getKey().getLogger().log("Parent command not found. Presuming command does not have one.");
+            this.entry.getValue().commandStores.add(new CommandStore(command, specBuilder, null));
         }
     }
 
     private void addChildCommands() {
         // Go through the commands to find any child commands
-        for (CommandStore commandStore : Internals.commandStores) {
+        for (CommandStore commandStore : this.entry.getValue().commandStores) {
             if (commandStore.childOf() != null) {
                 if (!(commandStore.childOf() instanceof EmptyCommand)) {
                     // Iterate through to find the parent
-                    for (CommandStore commandStore2 : Internals.commandStores) {
+                    for (CommandStore commandStore2 : this.entry.getValue().commandStores) {
                         if (commandStore2.command().equals(commandStore.childOf())) {
-                            Internals.logger.log("Adding '" + commandStore.command().aliases()[0] + "' as a child command of '"
+                            this.entry.getKey().getLogger().log("Adding '" + commandStore.command().aliases()[0] + "' as a child command of '"
                                     + commandStore2.command().aliases()[0] + "'");
                             commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
@@ -137,18 +140,12 @@ public class CommandHandler extends InternalHandler {
      * @param command The command
      */
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
-        Internals.logger.log("Building and registering the command: '" + command.aliases()[0] + "'");
-        Sponge.getCommandManager().register(Internals.plugin, commandSpec.build(), command.aliases());
+        this.entry.getKey().getLogger().log("Building and registering the command: '" + command.aliases()[0] + "'");
+        Sponge.getCommandManager().register(this.entry.getKey().getPlugin(), commandSpec.build(), command.aliases());
     }
 
-    /**
-     * Gets the specified command object.
-     * 
-     * @param clazz The class of the command to get
-     * @return The command object
-     */
-    public static Command getCommand(Class<? extends Command> clazz) {
-        for (Command command : Internals.commands) {
+    public Command getCommand(Class<? extends Command> clazz) {
+        for (Command command : this.commands) {
             if (clazz.isInstance(command)) {
                 return command;
             }
@@ -156,7 +153,7 @@ public class CommandHandler extends InternalHandler {
         return null;
     }
 
-    public static CommandHandler get() {
-        return instance;
+    public Set<Command> getCommands() {
+        return this.commands;
     }
 }

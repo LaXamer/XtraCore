@@ -49,7 +49,9 @@ import com.xtra.core.command.runnable.CommandPhase;
 import com.xtra.core.command.runnable.CommandRunnable;
 import com.xtra.core.command.runnable.CommandRunnableResult;
 import com.xtra.core.command.runnable.RunAt;
-import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.registry.CommandRegistry;
 
 public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric {
 
@@ -57,22 +59,23 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
 
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
+        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainersForCommand(this.getClass());
         Map<CommandRunnable, RunAt> map = new HashMap<>();
-        if (Internals.commandRunnables.keySet().contains(this.getClass())) {
-            Collection<CommandRunnable> runnables = Internals.commandRunnables.get(this.getClass());
+        if (entry.getValue().commandRunnables.keySet().contains(this.getClass())) {
+            Collection<CommandRunnable> runnables = entry.getValue().commandRunnables.get(this.getClass());
             try {
                 for (CommandRunnable runnable : runnables) {
                     map.put(runnable, runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class));
                 }
             } catch (NoSuchMethodException | SecurityException e) {
-                Internals.logger.log(e);
+                entry.getKey().getLogger().log(e);
             }
         }
-        for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
-            if (entry.getValue().phase().equals(CommandPhase.PRE)) {
-                CommandRunnableResult result = entry.getKey().run(source, args);
-                if (result.result() != null) {
-                    return result.result();
+        for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
+            if (runnableEntry.getValue().phase().equals(CommandPhase.PRE)) {
+                CommandRunnableResult result = runnableEntry.getKey().run(source, args);
+                if (result.getResult() != null) {
+                    return result.getResult();
                 }
             }
         }
@@ -93,11 +96,11 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
         @SuppressWarnings("unchecked")
         T src = (T) source;
 
-        for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
-            if (entry.getValue().phase().equals(CommandPhase.START)) {
-                CommandRunnableResult result = entry.getKey().run(src, args);
-                if (result.result() != null) {
-                    return result.result();
+        for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
+            if (runnableEntry.getValue().phase().equals(CommandPhase.START)) {
+                CommandRunnableResult result = runnableEntry.getKey().run(src, args);
+                if (result.getResult() != null) {
+                    return result.getResult();
                 }
             }
         }
@@ -110,12 +113,12 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
                         } catch (TextMessageException e) {
                             src.sendMessage(e.getText());
                         } catch (Exception e2) {
-                            Internals.logger.log(e2);
+                            entry.getKey().getLogger().log(e2);
                         }
-                    }).async().submit(Internals.plugin);
-            for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
-                if (entry.getValue().phase().equals(CommandPhase.POST)) {
-                    entry.getKey().run(src, args);
+                    }).async().submit(entry.getKey().getPlugin());
+            for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
+                if (runnableEntry.getValue().phase().equals(CommandPhase.POST)) {
+                    runnableEntry.getKey().run(src, args);
                 }
             }
             return CommandResult.success();
@@ -123,16 +126,16 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
 
         try {
             CommandResult result = this.executeCommand(src, args);
-            for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
-                if (entry.getValue().phase().equals(CommandPhase.POST)) {
-                    entry.getKey().run(src, args);
+            for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
+                if (runnableEntry.getValue().phase().equals(CommandPhase.POST)) {
+                    runnableEntry.getKey().run(src, args);
                 }
             }
             return result;
         } catch (TextMessageException e) {
             src.sendMessage(e.getText());
         } catch (Exception e2) {
-            Internals.logger.log(e2);
+            entry.getKey().getLogger().log(e2);
         }
         // If errored
         return CommandResult.empty();

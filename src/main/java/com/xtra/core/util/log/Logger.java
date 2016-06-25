@@ -31,33 +31,51 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.spongepowered.api.Sponge;
 
 import com.laxamer.file.FileUtils;
 import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCorePluginContainer;
 
 public class Logger {
 
     private File logFile;
-    private boolean log;
+    private XtraCorePluginContainer container;
 
-    public Logger(boolean log) {
-        this.log = log;
-        if (log) {
-            File directory = new File(Sponge.getGame().getSavesDirectory() + "/logs/xtracore-logs");
-            this.logFile = new File(directory + "/" + Internals.pluginContainer.getId() + ".log");
-            if (!directory.exists()) {
-                directory.mkdirs();
+    public Logger(XtraCorePluginContainer container) {
+        this.container = container;
+        File directory = new File(Internals.LOG_DIRECTORY);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        this.logFile = new File(directory + "/" + container.getPluginContainer().getId() + ".log");
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            if (!this.logFile.exists()) {
-                try {
-                    this.logFile.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                FileUtils.wipeFile(this.logFile);
+        } else {
+            FileUtils.wipeFile(logFile);
+        }
+    }
+
+    /**
+     * Creates a global XtraCore logger.
+     */
+    public Logger() {
+        File directory = new File(Internals.LOG_DIRECTORY);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        this.logFile = new File(directory + "/xtracore.log");
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        } else {
+            FileUtils.wipeFile(logFile);
         }
     }
 
@@ -70,30 +88,26 @@ public class Logger {
     }
 
     public void log(Level level, String message) {
-        if (this.log) {
-            FileUtils.writeToFile(this.logFile,
-                    "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
-            if (level.equals(Level.WARNING)) {
-                Internals.pluginContainer.getLogger().warn(message);
-            } else if (level.equals(Level.ERROR)) {
-                Internals.pluginContainer.getLogger().error(message);
-            }
+        FileUtils.writeToFile(this.logFile,
+                "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
+        if (level.equals(Level.WARNING)) {
+            this.container.getPluginContainer().getLogger().warn(message);
+        } else if (level.equals(Level.ERROR)) {
+            this.container.getPluginContainer().getLogger().error(message);
         }
     }
 
     public void log(Level level, Throwable cause) {
-        if (this.log) {
-            FileUtils.writeToFile(this.logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: "
-                    + cause.getMessage() + FileUtils.lineSeparator);
-            String stackTrace = ExceptionUtils.getStackTrace(cause);
-            FileUtils.writeToFile(logFile, stackTrace);
+        FileUtils.writeToFile(this.logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: "
+                + cause.getMessage() + FileUtils.lineSeparator);
+        String stackTrace = ExceptionUtils.getStackTrace(cause);
+        FileUtils.writeToFile(logFile, stackTrace);
 
-            if (level.equals(Level.WARNING)) {
-                Internals.pluginContainer.getLogger().warn(cause.getMessage());
-            } else if (level.equals(Level.ERROR)) {
-                Internals.pluginContainer.getLogger().error(cause.getMessage());
-                Internals.pluginContainer.getLogger().error(stackTrace);
-            }
+        if (level.equals(Level.WARNING)) {
+            this.container.getPluginContainer().getLogger().warn(cause.getMessage());
+        } else if (level.equals(Level.ERROR)) {
+            this.container.getPluginContainer().getLogger().error(cause.getMessage());
+            this.container.getPluginContainer().getLogger().error(stackTrace);
         }
     }
 

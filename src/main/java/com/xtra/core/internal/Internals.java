@@ -25,18 +25,14 @@
 
 package com.xtra.core.internal;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.spongepowered.api.plugin.PluginContainer;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.xtra.core.command.Command;
-import com.xtra.core.command.runnable.CommandRunnable;
 import com.xtra.core.config.Config;
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.util.log.Logger;
-import com.xtra.core.util.store.CommandStore;
 
 /**
  * This is an internal class for storing various information that should only
@@ -45,37 +41,34 @@ import com.xtra.core.util.store.CommandStore;
  */
 public class Internals {
 
+    public static Map<XtraCorePluginContainer, XtraCoreInternalPluginContainer> plugins = new HashMap<>();
     public static final String VERSION = "@project.version@";
-    public static Object plugin;
-    public static PluginContainer pluginContainer;
-    public static Set<Command> commands;
-    public static Set<CommandStore> commandStores = new HashSet<>();
-    public static Set<Config> configs;
-    public static boolean initialized = false;
-    public static Logger logger;
-    public static Multimap<Class<? extends Command>, CommandRunnable> commandRunnables = ArrayListMultimap.create();
+    public static final String LOG_DIRECTORY = "/logs/xtracore-logs";
+    public static Logger globalLogger = new Logger();
 
     /**
      * Checks if the specified class has already been instantiated and if so
      * then returns its object. If not, then this will instantiate a new object
      * for the specified class.
      * 
+     * @param container The container
      * @param clazz The class to check
      * @return The object if it has already been instantiated, otherwise a new
      *         instance of the specified class
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public static Object checkIfAlreadyExists(Class<?> clazz) throws InstantiationException, IllegalAccessException {
-        if (commands != null) {
-            for (Command command : commands) {
+    public static Object checkIfAlreadyExists(XtraCorePluginContainer container, Class<?> clazz)
+            throws InstantiationException, IllegalAccessException {
+        if (container.getCommandHandler() != null) {
+            for (Command command : container.getCommandHandler().getCommands()) {
                 if (clazz.equals(command.getClass())) {
                     return command;
                 }
             }
         }
-        if (configs != null) {
-            for (Config config : configs) {
+        if (container.getConfigHandler() != null) {
+            for (Config config : container.getConfigHandler().getConfigs()) {
                 if (clazz.equals(config.getClass())) {
                     return config;
                 }

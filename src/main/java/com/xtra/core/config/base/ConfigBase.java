@@ -28,10 +28,13 @@ package com.xtra.core.config.base;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import com.xtra.core.config.Config;
 import com.xtra.core.config.annotation.RegisterConfig;
-import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.registry.ConfigRegistry;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -42,14 +45,16 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
  */
 public abstract class ConfigBase implements Config {
 
+    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
     private ConfigurationLoader<CommentedConfigurationNode> loader;
     private CommentedConfigurationNode rootNode;
 
     @Override
     public void init() {
+        this.entry = ConfigRegistry.getContainersForConfig(this.getClass());
         RegisterConfig rc = this.getClass().getAnnotation(RegisterConfig.class);
 
-        Internals.logger.log("Initializing configuration for '" + rc.configName() + ".conf'.");
+        this.entry.getKey().getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
 
         HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
         Path path;
@@ -59,13 +64,13 @@ public abstract class ConfigBase implements Config {
         if (rc.sharedRoot()) {
             path = Paths.get("config/" + rc.configName() + ".conf");
         } else {
-            path = Paths.get("config/" + Internals.pluginContainer.getId() + "/" + rc.configName() + ".conf");
+            path = Paths.get("config/" + this.entry.getKey().getPluginContainer().getId() + "/" + rc.configName() + ".conf");
         }
         exists = path.toFile().exists();
         loaderBuilder.setPath(path);
         this.loader = loaderBuilder.build();
         if (!exists) {
-            Internals.logger.log("Configuration currently does not exist. Creating...");
+            this.entry.getKey().getLogger().log("Configuration currently does not exist. Creating...");
             this.rootNode = loader.createEmptyNode();
             this.populate();
             this.save();
@@ -78,7 +83,7 @@ public abstract class ConfigBase implements Config {
         try {
             rootNode = loader.load();
         } catch (IOException e) {
-            Internals.logger.log(e);
+            this.entry.getKey().getLogger().log(e);
         }
     }
 
@@ -87,7 +92,7 @@ public abstract class ConfigBase implements Config {
         try {
             loader.save(rootNode);
         } catch (IOException e) {
-            Internals.logger.log(e);
+            this.entry.getKey().getLogger().log(e);
         }
     }
 

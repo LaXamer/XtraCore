@@ -25,19 +25,25 @@
 
 package com.xtra.core.listener;
 
+import java.util.Map;
+
 import org.spongepowered.api.Sponge;
 
-import com.xtra.core.internal.Internals;
-import com.xtra.core.util.ReflectionScanner;
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.plugin.XtraCorePluginHandler;
 
 public class ListenerHandler {
 
     /**
      * Automatically scans and registers plugin listeners.
+     * 
+     * @param plugin The plugin
      */
-    public static void registerListeners() {
-        for (Object listener : ReflectionScanner.getPluginListeners()) {
-            Sponge.getEventManager().registerListeners(Internals.plugin, listener);
+    public static void registerListeners(Object plugin) {
+        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = XtraCorePluginHandler.getEntryContainerUnchecked(plugin);
+        for (Object listener : entry.getValue().scanner.getPluginListeners()) {
+            Sponge.getEventManager().registerListeners(entry.getKey().getPlugin(), listener);
         }
     }
 }

@@ -31,14 +31,22 @@ public class CommandRunnableResult {
 
     private CommandResult result;
 
-    public CommandRunnableResult() {
+    private CommandRunnableResult() {
     }
 
-    public CommandRunnableResult(CommandResult result) {
+    private CommandRunnableResult(CommandResult result) {
         this.result = result;
     }
 
-    public CommandResult result() {
-        return this.result;
+    public static CommandRunnableResult keepRunning() {
+        return new CommandRunnableResult();
+    }
+
+    public static CommandRunnableResult stop(CommandResult result) {
+        return new CommandRunnableResult(result);
+    }
+
+    public CommandResult getResult() {
+        return result;
     }
 }

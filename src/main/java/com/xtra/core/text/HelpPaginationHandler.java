@@ -27,6 +27,7 @@ package com.xtra.core.text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
@@ -35,8 +36,9 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.xtra.core.command.Command;
-import com.xtra.core.internal.InternalHandler;
-import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.plugin.XtraCorePluginHandler;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.store.CommandStore;
@@ -46,9 +48,10 @@ import com.xtra.core.util.store.CommandStore;
  * plugin. Use of this class is optional, however it is recommended if creating
  * a help list for your plugin.
  */
-public class HelpPaginationHandler extends InternalHandler {
+public class HelpPaginationHandler {
 
-    private static HelpPaginationHandler instance;
+    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
+    private CommandHelper helper;
     private PaginationList.Builder paginationBuilder;
     private Text title;
     private Text padding;
@@ -65,9 +68,11 @@ public class HelpPaginationHandler extends InternalHandler {
      * Creates a basis class for generating a {@link PaginationList} for the
      * plugin's commands help list. Further configuration is provided through
      * {@link HelpPaginationHandler#paginationBuilder()}.
+     * 
+     * @param plugin The plugin
      */
-    public static HelpPaginationHandler create() {
-        return new HelpPaginationHandler().init();
+    public static HelpPaginationHandler create(Object plugin) {
+        return new HelpPaginationHandler().init(XtraCorePluginHandler.getEntryContainerUnchecked(plugin));
     }
 
     /**
@@ -76,10 +81,10 @@ public class HelpPaginationHandler extends InternalHandler {
      * @param plugin The plugin
      * @param title The title
      */
-    public static HelpPaginationHandler create(Text title) {
+    public static HelpPaginationHandler create(Object plugin, Text title) {
         HelpPaginationHandler gen = new HelpPaginationHandler();
         gen.title = title;
-        return gen.init();
+        return gen.init(XtraCorePluginHandler.getEntryContainerUnchecked(plugin));
     }
 
     /**
@@ -89,19 +94,18 @@ public class HelpPaginationHandler extends InternalHandler {
      * @param title The title
      * @param padding The padding
      */
-    public static HelpPaginationHandler create(Text title, Text padding) {
+    public static HelpPaginationHandler create(Object plugin, Text title, Text padding) {
         HelpPaginationHandler gen = new HelpPaginationHandler();
         gen.title = title;
         gen.padding = padding;
-        return gen.init();
+        return gen.init(XtraCorePluginHandler.getEntryContainerUnchecked(plugin));
     }
 
-    private HelpPaginationHandler init() {
-        this.checkHasCoreInitialized();
-        instance = this;
-
-        Internals.logger.log("Initializing the help pagination handler!");
+    private HelpPaginationHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
+        this.entry = entry;
+        this.entry.getKey().getLogger().log("Initializing the help pagination handler!");
         this.paginationBuilder = PaginationList.builder();
+        this.helper = new CommandHelper(this.entry);
         this.setDefaults();
         return this;
     }
@@ -178,9 +182,9 @@ public class HelpPaginationHandler extends InternalHandler {
     public <T extends Command> HelpPaginationHandler specifyCommandShouldBeIgnored(Class<T> clazz) {
         // We still need the command store, so don't bother calling
         // CommandHelper#getEquivalentCommand
-        for (CommandStore store : Internals.commandStores) {
+        for (CommandStore store : this.entry.getValue().commandStores) {
             if (clazz.isInstance(store.command())) {
-                Internals.logger.log("Command " + store.command().aliases()[0] + " will be ignored!");
+                this.entry.getKey().getLogger().log("Command " + store.command().aliases()[0] + " will be ignored!");
                 store.setIgnore(true);
             }
         }
@@ -199,7 +203,7 @@ public class HelpPaginationHandler extends InternalHandler {
     public <T extends Command> HelpPaginationHandler specifyCommandShouldBeIgnored(Class<T>... clazz) {
         for (Class<T> cmd : clazz) {
             // As long as this cmd class is a real command
-            if (CommandHelper.getEquivalentCommand(cmd) != null) {
+            if (this.helper.getEquivalentCommand(cmd) != null) {
                 this.specifyCommandShouldBeIgnored(cmd);
             }
         }
@@ -261,7 +265,7 @@ public class HelpPaginationHandler extends InternalHandler {
      * @return The object, for chaining
      */
     public HelpPaginationHandler generateContents() {
-        Internals.logger.log("Generating the contents for the help pagination list!");
+        this.entry.getKey().getLogger().log("Generating the contents for the help pagination list!");
         this.contents = new ArrayList<>();
         if (this.childBehavior == null) {
             this.childBehavior = ChildBehavior.BOTH;
@@ -269,23 +273,23 @@ public class HelpPaginationHandler extends InternalHandler {
         if (this.commandOrdering == null) {
             this.commandOrdering = CommandOrdering.A_Z;
         }
-        Internals.logger.log("Using settings:");
-        Internals.logger.log("Child behavior: " + this.childBehavior);
-        Internals.logger.log("Command ordering: " + this.commandOrdering);
-        Internals.logger.log("Command color: " + this.commandColor.getName());
-        Internals.logger.log("Description color: " + this.descriptionColor.getName());
+        this.entry.getKey().getLogger().log("Using settings:");
+        this.entry.getKey().getLogger().log("Child behavior: " + this.childBehavior);
+        this.entry.getKey().getLogger().log("Command ordering: " + this.commandOrdering);
+        this.entry.getKey().getLogger().log("Command color: " + this.commandColor.getName());
+        this.entry.getKey().getLogger().log("Description color: " + this.descriptionColor.getName());
         // Don't override the commands in Internals, just store our own
-        List<CommandStore> commandStores = CommandHelper.orderContents(Internals.commandStores, this.commandOrdering);
+        List<CommandStore> commandStores = this.helper.orderContents(this.entry.getValue().commandStores, this.commandOrdering);
         for (CommandStore command : commandStores) {
             if (!command.ignore()) {
                 Command cmd = command.command();
-                Command parentCommand = CommandHelper.getParentCommand(cmd);
+                Command parentCommand = this.helper.getParentCommand(cmd);
                 String commandString = null;
                 switch (this.childBehavior) {
                     case IGNORE_PARENT:
                         // If the child commands is empty, then this is not a
                         // parent command
-                        if (CommandHelper.getChildCommands(command.command()).isEmpty()) {
+                        if (this.helper.getChildCommands(command.command()).isEmpty()) {
                             commandString = "/" + cmd.aliases()[0];
                         }
                         break;
@@ -303,9 +307,9 @@ public class HelpPaginationHandler extends InternalHandler {
                 }
                 TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
                 TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
-                Internals.logger.log("Adding command string: " + commandString);
+                this.entry.getKey().getLogger().log("Adding command string: " + commandString);
                 if (cmd.description() != null) {
-                    Internals.logger.log("Adding command description: " + cmd.description());
+                    this.entry.getKey().getLogger().log("Adding command description: " + cmd.description());
                     this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
                 } else {
                     this.contents.add(Text.of(commandColor, commandString));
@@ -313,7 +317,7 @@ public class HelpPaginationHandler extends InternalHandler {
             }
         }
         this.paginationBuilder.contents(this.contents);
-        Internals.logger.log("Help pagination list contents generated!");
+        this.entry.getKey().getLogger().log("Help pagination list contents generated!");
         return this;
     }
 
@@ -323,13 +327,13 @@ public class HelpPaginationHandler extends InternalHandler {
      * {@link HelpPaginationHandler#paginationBuilder()}.
      */
     private void setDefaults() {
-        Internals.logger.log("Setting the help pagination handler default values.");
-        Internals.logger.log("======================================================");
+        this.entry.getKey().getLogger().log("Setting the help pagination handler default values.");
+        this.entry.getKey().getLogger().log("======================================================");
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {
             // Default to plugin name
-            this.paginationBuilder.title(Text.of(TextColors.GOLD, Internals.pluginContainer.getName()));
+            this.paginationBuilder.title(Text.of(TextColors.GOLD, this.entry.getKey().getPluginContainer().getName()));
         }
         if (this.padding != null) {
             this.paginationBuilder.padding(padding);
@@ -338,10 +342,6 @@ public class HelpPaginationHandler extends InternalHandler {
         }
         this.commandColor = TextColors.GREEN;
         this.descriptionColor = TextColors.GOLD;
-    }
-
-    public static HelpPaginationHandler get() {
-        return HelpPaginationHandler.instance;
     }
 
     /**

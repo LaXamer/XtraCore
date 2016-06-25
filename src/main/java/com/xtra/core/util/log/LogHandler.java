@@ -23,34 +23,23 @@
  * SOFTWARE.
  */
 
-package com.xtra.core;
+package com.xtra.core.util.log;
 
 import java.util.Map;
 
 import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.plugin.XtraCorePluginHandler;
-import com.xtra.core.util.log.LogHandler;
-import com.xtra.core.util.log.Logger;
 
-public class Core {
+public class LogHandler {
 
-    public static XtraCorePluginContainer initialze(Object plugin) {
-        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = XtraCorePluginHandler.add(plugin);
-        Logger logger = LogHandler.create(entry);
-        logger.log("======================================================");
-        logger.log("Initializing with XtraCore version " + Internals.VERSION + "!");
-        logger.log("======================================================");
-        return entry.getKey();
+    public static Logger create(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
+        Logger logger = new Logger();
+        entry.getValue().setLogger(logger);
+        return logger;
     }
 
-    /**
-     * Gets the XtraCore version.
-     * 
-     * @return The XtraCore version
-     */
-    public static String version() {
-        return Internals.VERSION;
+    public static Logger getGlobalLogger() {
+        return Internals.globalLogger;
     }
 }

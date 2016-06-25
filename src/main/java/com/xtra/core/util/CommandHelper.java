@@ -29,11 +29,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.text.HelpPaginationHandler;
 import com.xtra.core.util.store.CommandStore;
 
@@ -42,6 +44,12 @@ import com.xtra.core.util.store.CommandStore;
  */
 public class CommandHelper {
 
+    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
+
+    public CommandHelper(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
+        this.entry = entry;
+    }
+
     /**
      * A convenience method for getting all of the child commands of the
      * specified command.
@@ -49,13 +57,13 @@ public class CommandHelper {
      * @param command The command to get children of
      * @return The child commands of the specified command
      */
-    public static Set<Command> getChildCommands(Command command) {
-        Internals.logger.log("Getting the child commands for the command: " + command.aliases()[0]);
+    public Set<Command> getChildCommands(Command command) {
+        this.entry.getKey().getLogger().log("Getting the child commands for the command: " + command.aliases()[0]);
         Set<Command> childCommands = new HashSet<>();
-        for (Command cmd : Internals.commands) {
+        for (Command cmd : entry.getKey().getCommandHandler().getCommands()) {
             Command parentCommand = getParentCommand(cmd);
             if (parentCommand != null && parentCommand.equals(command)) {
-                Internals.logger.log("Child command found! Child command is: " + cmd.aliases()[0]);
+                this.entry.getKey().getLogger().log("Child command found! Child command is: " + cmd.aliases()[0]);
                 childCommands.add(cmd);
             }
         }
@@ -68,8 +76,8 @@ public class CommandHelper {
      * @param command The child command to get the parent of
      * @return The parent command
      */
-    public static Command getParentCommand(Command command) {
-        Internals.logger.log("Getting the parent command for the command: '" + command.aliases()[0] + "'.");
+    public Command getParentCommand(Command command) {
+        this.entry.getKey().getLogger().log("Getting the parent command for the command: '" + command.aliases()[0] + "'.");
         Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
         Command parentCommand2 = getEquivalentCommand(parentCommand);
         return parentCommand2;
@@ -82,8 +90,8 @@ public class CommandHelper {
      * @param clazz The class
      * @return The command object for the specified class
      */
-    public static Command getEquivalentCommand(Class<? extends Command> clazz) {
-        for (Command cmd : Internals.commands) {
+    public Command getEquivalentCommand(Class<? extends Command> clazz) {
+        for (Command cmd : this.entry.getKey().getCommandHandler().getCommands()) {
             if (clazz.isInstance(cmd)) {
                 return cmd;
             }
@@ -91,7 +99,7 @@ public class CommandHelper {
         return null;
     }
 
-    public static List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationHandler.CommandOrdering ordering) {
+    public List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationHandler.CommandOrdering ordering) {
         List<CommandStore> commandStore = new ArrayList<>();
         commandStore.addAll(contentsStore);
         if (ordering.equals(HelpPaginationHandler.CommandOrdering.A_Z)) {

@@ -25,13 +25,18 @@
 
 package com.xtra.core.config;
 
-import com.xtra.core.internal.InternalHandler;
-import com.xtra.core.internal.Internals;
-import com.xtra.core.util.ReflectionScanner;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-public class ConfigHandler extends InternalHandler {
+import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.plugin.XtraCorePluginHandler;
+import com.xtra.core.registry.ConfigRegistry;
 
-    private static ConfigHandler instance;
+public class ConfigHandler {
+
+    private Set<Config> configs = new HashSet<>();
 
     private ConfigHandler() {
     }
@@ -41,20 +46,20 @@ public class ConfigHandler extends InternalHandler {
      * 
      * @return The new config handler
      */
-    public static ConfigHandler create() {
-        return new ConfigHandler().init();
+    public static ConfigHandler create(Object plugin) {
+        return new ConfigHandler().init(XtraCorePluginHandler.getEntryContainerUnchecked(plugin));
     }
 
-    private ConfigHandler init() {
-        this.checkHasCoreInitialized();
-        instance = this;
-        Internals.configs = ReflectionScanner.getConfigs();
+    private ConfigHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
+        this.configs = entry.getValue().scanner.getConfigs();
 
-        Internals.logger.log("Initializing the configs!");
-        for (Config config : Internals.configs) {
+        entry.getKey().getLogger().log("Initializing the configs!");
+        for (Config config : this.configs) {
             config.init();
+            ConfigRegistry.add(config, entry.getKey());
         }
-        Internals.logger.log("======================================================");
+        entry.getKey().getLogger().log("======================================================");
+        entry.getValue().setConfigHandler(this);
         return this;
     }
 
@@ -64,8 +69,8 @@ public class ConfigHandler extends InternalHandler {
      * @param clazz The class of the config
      * @return The config object
      */
-    public static Config getConfig(Class<? extends Config> clazz) {
-        for (Config config : Internals.configs) {
+    public Config getConfig(Class<? extends Config> clazz) {
+        for (Config config : this.configs) {
             if (clazz.isInstance(config)) {
                 return config;
             }
@@ -73,7 +78,7 @@ public class ConfigHandler extends InternalHandler {
         return null;
     }
 
-    public static ConfigHandler get() {
-        return instance;
+    public Set<Config> getConfigs() {
+        return this.configs;
     }
 }

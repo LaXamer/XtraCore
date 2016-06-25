@@ -23,25 +23,50 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.internal;
+package com.xtra.core.plugin;
 
-import com.xtra.core.util.exceptions.XtraCoreException;
+import org.spongepowered.api.plugin.PluginContainer;
 
-/**
- * A base class for any checks shared by multiple handlers.
- */
-public class InternalHandler {
+import com.xtra.core.command.CommandHandler;
+import com.xtra.core.command.runnable.CommandRunnableHandler;
+import com.xtra.core.config.ConfigHandler;
+import com.xtra.core.util.log.Logger;
 
-    /**
-     * Checks if Core has been initialized. If not, then everything will fail!
-     */
-    protected void checkHasCoreInitialized() {
-        if (!Internals.initialized) {
-            try {
-                throw new XtraCoreException("com.xtra.core.Core has not been initialized yet! XtraCore cannot function properly!");
-            } catch (XtraCoreException e) {
-                e.printStackTrace();
-            }
-        }
+public class XtraCorePluginContainer {
+
+    private Object plugin;
+    private PluginContainer pluginContainer;
+    protected Logger logger;
+    protected CommandHandler commandHandler;
+    protected ConfigHandler configHandler;
+    protected CommandRunnableHandler commandRunnableHandler;
+
+    public XtraCorePluginContainer(Object plugin, PluginContainer pluginContainer) {
+        this.plugin = plugin;
+        this.pluginContainer = pluginContainer;
+    }
+
+    public Object getPlugin() {
+        return this.plugin;
+    }
+
+    public PluginContainer getPluginContainer() {
+        return this.pluginContainer;
+    }
+    
+    public Logger getLogger() {
+        return this.logger;
+    }
+
+    public CommandHandler getCommandHandler() {
+        return this.commandHandler;
+    }
+
+    public ConfigHandler getConfigHandler() {
+        return this.configHandler;
+    }
+
+    public CommandRunnableHandler getCommandRunnableHandler() {
+        return this.commandRunnableHandler;
     }
 }

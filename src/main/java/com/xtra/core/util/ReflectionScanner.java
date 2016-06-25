@@ -41,6 +41,7 @@ import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.config.Config;
 import com.xtra.core.config.annotation.RegisterConfig;
 import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCorePluginContainer;
 
 /**
  * A class that uses reflection to scan a plugin for information, such as the
@@ -48,17 +49,28 @@ import com.xtra.core.internal.Internals;
  */
 public class ReflectionScanner {
 
-    private static final Reflections REFLECTIONS = new Reflections(Internals.plugin.getClass().getPackage().getName(), new SubTypesScanner(),
-            new TypeAnnotationsScanner(), new MethodAnnotationsScanner());
+    private XtraCorePluginContainer container;
+    private Reflections reflections;
+
+    private ReflectionScanner() {
+    }
+
+    public static ReflectionScanner create(XtraCorePluginContainer container) {
+        ReflectionScanner scanner = new ReflectionScanner();
+        scanner.container = container;
+        scanner.reflections = new Reflections(container.getPlugin().getClass().getPackage().getName(), new SubTypesScanner(),
+                new TypeAnnotationsScanner(), new MethodAnnotationsScanner());
+        return scanner;
+    }
 
     /**
      * Uses reflection to get the commands of the plugin.
      * 
      * @return A set of the commands
      */
-    public static Set<Command> getCommands() {
-        Internals.logger.log("Using reflection to access the registered commands...");
-        Set<Class<?>> classes = REFLECTIONS.getTypesAnnotatedWith(RegisterCommand.class);
+    public Set<Command> getCommands() {
+        this.container.getLogger().log("Using reflection to access the registered commands...");
+        Set<Class<?>> classes = this.reflections.getTypesAnnotatedWith(RegisterCommand.class);
         Set<Command> commands = new HashSet<>();
 
         for (Class<?> oneClass : classes) {
@@ -66,15 +78,15 @@ public class ReflectionScanner {
                 Object o = oneClass.newInstance();
                 if (o instanceof Command) {
                     Command c = (Command) o;
-                    Internals.logger.log("Recognized command '" + c.aliases()[0] + "'! Adding to command list...");
+                    this.container.getLogger().log("Recognized command '" + c.aliases()[0] + "'! Adding to command list...");
                     commands.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                Internals.logger.log(e);
+                this.container.getLogger().log(e);
             }
         }
-        Internals.logger.log("Commands added.");
-        Internals.logger.log("======================================================");
+        this.container.getLogger().log("Commands added.");
+        this.container.getLogger().log("======================================================");
         return commands;
     }
 
@@ -83,9 +95,9 @@ public class ReflectionScanner {
      * 
      * @return A set of configs
      */
-    public static Set<Config> getConfigs() {
-        Internals.logger.log("Using reflection to access the registered configs...");
-        Set<Class<?>> classes = REFLECTIONS.getTypesAnnotatedWith(RegisterConfig.class);
+    public Set<Config> getConfigs() {
+        this.container.getLogger().log("Using reflection to access the registered configs...");
+        Set<Class<?>> classes = this.reflections.getTypesAnnotatedWith(RegisterConfig.class);
         Set<Config> configs = new HashSet<>();
 
         for (Class<?> oneClass : classes) {
@@ -93,36 +105,36 @@ public class ReflectionScanner {
                 Object o = oneClass.newInstance();
                 if (o instanceof Config) {
                     Config c = (Config) o;
-                    Internals.logger.log("Recognized config '" + c.getClass().getAnnotation(RegisterConfig.class).configName()
+                    this.container.getLogger().log("Recognized config '" + c.getClass().getAnnotation(RegisterConfig.class).configName()
                             + "'! Adding to config list...");
                     configs.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                Internals.logger.log(e);
+                this.container.getLogger().log(e);
             }
         }
-        Internals.logger.log("Configs added.");
-        Internals.logger.log("======================================================");
+        this.container.getLogger().log("Configs added.");
+        this.container.getLogger().log("======================================================");
         return configs;
     }
 
-    public static Set<Object> getPluginListeners() {
-        Internals.logger.log("Using reflection to access and register the listeners...");
-        Set<Method> methods = REFLECTIONS.getMethodsAnnotatedWith(Listener.class);
+    public Set<Object> getPluginListeners() {
+        this.container.getLogger().log("Using reflection to access and register the listeners...");
+        Set<Method> methods = this.reflections.getMethodsAnnotatedWith(Listener.class);
         Set<Object> listenerClasses = new HashSet<>();
         for (Method method : methods) {
             try {
                 if (method.getDeclaringClass().getAnnotation(Plugin.class) == null) {
-                    Internals.logger.log("Registering method listener:");
-                    Internals.logger.log(method.toString());
-                    listenerClasses.add(Internals.checkIfAlreadyExists(method.getDeclaringClass()));
+                    this.container.getLogger().log("Registering method listener:");
+                    this.container.getLogger().log(method.toString());
+                    listenerClasses.add(Internals.checkIfAlreadyExists(this.container, method.getDeclaringClass()));
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                Internals.logger.log(e);
+                this.container.getLogger().log(e);
             }
         }
-        Internals.logger.log("Listeners added.");
-        Internals.logger.log("======================================================");
+        this.container.getLogger().log("Listeners added.");
+        this.container.getLogger().log("======================================================");
         return listenerClasses;
     }
 }
