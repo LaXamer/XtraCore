@@ -30,6 +30,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import com.xtra.core.command.CommandHandler;
 import com.xtra.core.command.runnable.CommandRunnableHandler;
 import com.xtra.core.config.ConfigHandler;
+import com.xtra.core.text.HelpPaginationHandler;
 import com.xtra.core.util.log.Logger;
 
 public class XtraCorePluginContainer {
@@ -40,6 +41,7 @@ public class XtraCorePluginContainer {
     protected CommandHandler commandHandler;
     protected ConfigHandler configHandler;
     protected CommandRunnableHandler commandRunnableHandler;
+    protected HelpPaginationHandler helpPaginationHandler;
 
     public XtraCorePluginContainer(Object plugin, PluginContainer pluginContainer) {
         this.plugin = plugin;
@@ -68,5 +70,9 @@ public class XtraCorePluginContainer {
 
     public CommandRunnableHandler getCommandRunnableHandler() {
         return this.commandRunnableHandler;
+    }
+
+    public HelpPaginationHandler getHelpPaginationHandler() {
+        return this.helpPaginationHandler;
     }
 }

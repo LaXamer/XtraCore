@@ -55,8 +55,8 @@ public class ConfigHandler {
 
         entry.getKey().getLogger().log("Initializing the configs!");
         for (Config config : this.configs) {
-            config.init();
             ConfigRegistry.add(config, entry.getKey());
+            config.init();
         }
         entry.getKey().getLogger().log("======================================================");
         entry.getValue().setConfigHandler(this);

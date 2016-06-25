@@ -35,6 +35,7 @@ import com.xtra.core.command.CommandHandler;
 import com.xtra.core.command.runnable.CommandRunnable;
 import com.xtra.core.command.runnable.CommandRunnableHandler;
 import com.xtra.core.config.ConfigHandler;
+import com.xtra.core.text.HelpPaginationHandler;
 import com.xtra.core.util.ReflectionScanner;
 import com.xtra.core.util.log.Logger;
 import com.xtra.core.util.store.CommandStore;
@@ -65,5 +66,9 @@ public class XtraCoreInternalPluginContainer {
 
     public void setCommandRunnableHandler(CommandRunnableHandler commandRunnableHandler) {
         this.container.commandRunnableHandler = commandRunnableHandler;
+    }
+
+    public void setHelpPaginationHandler(HelpPaginationHandler helpPaginationHandler) {
+        this.container.helpPaginationHandler = helpPaginationHandler;
     }
 }

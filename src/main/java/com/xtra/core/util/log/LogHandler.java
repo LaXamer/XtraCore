@@ -34,7 +34,7 @@ import com.xtra.core.plugin.XtraCorePluginContainer;
 public class LogHandler {
 
     public static Logger create(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
-        Logger logger = new Logger();
+        Logger logger = new Logger(entry.getKey());
         entry.getValue().setLogger(logger);
         return logger;
     }

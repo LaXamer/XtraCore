@@ -104,6 +104,7 @@ public class HelpPaginationHandler {
     private HelpPaginationHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
         this.entry = entry;
         this.entry.getKey().getLogger().log("Initializing the help pagination handler!");
+        this.entry.getValue().setHelpPaginationHandler(this);
         this.paginationBuilder = PaginationList.builder();
         this.helper = new CommandHelper(this.entry);
         this.setDefaults();

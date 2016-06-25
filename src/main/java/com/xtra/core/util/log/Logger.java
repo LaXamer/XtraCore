@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
 
 import com.laxamer.file.FileUtils;
 import com.xtra.core.internal.Internals;
@@ -91,9 +93,17 @@ public class Logger {
         FileUtils.writeToFile(this.logFile,
                 "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
         if (level.equals(Level.WARNING)) {
-            this.container.getPluginContainer().getLogger().warn(message);
+            if (container != null) {
+                this.container.getPluginContainer().getLogger().warn(message);
+            } else {
+                Sponge.getServer().getConsole().sendMessage(Text.of(message));
+            }
         } else if (level.equals(Level.ERROR)) {
-            this.container.getPluginContainer().getLogger().error(message);
+            if (container != null) {
+                this.container.getPluginContainer().getLogger().error(message);
+            } else {
+                Sponge.getServer().getConsole().sendMessage(Text.of(message));
+            }
         }
     }
 
@@ -104,10 +114,19 @@ public class Logger {
         FileUtils.writeToFile(logFile, stackTrace);
 
         if (level.equals(Level.WARNING)) {
-            this.container.getPluginContainer().getLogger().warn(cause.getMessage());
+            if (container != null) {
+                this.container.getPluginContainer().getLogger().warn(cause.getMessage());
+            } else {
+                Sponge.getServer().getConsole().sendMessage(Text.of(cause.getMessage()));
+            }
         } else if (level.equals(Level.ERROR)) {
-            this.container.getPluginContainer().getLogger().error(cause.getMessage());
-            this.container.getPluginContainer().getLogger().error(stackTrace);
+            if (container != null) {
+                this.container.getPluginContainer().getLogger().error(cause.getMessage());
+                this.container.getPluginContainer().getLogger().error(stackTrace);
+            } else {
+                Sponge.getServer().getConsole().sendMessage(Text.of(cause.getMessage()));
+                Sponge.getServer().getConsole().sendMessage(Text.of(stackTrace));
+            }
         }
     }
 
