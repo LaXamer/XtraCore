@@ -26,6 +26,7 @@
 package com.xtra.core.config.base;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -57,17 +58,25 @@ public abstract class ConfigBase implements Config {
         this.entry.getKey().getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
 
         HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
-        Path path;
+        Path dir;
         // The file is created automatically, however we need to know if we need
         // to populate it or not
         boolean exists;
         if (rc.sharedRoot()) {
-            path = Paths.get("config/" + rc.configName() + ".conf");
+            dir = Paths.get(System.getProperty("user.dir"), "/config/");
         } else {
-            path = Paths.get("config/" + this.entry.getKey().getPluginContainer().getId() + "/" + rc.configName() + ".conf");
+            dir = Paths.get(System.getProperty("user.dir"), "/config/" + this.entry.getKey().getPluginContainer().getId());
+            if (!Files.exists(dir)) {
+                try {
+                    Files.createDirectories(dir);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        exists = path.toFile().exists();
-        loaderBuilder.setPath(path);
+        Path configPath = dir.resolve(rc.configName() + ".conf");
+        exists = Files.exists(configPath);
+        loaderBuilder.setPath(configPath);
         this.loader = loaderBuilder.build();
         if (!exists) {
             this.entry.getKey().getLogger().log("Configuration currently does not exist. Creating...");
