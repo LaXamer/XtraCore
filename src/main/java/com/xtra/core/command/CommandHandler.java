@@ -61,6 +61,7 @@ public class CommandHandler {
         this.entry = entry;
 
         this.commands = this.entry.getValue().scanner.getCommands();
+        this.entry.getValue().setCommandHandler(this);
         this.helper = new CommandHelper(this.entry);
         this.entry.getKey().getLogger().log("Initializing the command handler!");
         this.entry.getKey().getLogger().log("Initializing the command specs for the commands...");
@@ -78,7 +79,6 @@ public class CommandHandler {
             CommandRegistry.add(command.command(), this.entry.getKey());
         }
         this.entry.getKey().getLogger().log("======================================================");
-        this.entry.getValue().setCommandHandler(this);
         return this;
     }
 
