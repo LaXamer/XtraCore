@@ -202,7 +202,7 @@ public class XtraCorePluginHandler {
             }
         }
         Internals.globalLogger.log(new XtraCoreException(
-                "Cannot find the plugin container entry for " + clazz.getClass().getName() + "! Did you pass the wrong object?"));
+                "Cannot find the plugin container entry for " + clazz.getName() + "! Did you pass the wrong object?"));
         return null;
     }
 }
