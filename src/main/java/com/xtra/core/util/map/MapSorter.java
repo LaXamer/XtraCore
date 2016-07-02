@@ -37,36 +37,6 @@ import com.xtra.core.util.runnable.TripleRunnable;
 
 public class MapSorter {
 
-    /*public static Map<CommandRunnable, RunAt> sortRunAtPriority(Map<CommandRunnable, RunAt> map) {
-        // Add the entries into a list to be ordered later.
-        List<CommandRunnable> keys = new ArrayList<>();
-        List<RunAt> values = new ArrayList<>();
-        for (Map.Entry<CommandRunnable, RunAt> entry : map.entrySet()) {
-            keys.add(entry.getKey());
-            values.add(entry.getValue());
-        }
-
-        // Create a mapping of the integer priority and the RunAt annotations
-        Map<Integer, RunAt> runAtMaps = new TreeMap<>();
-        for (RunAt value : values) {
-            // Because the integer is specified as the key, it will be
-            // automatically sorted for us
-            runAtMaps.put(value.priority(), value);
-        }
-
-        // Bring the ordered RunAt values back together with their
-        // CommandRunnables
-        Map<CommandRunnable, RunAt> treeMap = new TreeMap<>();
-        // You cannot 'get' from a set, so we need to track the index separately
-        // from the for loop
-        int index = 0;
-        for (Map.Entry<Integer, RunAt> runAtMap : runAtMaps.entrySet()) {
-            treeMap.put(keys.get(index), runAtMap.getValue());
-            index++;
-        }
-        return treeMap;
-    }*/
-
     public static Map<CommandRunnable, RunAt> sortRunAtPriority(Map<CommandRunnable, RunAt> map) {
         // Add the entries into a list to be ordered later.
         List<TripleRunnable<CommandRunnable, RunAt, Integer>> triples = new ArrayList<>();

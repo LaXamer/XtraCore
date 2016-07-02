@@ -40,7 +40,7 @@ public class GlobalCommandRunnableHandler {
      * @param clazz The class to run the runnable on
      * @param runnable The command runnable to run
      */
-    public static void create(Object plugin, Class<? extends Command> clazz, CommandRunnable runnable) {
+    public static void create(Class<?> plugin, Class<? extends Command> clazz, CommandRunnable runnable) {
         XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getValue().commandRunnables.put(clazz, runnable);
     }
 
@@ -53,7 +53,7 @@ public class GlobalCommandRunnableHandler {
      * @param classes The classes to run the command runnable on
      */
     @SafeVarargs
-    public static void create(Object plugin, CommandRunnable runnable, Class<? extends Command>... classes) {
+    public static void create(Class<?> plugin, CommandRunnable runnable, Class<? extends Command>... classes) {
         for (Class<? extends Command> clazz : classes) {
             XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getValue().commandRunnables.put(clazz, runnable);
         }
@@ -65,7 +65,7 @@ public class GlobalCommandRunnableHandler {
      * @param plugin The plugin
      * @param runnable The runnable to run for all commands
      */
-    public static void createForAllCommands(Object plugin, CommandRunnable runnable) {
+    public static void createForAllCommands(Class<?> plugin, CommandRunnable runnable) {
         for (Command command : XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getKey().getCommandHandler().getCommands()) {
             XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getValue().commandRunnables.put(command.getClass(), runnable);
         }
@@ -80,7 +80,7 @@ public class GlobalCommandRunnableHandler {
      * @param classes The classes to not run this runnable on
      */
     @SafeVarargs
-    public static void createForAllCommandsExcept(Object plugin, CommandRunnable runnable, Class<? extends Command>... classes) {
+    public static void createForAllCommandsExcept(Class<?> plugin, CommandRunnable runnable, Class<? extends Command>... classes) {
         for (Command command : XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getKey().getCommandHandler().getCommands()) {
             if (!Arrays.asList(classes).contains(command.getClass())) {
                 XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getValue().commandRunnables.put(command.getClass(), runnable);
@@ -96,7 +96,7 @@ public class GlobalCommandRunnableHandler {
      * @param clazz The class to check
      * @return If the class has any corresponding runnables
      */
-    public static boolean doesCommandHaveRunnable(Object plugin, Class<? extends Command> clazz) {
+    public static boolean doesCommandHaveRunnable(Class<?> plugin, Class<? extends Command> clazz) {
         return XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getValue().commandRunnables.containsKey(clazz);
     }
 
@@ -108,7 +108,7 @@ public class GlobalCommandRunnableHandler {
      * @param plugin The plugin
      * @param clazz The class to remove runnables from
      */
-    public static void removeRunnable(Object plugin, Class<? extends Command> clazz) {
+    public static void removeRunnable(Class<?> plugin, Class<? extends Command> clazz) {
         XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getValue().commandRunnables.removeAll(clazz);
     }
 
@@ -117,7 +117,7 @@ public class GlobalCommandRunnableHandler {
      * 
      * @param plugin The plugin
      */
-    public static void removeAllRunnables(Object plugin) {
+    public static void removeAllRunnables(Class<?> plugin) {
         XtraCorePluginHandler.getEntryContainerUnchecked(plugin).getValue().commandRunnables.clear();
     }
 }
