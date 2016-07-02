@@ -27,9 +27,11 @@ package com.xtra.core;
 
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
+import com.xtra.core.internal.InternalCommands;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.util.log.Logger;
 
@@ -41,5 +43,10 @@ public class XtraCore {
         Internals.globalLogger = new Logger();
         Internals.globalLogger.log("======================================================");
         Internals.globalLogger.log("Initializing XtraCore version " + Internals.VERSION);
+    }
+
+    @Listener
+    public void onInit(GameInitializationEvent event) {
+        InternalCommands.createCommands(this);
     }
 }
