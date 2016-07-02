@@ -27,6 +27,7 @@ package com.xtra.core.registry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
@@ -45,31 +46,32 @@ public class CommandRegistry {
         globalCommands.put(command, container);
     }
 
-    public static Command getCommand(Class<? extends Command> clazz) {
+    public static Optional<Command> getCommand(Class<? extends Command> clazz) {
         for (Command command : globalCommands.keySet()) {
             if (command.getClass().equals(clazz)) {
-                return command;
+                return Optional.of(command);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static Map.Entry<Command, XtraCorePluginContainer> getEntry(Class<? extends Command> clazz) {
+    public static Optional<Map.Entry<Command, XtraCorePluginContainer>> getEntry(Class<? extends Command> clazz) {
         for (Map.Entry<Command, XtraCorePluginContainer> entry : globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
-                return entry;
+                return Optional.of(entry);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> getContainerForCommand(Class<? extends Command> clazz) {
+    public static Optional<Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer>>
+            getContainerForCommand(Class<? extends Command> clazz) {
         for (Map.Entry<Command, XtraCorePluginContainer> entry : globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
-                return Maps.immutableEntry(entry.getValue(), Internals.plugins.get(entry.getValue()));
+                return Optional.of(Maps.immutableEntry(entry.getValue(), Internals.plugins.get(entry.getValue())));
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public static Set<Command> getAllCommands() {

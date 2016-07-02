@@ -39,8 +39,8 @@ import org.spongepowered.api.util.ban.Ban;
 public class BanHandler {
 
     /**
-     * Gets the ban reason for the specified profile. Will return null if one
-     * does not exist.
+     * Gets the ban reason for the specified profile. Will return
+     * {@link Optional#empty()} if one does not exist.
      * 
      * @param profile The profile to get the ban reason from
      * @return The reason, null if one is not available

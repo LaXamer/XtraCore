@@ -27,6 +27,7 @@ package com.xtra.core.config;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
@@ -71,15 +72,16 @@ public class ConfigHandler {
      * Gets the specified config object.
      * 
      * @param clazz The class of the config
-     * @return The config object
+     * @return {@link Optional#empty()} if the specifed config could not be
+     *         found
      */
-    public Config getConfig(Class<? extends Config> clazz) {
+    public Optional<Config> getConfig(Class<? extends Config> clazz) {
         for (Config config : this.configs) {
             if (clazz.isInstance(config)) {
-                return config;
+                return Optional.of(config);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public Set<Config> getConfigs() {

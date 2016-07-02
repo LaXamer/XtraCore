@@ -73,7 +73,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
         // Get the plugin containers
-        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainerForCommand(this.getClass());
+        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainerForCommand(this.getClass()).get();
         // Start again with an empty map
         this.map = new HashMap<>();
         // If there is a command runnable set for this class, get them

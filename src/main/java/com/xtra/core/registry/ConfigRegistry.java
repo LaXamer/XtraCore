@@ -27,6 +27,7 @@ package com.xtra.core.registry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
@@ -47,31 +48,32 @@ public class ConfigRegistry {
         globalConfigs.put(config, container);
     }
 
-    public static Config getConfig(Class<? extends Config> clazz) {
+    public static Optional<Config> getConfig(Class<? extends Config> clazz) {
         for (Config config : globalConfigs.keySet()) {
             if (config.getClass().equals(clazz)) {
-                return config;
+                return Optional.of(config);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static Map.Entry<Config, XtraCorePluginContainer> getEntry(Class<? extends Config> clazz) {
+    public static Optional<Map.Entry<Config, XtraCorePluginContainer>> getEntry(Class<? extends Config> clazz) {
         for (Map.Entry<Config, XtraCorePluginContainer> entry : globalConfigs.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
-                return entry;
+                return Optional.of(entry);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> getContainersForConfig(Class<? extends Config> clazz) {
+    public static Optional<Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer>>
+            getContainersForConfig(Class<? extends Config> clazz) {
         for (Map.Entry<Config, XtraCorePluginContainer> entry : globalConfigs.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
-                return Maps.immutableEntry(entry.getValue(), Internals.plugins.get(entry.getValue()));
+                return Optional.of(Maps.immutableEntry(entry.getValue(), Internals.plugins.get(entry.getValue())));
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public static Set<Config> getAllConfigs() {

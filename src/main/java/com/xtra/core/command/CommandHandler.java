@@ -26,6 +26,7 @@
 package com.xtra.core.command;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.spongepowered.api.Sponge;
@@ -151,13 +152,19 @@ public class CommandHandler {
         Sponge.getCommandManager().register(this.entry.getKey().getPlugin(), commandSpec.build(), command.aliases());
     }
 
-    public Command getCommand(Class<? extends Command> clazz) {
+    /**
+     * Gets the command object for the specified class.
+     * 
+     * @param clazz The command class
+     * @return {@link Optional#empty()} if the command could not be found
+     */
+    public Optional<Command> getCommand(Class<? extends Command> clazz) {
         for (Command command : this.commands) {
             if (clazz.isInstance(command)) {
-                return command;
+                return Optional.of(command);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public Set<Command> getCommands() {

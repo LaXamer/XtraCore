@@ -52,7 +52,7 @@ public abstract class ConfigBase implements Config {
 
     @Override
     public void init() {
-        this.entry = ConfigRegistry.getContainersForConfig(this.getClass());
+        this.entry = ConfigRegistry.getContainersForConfig(this.getClass()).get();
         RegisterConfig rc = this.getClass().getAnnotation(RegisterConfig.class);
 
         this.entry.getKey().getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
