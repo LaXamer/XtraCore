@@ -57,6 +57,7 @@ public class XtraCore {
     @Listener
     public void onReload(GameReloadEvent event) {
         for (Config config : ConfigRegistry.getAllConfigs()) {
+            // If there is no DoNotReload annotation, then reload.
             if (config.getClass().getAnnotation(DoNotReload.class) == null) {
                 config.load();
             }
