@@ -100,8 +100,7 @@ public class CommandHelper {
     }
 
     public List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationHandler.CommandOrdering ordering) {
-        List<CommandStore> commandStore = new ArrayList<>();
-        commandStore.addAll(contentsStore);
+        List<CommandStore> commandStore = new ArrayList<>(contentsStore);
         if (ordering.equals(HelpPaginationHandler.CommandOrdering.A_Z)) {
             Collections.sort(commandStore);
             return commandStore;

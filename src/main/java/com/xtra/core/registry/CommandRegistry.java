@@ -61,7 +61,7 @@ public class CommandRegistry {
         return null;
     }
 
-    public static Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> getContainersForCommand(Class<? extends Command> clazz) {
+    public static Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> getContainerForCommand(Class<? extends Command> clazz) {
         for (Map.Entry<Command, XtraCorePluginContainer> entry : globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 return Maps.immutableEntry(entry.getValue(), Internals.plugins.get(entry.getValue()));

@@ -52,6 +52,7 @@ import com.xtra.core.command.runnable.RunAt;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.registry.CommandRegistry;
+import com.xtra.core.util.map.MapSorter;
 
 public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric {
 
@@ -59,7 +60,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
 
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
-        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainersForCommand(this.getClass());
+        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainerForCommand(this.getClass());
         Map<CommandRunnable, RunAt> map = new HashMap<>();
         if (entry.getValue().commandRunnables.keySet().contains(this.getClass())) {
             Collection<CommandRunnable> runnables = entry.getValue().commandRunnables.get(this.getClass());
@@ -71,6 +72,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
                 entry.getKey().getLogger().log(e);
             }
         }
+        map = MapSorter.sortRunAtPriority(map);
         for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
             if (runnableEntry.getValue().phase().equals(CommandPhase.PRE)) {
                 CommandRunnableResult result = runnableEntry.getKey().run(source, args);

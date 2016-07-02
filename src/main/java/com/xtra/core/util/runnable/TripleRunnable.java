@@ -23,30 +23,45 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command.runnable;
+package com.xtra.core.util.runnable;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.xtra.core.command.runnable.CommandRunnable;
+import com.xtra.core.command.runnable.RunAt;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface RunAt {
+// Because Integer is final
+@SuppressWarnings("all")
+public class TripleRunnable<T extends CommandRunnable, U extends RunAt, V extends Integer>
+        implements Comparable<TripleRunnable<CommandRunnable, RunAt, Integer>> {
 
-    /**
-     * The phase at which a {@link CommandRunnable} will execute.
-     * 
-     * @return The phase at which this will run
-     */
-    CommandPhase phase() default CommandPhase.START;
+    private CommandRunnable commandRunnable;
+    private RunAt runAt;
+    private Integer priority;
 
-    /**
-     * The priority at which a {@link CommandRunnable} should be executed
-     * compared to other runnables. The lower this value, the higher priority it
-     * gets.
-     * 
-     * @return The priority
-     */
-    int priority() default 1000;
+    public TripleRunnable(CommandRunnable a, RunAt b, Integer c) {
+        this.commandRunnable = a;
+        this.runAt = b;
+        this.priority = c;
+    }
+
+    public CommandRunnable getCommandRunnable() {
+        return commandRunnable;
+    }
+
+    public RunAt getRunAt() {
+        return runAt;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    @Override
+    public int compareTo(TripleRunnable<CommandRunnable, RunAt, Integer> o) {
+        if (this.priority > o.priority) {
+            return 1;
+        } else if (this.priority < o.priority) {
+            return -1;
+        }
+        return 0;
+    }
 }

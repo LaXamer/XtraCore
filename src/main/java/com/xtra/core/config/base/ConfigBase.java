@@ -64,15 +64,10 @@ public abstract class ConfigBase implements Config {
         boolean exists;
         if (rc.sharedRoot()) {
             dir = Paths.get(System.getProperty("user.dir"), "/config/");
+            this.checkExists(dir);
         } else {
             dir = Paths.get(System.getProperty("user.dir"), "/config/" + this.entry.getKey().getPluginContainer().getId());
-            if (!Files.exists(dir)) {
-                try {
-                    Files.createDirectories(dir);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            this.checkExists(dir);
         }
         Path configPath = dir.resolve(rc.configName() + ".conf");
         exists = Files.exists(configPath);
@@ -85,6 +80,16 @@ public abstract class ConfigBase implements Config {
             this.save();
         }
         this.load();
+    }
+
+    private void checkExists(Path dir) {
+        if (!Files.exists(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
