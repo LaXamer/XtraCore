@@ -151,6 +151,23 @@ public class XtraCorePluginHandler {
 
     /**
      * Gets the mapping entry of an {@link XtraCorePluginContainer} and a
+     * {@link XtraCoreInternalPluginContainer}.
+     * 
+     * @param clazz The plugin class
+     * @return The mapping entry, or {@link Optional#empty()} if an entry could
+     *         not be found
+     */
+    public static Optional<Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer>> getEntryContainer(Class<?> clazz) {
+        for (Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry : Internals.plugins.entrySet()) {
+            if (entry.getKey().getPlugin().getClass().equals(clazz)) {
+                return Optional.of(entry);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Gets the mapping entry of an {@link XtraCorePluginContainer} and a
      * {@link XtraCoreInternalPluginContainer}. Throws an
      * {@link XtraCoreException} if the specified plugin's entry could not be
      * found.
@@ -166,6 +183,26 @@ public class XtraCorePluginHandler {
         }
         Internals.globalLogger.log(new XtraCoreException(
                 "Cannot find the plugin container entry for " + plugin.getClass().getName() + "! Did you pass the wrong object?"));
+        return null;
+    }
+
+    /**
+     * Gets the mapping entry of an {@link XtraCorePluginContainer} and a
+     * {@link XtraCoreInternalPluginContainer}. Throws an
+     * {@link XtraCoreException} if the specified plugin's entry could not be
+     * found.
+     * 
+     * @param clazz The plugin class
+     * @return The mapping entry
+     */
+    public static Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> getEntryContainerUnchecked(Class<?> clazz) {
+        for (Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry : Internals.plugins.entrySet()) {
+            if (entry.getKey().getPlugin().getClass().equals(clazz)) {
+                return entry;
+            }
+        }
+        Internals.globalLogger.log(new XtraCoreException(
+                "Cannot find the plugin container entry for " + clazz.getClass().getName() + "! Did you pass the wrong object?"));
         return null;
     }
 }
