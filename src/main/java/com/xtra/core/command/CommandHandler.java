@@ -38,6 +38,7 @@ import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.plugin.XtraCorePluginHandler;
 import com.xtra.core.registry.CommandRegistry;
 import com.xtra.core.util.CommandHelper;
+import com.xtra.core.util.log.LogHandler;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -59,10 +60,14 @@ public class CommandHandler {
 
     private CommandHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
         this.entry = entry;
+        LogHandler.getGlobalLogger().log("======================================================");
+        LogHandler.getGlobalLogger().log("Initializing command handler for " + entry.getKey().getPlugin().getClass().getName());
 
+        this.entry.getKey().getLogger().log("======================================================");
         this.commands = this.entry.getValue().scanner.getCommands();
         this.entry.getValue().setCommandHandler(this);
         this.helper = new CommandHelper(this.entry);
+        this.entry.getKey().getLogger().log("======================================================");
         this.entry.getKey().getLogger().log("Initializing the command handler!");
         this.entry.getKey().getLogger().log("Initializing the command specs for the commands...");
 
@@ -78,7 +83,6 @@ public class CommandHandler {
             this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
             CommandRegistry.add(command.command(), this.entry.getKey());
         }
-        this.entry.getKey().getLogger().log("======================================================");
         return this;
     }
 

@@ -46,9 +46,6 @@ public class Logger {
     public Logger(XtraCorePluginContainer container) {
         this.container = container;
         File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
         this.logFile = new File(directory + "/" + container.getPluginContainer().getId() + ".log");
         if (!logFile.exists()) {
             try {
@@ -65,7 +62,7 @@ public class Logger {
      * Creates a global XtraCore logger.
      */
     public Logger() {
-        File directory = new File(Internals.LOG_DIRECTORY);
+        File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
         if (!directory.exists()) {
             directory.mkdirs();
         }

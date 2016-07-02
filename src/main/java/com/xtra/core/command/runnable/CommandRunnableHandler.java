@@ -32,6 +32,7 @@ import com.xtra.core.command.Command;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.plugin.XtraCorePluginHandler;
+import com.xtra.core.util.log.LogHandler;
 
 public class CommandRunnableHandler {
 
@@ -41,6 +42,8 @@ public class CommandRunnableHandler {
     }
 
     public static CommandRunnableHandler create(Object plugin) {
+        LogHandler.getGlobalLogger().log("Initializing the command runnable handler for " + plugin.getClass().getName());
+
         CommandRunnableHandler handler = new CommandRunnableHandler();
         handler.container = XtraCorePluginHandler.getEntryContainerUnchecked(plugin);
         handler.container.getValue().setCommandRunnableHandler(handler);

@@ -33,6 +33,7 @@ import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.plugin.XtraCorePluginHandler;
 import com.xtra.core.registry.ConfigRegistry;
+import com.xtra.core.util.log.LogHandler;
 
 public class ConfigHandler {
 
@@ -51,14 +52,17 @@ public class ConfigHandler {
     }
 
     private ConfigHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
+        LogHandler.getGlobalLogger().log("======================================================");
+        LogHandler.getGlobalLogger().log("Initializing config handler for " + entry.getKey().getPlugin().getClass().getName());
+        entry.getKey().getLogger().log("======================================================");
         this.configs = entry.getValue().scanner.getConfigs();
 
+        entry.getKey().getLogger().log("======================================================");
         entry.getKey().getLogger().log("Initializing the configs!");
         for (Config config : this.configs) {
             ConfigRegistry.add(config, entry.getKey());
             config.init();
         }
-        entry.getKey().getLogger().log("======================================================");
         entry.getValue().setConfigHandler(this);
         return this;
     }

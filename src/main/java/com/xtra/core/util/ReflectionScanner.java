@@ -86,7 +86,6 @@ public class ReflectionScanner {
             }
         }
         this.container.getLogger().log("Commands added.");
-        this.container.getLogger().log("======================================================");
         return commands;
     }
 
@@ -114,7 +113,6 @@ public class ReflectionScanner {
             }
         }
         this.container.getLogger().log("Configs added.");
-        this.container.getLogger().log("======================================================");
         return configs;
     }
 
@@ -134,7 +132,6 @@ public class ReflectionScanner {
             }
         }
         this.container.getLogger().log("Listeners added.");
-        this.container.getLogger().log("======================================================");
         return listenerClasses;
     }
 }

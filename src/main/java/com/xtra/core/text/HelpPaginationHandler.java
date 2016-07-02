@@ -41,6 +41,7 @@ import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.plugin.XtraCorePluginHandler;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.ReflectionScanner;
+import com.xtra.core.util.log.LogHandler;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -103,6 +104,9 @@ public class HelpPaginationHandler {
 
     private HelpPaginationHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
         this.entry = entry;
+        LogHandler.getGlobalLogger().log("======================================================");
+        LogHandler.getGlobalLogger().log("Initializing help pagination handler for " + entry.getKey().getPlugin().getClass().getName());
+        this.entry.getKey().getLogger().log("======================================================");
         this.entry.getKey().getLogger().log("Initializing the help pagination handler!");
         this.entry.getValue().setHelpPaginationHandler(this);
         this.paginationBuilder = PaginationList.builder();
@@ -329,7 +333,6 @@ public class HelpPaginationHandler {
      */
     private void setDefaults() {
         this.entry.getKey().getLogger().log("Setting the help pagination handler default values.");
-        this.entry.getKey().getLogger().log("======================================================");
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {

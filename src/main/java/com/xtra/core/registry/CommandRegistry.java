@@ -34,12 +34,14 @@ import com.xtra.core.command.Command;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.util.log.LogHandler;
 
 public class CommandRegistry {
     
     private static Map<Command, XtraCorePluginContainer> globalCommands = new HashMap<>();
 
     public static void add(Command command, XtraCorePluginContainer container) {
+        LogHandler.getGlobalLogger().log("Adding command '" + command.aliases()[0] + "' to the global command registry!");
         globalCommands.put(command, container);
     }
 

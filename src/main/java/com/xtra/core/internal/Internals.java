@@ -41,10 +41,11 @@ import com.xtra.core.util.log.Logger;
  */
 public class Internals {
 
-    public static Map<XtraCorePluginContainer, XtraCoreInternalPluginContainer> plugins = new HashMap<>();
     public static final String VERSION = "@project.version@";
+    public static final String DESCRIPTION = "A unifying plugin utility backend.";
+    public static Map<XtraCorePluginContainer, XtraCoreInternalPluginContainer> plugins = new HashMap<>();
     public static final String LOG_DIRECTORY = "/logs/xtracore-logs";
-    public static Logger globalLogger = new Logger();
+    public static Logger globalLogger;
 
     /**
      * Checks if the specified class has already been instantiated and if so

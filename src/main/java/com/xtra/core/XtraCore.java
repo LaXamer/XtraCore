@@ -23,29 +23,23 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.listener;
+package com.xtra.core;
 
-import java.util.Map;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.plugin.Plugin;
 
-import org.spongepowered.api.Sponge;
+import com.xtra.core.internal.Internals;
+import com.xtra.core.util.log.Logger;
 
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.plugin.XtraCorePluginHandler;
-import com.xtra.core.util.log.LogHandler;
+@Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwesomeMan34"}, description = Internals.DESCRIPTION)
+public class XtraCore {
 
-public class ListenerHandler {
-
-    /**
-     * Automatically scans and registers plugin listeners.
-     * 
-     * @param plugin The plugin
-     */
-    public static void registerListeners(Object plugin) {
-        LogHandler.getGlobalLogger().log("Registering listeners for " + plugin.getClass().getName());
-        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = XtraCorePluginHandler.getEntryContainerUnchecked(plugin);
-        for (Object listener : entry.getValue().scanner.getPluginListeners()) {
-            Sponge.getEventManager().registerListeners(entry.getKey().getPlugin(), listener);
-        }
+    @Listener(order = Order.FIRST)
+    public void onPreInit(GamePreInitializationEvent event) {
+        Internals.globalLogger = new Logger();
+        Internals.globalLogger.log("======================================================");
+        Internals.globalLogger.log("Initializing XtraCore version " + Internals.VERSION);
     }
 }

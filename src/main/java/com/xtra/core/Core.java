@@ -41,7 +41,9 @@ public class Core {
         Logger logger = LogHandler.create(entry);
         logger.log("======================================================");
         logger.log("Initializing with XtraCore version " + Internals.VERSION + "!");
-        logger.log("======================================================");
+
+        Internals.globalLogger.log("======================================================");
+        LogHandler.getGlobalLogger().log("Initializing plugin class " + plugin.getClass().getName());
         return entry.getKey();
     }
 

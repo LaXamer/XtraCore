@@ -31,22 +31,26 @@ import java.util.Set;
 
 import com.google.common.collect.Maps;
 import com.xtra.core.config.Config;
+import com.xtra.core.config.annotation.RegisterConfig;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.util.log.LogHandler;
 
 public class ConfigRegistry {
 
     private static Map<Config, XtraCorePluginContainer> globalConfigs = new HashMap<>();
 
-    public static void add(Config command, XtraCorePluginContainer container) {
-        globalConfigs.put(command, container);
+    public static void add(Config config, XtraCorePluginContainer container) {
+        LogHandler.getGlobalLogger()
+                .log("Adding config '" + config.getClass().getAnnotation(RegisterConfig.class).configName() + "' to the global config registry!");
+        globalConfigs.put(config, container);
     }
 
-    public static Config getCommand(Class<? extends Config> clazz) {
-        for (Config command : globalConfigs.keySet()) {
-            if (command.getClass().equals(clazz)) {
-                return command;
+    public static Config getConfig(Class<? extends Config> clazz) {
+        for (Config config : globalConfigs.keySet()) {
+            if (config.getClass().equals(clazz)) {
+                return config;
             }
         }
         return null;
