@@ -38,10 +38,23 @@ public class CommandRunnableResult {
         this.result = result;
     }
 
+    /**
+     * Indicates the the {@link Command} should keep running after the
+     * {@link CommandRunnable} has finished execution.
+     * 
+     * @return The command runnable result
+     */
     public static CommandRunnableResult keepRunning() {
         return new CommandRunnableResult();
     }
 
+    /**
+     * Indicates that the {@link Command} should be stopped and should no longer
+     * continue execution.
+     * 
+     * @param result The command result to return for the command
+     * @return The command runnable result
+     */
     public static CommandRunnableResult stop(CommandResult result) {
         return new CommandRunnableResult(result);
     }

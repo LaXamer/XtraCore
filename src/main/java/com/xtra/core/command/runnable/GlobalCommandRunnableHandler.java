@@ -101,9 +101,9 @@ public class GlobalCommandRunnableHandler {
     }
 
     /**
-     * Removes a {@link CommandRunnable} from the specified class. Note that if
-     * the class has multiple corresponding {@link CommandRunnable}s, they will
-     * all be removed.
+     * Removes all {@link CommandRunnable} from the specified class. Note that
+     * if the class has multiple corresponding {@link CommandRunnable}s, they
+     * will also be removed.
      * 
      * @param plugin The plugin
      * @param clazz The class to remove runnables from
@@ -113,7 +113,7 @@ public class GlobalCommandRunnableHandler {
     }
 
     /**
-     * Removes all runnables from all classes.
+     * Removes all of the runnables from all classes of a plugin.
      * 
      * @param plugin The plugin
      */

@@ -29,8 +29,8 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 
 /**
- * Indicates that something will be ran sometime during a commands execution,
- * such as before or after execution.
+ * Indicates that a piece of code will be ran sometime during a commands
+ * execution, such as before or after execution.
  */
 public interface CommandRunnable {
 

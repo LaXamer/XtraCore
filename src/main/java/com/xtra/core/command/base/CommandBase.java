@@ -215,13 +215,19 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
     @Override
     public Optional<CommandRunnableResult> checkPhase(CommandPhase phase, CommandSource source, CommandContext args) {
         for (Map.Entry<CommandRunnable, RunAt> runnableEntry : this.map.entrySet()) {
+            // Check if the runnable's phase is equal to the current phase
             if (runnableEntry.getValue().phase().equals(phase)) {
+                // Run the runnable
                 CommandRunnableResult result = runnableEntry.getKey().run(source, args);
+                // If there is a result, return it so that we may stop the
+                // command
                 if (result.getResult() != null) {
                     return Optional.of(result);
                 }
             }
         }
+        // Either no runnables were found, or they all allowed the command to
+        // continue running
         return Optional.empty();
     }
 }

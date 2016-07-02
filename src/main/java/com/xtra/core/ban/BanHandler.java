@@ -33,9 +33,6 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 
-/**
- * Convenience class for banning players.
- */
 public class BanHandler {
 
     /**
@@ -43,7 +40,7 @@ public class BanHandler {
      * {@link Optional#empty()} if one does not exist.
      * 
      * @param profile The profile to get the ban reason from
-     * @return The reason, null if one is not available
+     * @return The reason, or {@link Optional#empty()} if one is not available
      */
     public static Optional<Text> getBanReason(GameProfile profile) {
         BanService service = Sponge.getServiceManager().provide(BanService.class).get();
