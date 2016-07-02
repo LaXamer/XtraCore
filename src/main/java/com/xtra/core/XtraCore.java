@@ -27,12 +27,16 @@ package com.xtra.core;
 
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
+import com.xtra.core.config.Config;
+import com.xtra.core.config.annotation.DoNotReload;
 import com.xtra.core.internal.InternalCommands;
 import com.xtra.core.internal.Internals;
+import com.xtra.core.registry.ConfigRegistry;
 import com.xtra.core.util.log.Logger;
 
 @Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwesomeMan34"}, description = Internals.DESCRIPTION)
@@ -48,5 +52,14 @@ public class XtraCore {
     @Listener
     public void onInit(GameInitializationEvent event) {
         InternalCommands.createCommands(this);
+    }
+
+    @Listener
+    public void onReload(GameReloadEvent event) {
+        for (Config config : ConfigRegistry.getAllConfigs()) {
+            if (config.getClass().getAnnotation(DoNotReload.class) == null) {
+                config.load();
+            }
+        }
     }
 }
