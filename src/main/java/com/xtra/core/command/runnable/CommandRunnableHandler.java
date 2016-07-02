@@ -29,25 +29,30 @@ import java.util.Arrays;
 import java.util.Map;
 
 import com.xtra.core.command.Command;
+import com.xtra.core.command.CommandHandler;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.plugin.XtraCorePluginHandler;
 import com.xtra.core.util.log.LogHandler;
 
 public class CommandRunnableHandler {
 
-    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> container;
+    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
 
     private CommandRunnableHandler() {
     }
 
-    public static CommandRunnableHandler create(Object plugin) {
-        LogHandler.getGlobalLogger().log("Initializing the command runnable handler for " + plugin.getClass().getName());
+    /**
+     * Creates a {@link CommandRunnableHandler}. This is automatically called
+     * when a {@link CommandHandler} is initialized.
+     * 
+     * @param entry The entry
+     */
+    public static void create(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
+        LogHandler.getGlobalLogger().log("Initializing the command runnable handler for " + entry.getKey().getPlugin().getClass().getName());
 
         CommandRunnableHandler handler = new CommandRunnableHandler();
-        handler.container = XtraCorePluginHandler.getEntryContainerUnchecked(plugin);
-        handler.container.getValue().setCommandRunnableHandler(handler);
-        return handler;
+        handler.entry = entry;
+        handler.entry.getValue().setCommandRunnableHandler(handler);
     }
 
     /**
@@ -58,7 +63,7 @@ public class CommandRunnableHandler {
      * @param runnable The command runnable to run
      */
     public void add(Class<? extends Command> clazz, CommandRunnable runnable) {
-        this.container.getValue().commandRunnables.put(clazz, runnable);
+        this.entry.getValue().commandRunnables.put(clazz, runnable);
     }
 
     /**
@@ -71,7 +76,7 @@ public class CommandRunnableHandler {
     @SuppressWarnings("unchecked")
     public void add(CommandRunnable runnable, Class<? extends Command>... classes) {
         for (Class<? extends Command> clazz : classes) {
-            this.container.getValue().commandRunnables.put(clazz, runnable);
+            this.entry.getValue().commandRunnables.put(clazz, runnable);
         }
     }
 
@@ -81,8 +86,8 @@ public class CommandRunnableHandler {
      * @param runnable The runnable to run for all commands
      */
     public void addForAllCommands(CommandRunnable runnable) {
-        for (Command command : this.container.getKey().getCommandHandler().getCommands()) {
-            this.container.getValue().commandRunnables.put(command.getClass(), runnable);
+        for (Command command : this.entry.getKey().getCommandHandler().getCommands()) {
+            this.entry.getValue().commandRunnables.put(command.getClass(), runnable);
         }
     }
 
@@ -95,9 +100,9 @@ public class CommandRunnableHandler {
      */
     @SuppressWarnings("unchecked")
     public void addForAllCommandsExcept(CommandRunnable runnable, Class<? extends Command>... classes) {
-        for (Command command : this.container.getKey().getCommandHandler().getCommands()) {
+        for (Command command : this.entry.getKey().getCommandHandler().getCommands()) {
             if (!Arrays.asList(classes).contains(command.getClass())) {
-                this.container.getValue().commandRunnables.put(command.getClass(), runnable);
+                this.entry.getValue().commandRunnables.put(command.getClass(), runnable);
             }
         }
     }
@@ -110,7 +115,7 @@ public class CommandRunnableHandler {
      * @return If the class has any corresponding runnables
      */
     public boolean doesCommandHaveRunnable(Class<? extends Command> clazz) {
-        return this.container.getValue().commandRunnables.containsKey(clazz);
+        return this.entry.getValue().commandRunnables.containsKey(clazz);
     }
 
     /**
@@ -121,13 +126,13 @@ public class CommandRunnableHandler {
      * @param clazz The class to remove runnables from
      */
     public void removeRunnable(Class<? extends Command> clazz) {
-        this.container.getValue().commandRunnables.removeAll(clazz);
+        this.entry.getValue().commandRunnables.removeAll(clazz);
     }
 
     /**
      * Removes all runnables from all classes.
      */
     public void removeAllRunnables() {
-        this.container.getValue().commandRunnables.clear();
+        this.entry.getValue().commandRunnables.clear();
     }
 }

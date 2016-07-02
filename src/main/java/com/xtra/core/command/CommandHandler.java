@@ -33,6 +33,7 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
 import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.command.runnable.CommandRunnableHandler;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.plugin.XtraCorePluginHandler;
@@ -83,6 +84,8 @@ public class CommandHandler {
             this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
             CommandRegistry.add(command.command(), this.entry.getKey());
         }
+
+        CommandRunnableHandler.create(entry);
         return this;
     }
 
