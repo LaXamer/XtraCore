@@ -23,39 +23,28 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command.runnable;
+package com.xtra.core.command;
+
+import java.util.Optional;
 
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
 
-import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.command.runnable.CommandPhase;
+import com.xtra.core.command.runnable.CommandRunnable;
+import com.xtra.core.command.runnable.CommandRunnableResult;
 
-/**
- * The phase at which a {@link CommandRunnable} will run.
- */
-public enum CommandPhase {
-
-    /**
-     * Symbolizes that the {@link CommandRunnable} will be ran when the command
-     * is first executed. This is before any special checks are ran regarding
-     * the initialization of a {@link CommandBase} or something similar.
-     */
-    PRE,
+public interface CommandPhaseChecker {
 
     /**
-     * Symbolizes that the {@link CommandRunnable} will be ran after basic
-     * initialization. In the default implementation of {@link CommandBase},
-     * this is various checks to determine the {@link CommandSource} and perform
-     * any necessary actions.
+     * Checks if there are {@link CommandRunnable}s for the specified
+     * {@link CommandPhase}.
      * 
-     * <p>Note that this is ran before the actual command has been
-     * processed.</p>
+     * @param phase The command phase to check
+     * @param source The command source of the command
+     * @param args The command arguments
+     * @return {@link Optional#empty()} if no runnables were found or if the
+     *         runnables had specified 'keepRunning'.
      */
-    START,
-
-    /**
-     * Symbolizes that the {@link CommandRunnable} will be ran after a command
-     * has been processed. Note that you cannot cancel the execution of a
-     * command in this phase, as the command has already been executed.
-     */
-    POST;
+    Optional<CommandRunnableResult> checkPhase(CommandPhase phase, CommandSource source, CommandContext args);
 }

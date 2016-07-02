@@ -51,6 +51,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 
 import com.xtra.core.command.Command;
+import com.xtra.core.command.CommandPhaseChecker;
 import com.xtra.core.command.CommandSourceChecker;
 import com.xtra.core.command.CommandSourceGeneric;
 import com.xtra.core.command.annotation.RegisterCommand;
@@ -63,34 +64,46 @@ import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.registry.CommandRegistry;
 import com.xtra.core.util.map.MapSorter;
 
-public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric, CommandSourceChecker {
+public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric, CommandSourceChecker, CommandPhaseChecker {
+
+    private Map<CommandRunnable, RunAt> map;
 
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
 
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
+        // Get the plugin containers
         Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainerForCommand(this.getClass());
-        Map<CommandRunnable, RunAt> map = new HashMap<>();
+        // Start again with an empty map
+        this.map = new HashMap<>();
+        // If there is a command runnable set for this class, get them
         if (entry.getValue().commandRunnables.keySet().contains(this.getClass())) {
             Collection<CommandRunnable> runnables = entry.getValue().commandRunnables.get(this.getClass());
             try {
                 for (CommandRunnable runnable : runnables) {
-                    map.put(runnable, runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class));
+                    // Put the command runnable as well as the RunAt annotation
+                    // into our mapping
+                    this.map.put(runnable,
+                            runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class));
                 }
             } catch (NoSuchMethodException | SecurityException e) {
+                // Should never really happen
                 entry.getKey().getLogger().log(e);
             }
         }
-        map = MapSorter.sortRunAtPriority(map);
-        for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
-            if (runnableEntry.getValue().phase().equals(CommandPhase.PRE)) {
-                CommandRunnableResult result = runnableEntry.getKey().run(source, args);
-                if (result.getResult() != null) {
-                    return result.getResult();
-                }
-            }
+        if (!this.map.isEmpty()) {
+            // Sort the mapping by priority specified in RunAt
+            this.map = MapSorter.sortRunAtPriority(this.map);
         }
 
+        // Execute any runnables set for 'PRE'
+        Optional<CommandRunnableResult> checkRunnablesPre = this.checkPhase(CommandPhase.PRE, source, args);
+        if (checkRunnablesPre.isPresent()) {
+            return checkRunnablesPre.get().getResult();
+        }
+
+        // Ensure that the specified CommandSource from the generic is the
+        // source that executed this command
         Class<?> type = this.getTargetCommandSource();
         Optional<Text> isCorrectCommandSource = this.checkCommandSource(type, source);
         if (isCorrectCommandSource.isPresent()) {
@@ -98,18 +111,17 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
             return CommandResult.empty();
         }
 
+        // It's safe to cast it now that we've checked
         @SuppressWarnings("unchecked")
         T src = (T) source;
 
-        for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
-            if (runnableEntry.getValue().phase().equals(CommandPhase.START)) {
-                CommandRunnableResult result = runnableEntry.getKey().run(src, args);
-                if (result.getResult() != null) {
-                    return result.getResult();
-                }
-            }
+        // Execute any runnables set for 'START'
+        Optional<CommandRunnableResult> checkRunnablesStart = this.checkPhase(CommandPhase.START, source, args);
+        if (checkRunnablesStart.isPresent()) {
+            return checkRunnablesStart.get().getResult();
         }
 
+        // Check if our command is async. If so, then run it asynchronously
         if (this.getClass().getAnnotation(RegisterCommand.class).async()) {
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
@@ -118,28 +130,27 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
                         } catch (TextMessageException e) {
                             src.sendMessage(e.getText());
                         } catch (Exception e2) {
+                            src.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
                             entry.getKey().getLogger().log(e2);
                         }
                     }).async().submit(entry.getKey().getPlugin());
-            for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
-                if (runnableEntry.getValue().phase().equals(CommandPhase.POST)) {
-                    runnableEntry.getKey().run(src, args);
-                }
-            }
+
+            // Execute any runnables set for 'POST'. Note that the result is
+            // effectively ignored.
+            this.checkPhase(CommandPhase.POST, source, args);
             return CommandResult.success();
         }
 
         try {
             CommandResult result = this.executeCommand(src, args);
-            for (Map.Entry<CommandRunnable, RunAt> runnableEntry : map.entrySet()) {
-                if (runnableEntry.getValue().phase().equals(CommandPhase.POST)) {
-                    runnableEntry.getKey().run(src, args);
-                }
-            }
+            // Execute any runnables set for 'POST'. Note that the result is
+            // effectively ignored.
+            this.checkPhase(CommandPhase.POST, source, args);
             return result;
         } catch (TextMessageException e) {
             src.sendMessage(e.getText());
         } catch (Exception e2) {
+            src.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
             entry.getKey().getLogger().log(e2);
         }
         // If errored
@@ -170,6 +181,11 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
 
     @Override
     public Optional<Text> checkCommandSource(Class<?> type, CommandSource source) {
+        // If it's CommandSource, don't bother with the checks below.
+        if (type.equals(CommandSource.class)) {
+            return Optional.empty();
+        }
+
         // Most common is player, so it's at the top. Otherwise these are to be
         // alphabetically ordered.
         if (type.equals(Player.class) && !(source instanceof Player)) {
@@ -192,6 +208,19 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
             return Optional.of(Text.of(TextColors.RED, "Only remote sources may execute this command!"));
         } else if (type.equals(SignSource.class) && !(source instanceof SignSource)) {
             return Optional.of(Text.of(TextColors.RED, "Only sign may execute this command!"));
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<CommandRunnableResult> checkPhase(CommandPhase phase, CommandSource source, CommandContext args) {
+        for (Map.Entry<CommandRunnable, RunAt> runnableEntry : this.map.entrySet()) {
+            if (runnableEntry.getValue().phase().equals(phase)) {
+                CommandRunnableResult result = runnableEntry.getKey().run(source, args);
+                if (result.getResult() != null) {
+                    return Optional.of(result);
+                }
+            }
         }
         return Optional.empty();
     }
