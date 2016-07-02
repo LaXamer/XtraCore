@@ -29,20 +29,29 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.command.source.LocatedSource;
+import org.spongepowered.api.command.source.ProxySource;
+import org.spongepowered.api.command.source.RconSource;
+import org.spongepowered.api.command.source.RemoteSource;
+import org.spongepowered.api.command.source.SignSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.vehicle.minecart.CommandBlockMinecart;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 
 import com.xtra.core.command.Command;
+import com.xtra.core.command.CommandSourceChecker;
 import com.xtra.core.command.CommandSourceGeneric;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.runnable.CommandPhase;
@@ -54,7 +63,7 @@ import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.registry.CommandRegistry;
 import com.xtra.core.util.map.MapSorter;
 
-public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric {
+public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric, CommandSourceChecker {
 
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
 
@@ -83,15 +92,9 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
         }
 
         Class<?> type = this.getTargetCommandSource();
-
-        if (type.equals(Player.class) && !(source instanceof Player)) {
-            source.sendMessage(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-            return CommandResult.empty();
-        } else if (type.equals(ConsoleSource.class) && !(source instanceof ConsoleSource)) {
-            source.sendMessage(Text.of(TextColors.RED, "You must be the console to execute this command!"));
-            return CommandResult.empty();
-        } else if (type.equals(CommandBlockSource.class) && !(source instanceof CommandBlockSource)) {
-            source.sendMessage(Text.of(TextColors.RED, "Only a command block may execute this command!"));
+        Optional<Text> isCorrectCommandSource = this.checkCommandSource(type, source);
+        if (isCorrectCommandSource.isPresent()) {
+            source.sendMessage(isCorrectCommandSource.get());
             return CommandResult.empty();
         }
 
@@ -163,5 +166,33 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
             type = CommandSource.class;
         }
         return type;
+    }
+
+    @Override
+    public Optional<Text> checkCommandSource(Class<?> type, CommandSource source) {
+        // Most common is player, so it's at the top. Otherwise these are to be
+        // alphabetically ordered.
+        if (type.equals(Player.class) && !(source instanceof Player)) {
+            return Optional.of(Text.of(TextColors.RED, "You must be a player to execute this command!"));
+        } else if (type.equals(CommandBlock.class) && !(source instanceof CommandBlock)) {
+            return Optional.of(Text.of(TextColors.RED, "Only a command block may execute this command!"));
+        } else if (type.equals(CommandBlockMinecart.class) && !(source instanceof CommandBlockMinecart)) {
+            return Optional.of(Text.of(TextColors.RED, "Only a command block minecart may execute this command!"));
+        } else if (type.equals(CommandBlockSource.class) && !(source instanceof CommandBlockSource)) {
+            return Optional.of(Text.of(TextColors.RED, "Only a command block may execute this command!"));
+        } else if (type.equals(ConsoleSource.class) && !(source instanceof ConsoleSource)) {
+            return Optional.of(Text.of(TextColors.RED, "You must be the console to execute this command!"));
+        } else if (type.equals(LocatedSource.class) && !(source instanceof LocatedSource)) {
+            return Optional.of(Text.of(TextColors.RED, "Only a command source with a location may execute this command!"));
+        } else if (type.equals(ProxySource.class) && !(source instanceof ProxySource)) {
+            return Optional.of(Text.of(TextColors.RED, "Only proxy sources may execute this command!"));
+        } else if (type.equals(RconSource.class) && !(source instanceof RconSource)) {
+            return Optional.of(Text.of(TextColors.RED, "Only an rcon source may execute this command!"));
+        } else if (type.equals(RemoteSource.class) && !(source instanceof RemoteSource)) {
+            return Optional.of(Text.of(TextColors.RED, "Only remote sources may execute this command!"));
+        } else if (type.equals(SignSource.class) && !(source instanceof SignSource)) {
+            return Optional.of(Text.of(TextColors.RED, "Only sign may execute this command!"));
+        }
+        return Optional.empty();
     }
 }
