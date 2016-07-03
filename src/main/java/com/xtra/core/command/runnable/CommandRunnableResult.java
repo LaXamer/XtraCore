@@ -50,6 +50,17 @@ public class CommandRunnableResult {
 
     /**
      * Indicates that the {@link Command} should be stopped and should no longer
+     * continue execution. The {@link CommandResult} defaults to
+     * {@link CommandResult#empty()}.
+     * 
+     * @return The command runnable result
+     */
+    public static CommandRunnableResult stop() {
+        return new CommandRunnableResult(CommandResult.empty());
+    }
+
+    /**
+     * Indicates that the {@link Command} should be stopped and should no longer
      * continue execution.
      * 
      * @param result The command result to return for the command
