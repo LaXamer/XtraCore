@@ -310,6 +310,9 @@ public class HelpPaginationHandler {
                         commandString = parentCommand != null ? "/" + parentCommand.aliases()[0] + " " + cmd.aliases()[0] : "/" + cmd.aliases()[0];
                         break;
                 }
+                if (command.command().usage() != null) {
+                    commandString += " " + command.command().usage();
+                }
                 TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
                 TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
                 this.entry.getKey().getLogger().log("Adding command string: " + commandString);

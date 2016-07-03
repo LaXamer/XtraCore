@@ -60,6 +60,11 @@ public class EmptyCommand implements Command {
     }
 
     @Override
+    public String usage() {
+        return null;
+    }
+
+    @Override
     public final CommandElement[] args() {
         return null;
     }

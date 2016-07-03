@@ -54,9 +54,17 @@ public interface Command extends CommandExecutor {
     @Nullable String description();
 
     /**
-     * The arguments for the command. Specify an empty array for no arguments.
+     * The arguments for the command. Specify an empty array or null for no
+     * arguments.
      * 
      * @return The command arguments
      */
     @Nullable CommandElement[] args();
+
+    /**
+     * The usage for the command.
+     * 
+     * @return The command usage
+     */
+    @Nullable String usage();
 }

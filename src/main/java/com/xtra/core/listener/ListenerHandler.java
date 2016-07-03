@@ -44,6 +44,7 @@ public class ListenerHandler {
     public static void registerListeners(Object plugin) {
         LogHandler.getGlobalLogger().log("Registering listeners for " + plugin.getClass().getName());
         Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = XtraCorePluginHandler.getEntryContainerUnchecked(plugin);
+        entry.getKey().getLogger().log("======================================================");
         for (Object listener : entry.getValue().scanner.getPluginListeners()) {
             Sponge.getEventManager().registerListeners(entry.getKey().getPlugin(), listener);
         }
