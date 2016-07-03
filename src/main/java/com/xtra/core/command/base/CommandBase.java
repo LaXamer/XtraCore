@@ -54,18 +54,23 @@ import com.xtra.core.command.Command;
 import com.xtra.core.command.CommandPhaseChecker;
 import com.xtra.core.command.CommandSourceChecker;
 import com.xtra.core.command.CommandSourceGeneric;
+import com.xtra.core.command.CommandStateChecker;
 import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.runnable.CommandPhase;
 import com.xtra.core.command.runnable.CommandRunnable;
 import com.xtra.core.command.runnable.CommandRunnableResult;
 import com.xtra.core.command.runnable.RunAt;
+import com.xtra.core.command.state.CommandState;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
 import com.xtra.core.plugin.XtraCorePluginContainer;
 import com.xtra.core.registry.CommandRegistry;
 import com.xtra.core.util.map.MapSorter;
+import com.xtra.core.util.store.CommandStore;
 
-public abstract class CommandBase<T extends CommandSource> implements Command, CommandSourceGeneric, CommandSourceChecker, CommandPhaseChecker {
+public abstract class CommandBase<T extends CommandSource>
+        implements Command, CommandSourceGeneric, CommandSourceChecker, CommandPhaseChecker, CommandStateChecker {
 
+    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
     private Map<CommandRunnable, RunAt> map;
 
     public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
@@ -73,12 +78,12 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
     @Override
     public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
         // Get the plugin containers
-        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainerForCommand(this.getClass()).get();
+        this.entry = CommandRegistry.getContainerForCommand(this.getClass()).get();
         // Start again with an empty map
         this.map = new HashMap<>();
         // If there is a command runnable set for this class, get them
-        if (entry.getValue().commandRunnables.keySet().contains(this.getClass())) {
-            Collection<CommandRunnable> runnables = entry.getValue().commandRunnables.get(this.getClass());
+        if (this.entry.getValue().commandRunnables.keySet().contains(this.getClass())) {
+            Collection<CommandRunnable> runnables = this.entry.getValue().commandRunnables.get(this.getClass());
             try {
                 for (CommandRunnable runnable : runnables) {
                     // Put the command runnable as well as the RunAt annotation
@@ -88,7 +93,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
                 }
             } catch (NoSuchMethodException | SecurityException e) {
                 // Should never really happen
-                entry.getKey().getLogger().log(e);
+                this.entry.getKey().getLogger().log(e);
             }
         }
         if (!this.map.isEmpty()) {
@@ -100,6 +105,12 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
         Optional<CommandRunnableResult> checkRunnablesPre = this.checkPhase(CommandPhase.PRE, source, args);
         if (checkRunnablesPre.isPresent()) {
             return checkRunnablesPre.get().getResult();
+        }
+
+        // If the CommandState is disabled, inform and return empty
+        if (!this.checkCommandState()) {
+            source.sendMessage(Text.of(TextColors.RED, "This command is currently disabled."));
+            return CommandResult.empty();
         }
 
         // Ensure that the specified CommandSource from the generic is the
@@ -133,7 +144,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
                             src.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
                             entry.getKey().getLogger().log(e2);
                         }
-                    }).async().submit(entry.getKey().getPlugin());
+                    }).async().submit(this.entry.getKey().getPlugin());
 
             // Execute any runnables set for 'POST'. Note that the result is
             // effectively ignored.
@@ -151,7 +162,7 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
             src.sendMessage(e.getText());
         } catch (Exception e2) {
             src.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-            entry.getKey().getLogger().log(e2);
+            this.entry.getKey().getLogger().log(e2);
         }
         // If errored
         return CommandResult.empty();
@@ -229,5 +240,17 @@ public abstract class CommandBase<T extends CommandSource> implements Command, C
         // Either no runnables were found, or they all allowed the command to
         // continue running
         return Optional.empty();
+    }
+
+    @Override
+    public boolean checkCommandState() {
+        for (CommandStore store : this.entry.getValue().commandStores) {
+            if (store.command().getClass().equals(this.getClass())) {
+                return store.state().equals(CommandState.ENABLED);
+            }
+        }
+        // Should never really happen, but if it does, then allow the command to
+        // process anyway
+        return true;
     }
 }

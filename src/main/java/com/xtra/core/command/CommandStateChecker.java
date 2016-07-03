@@ -23,35 +23,17 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command.runnable;
+package com.xtra.core.command;
 
-import com.xtra.core.command.base.CommandBase;
+import com.xtra.core.command.state.CommandState;
 
-/**
- * The phase at which a {@link CommandRunnable} will run.
- */
-public enum CommandPhase {
+public interface CommandStateChecker {
 
     /**
-     * Symbolizes that the {@link CommandRunnable} will be ran when the command
-     * is first executed. This is before any special checks are ran regarding
-     * the initialization of a {@link CommandBase} or something similar.
-     */
-    PRE,
-
-    /**
-     * Symbolizes that the {@link CommandRunnable} will be ran after basic
-     * initialization.
+     * Checks if the {@link CommandState} will allow the command to run.
      * 
-     * <p>Note that this is ran before the actual command has been
-     * processed.</p>
+     * @return True if {@link CommandState#ENABLED} is the current state, false
+     *         if {@link CommandState#DISABLED} is the current state
      */
-    START,
-
-    /**
-     * Symbolizes that the {@link CommandRunnable} will be ran after a command
-     * has been processed. Note that you cannot cancel the execution of a
-     * command in this phase, as the command has already been executed.
-     */
-    POST;
+    boolean checkCommandState();
 }

@@ -33,6 +33,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
+import com.xtra.core.command.annotation.RegisterCommand;
 import com.xtra.core.command.base.EmptyCommand;
 import com.xtra.core.command.runnable.CommandRunnableHandler;
 import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
@@ -148,8 +149,10 @@ public class CommandHandler {
      * @param command The command
      */
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
-        this.entry.getKey().getLogger().log("Building and registering the command: '" + command.aliases()[0] + "'");
-        Sponge.getCommandManager().register(this.entry.getKey().getPlugin(), commandSpec.build(), command.aliases());
+        if (command.getClass().getAnnotation(RegisterCommand.class).childOf().equals(EmptyCommand.class)) {
+            this.entry.getKey().getLogger().log("Building and registering the command: '" + command.aliases()[0] + "'");
+            Sponge.getCommandManager().register(this.entry.getKey().getPlugin(), commandSpec.build(), command.aliases());
+        }
     }
 
     /**
