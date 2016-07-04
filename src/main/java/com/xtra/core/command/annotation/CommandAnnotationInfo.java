@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import com.xtra.core.command.Command;
 import com.xtra.core.command.base.EmptyCommand;
+import com.xtra.core.registry.CommandRegistry;
 
 /**
  * A helper class that gets information from any command annotations.
@@ -56,6 +57,22 @@ public class CommandAnnotationInfo {
         Class<? extends Command> parent = clazz.getAnnotation(RegisterCommand.class).childOf();
         if (!parent.equals(EmptyCommand.class)) {
             return Optional.of(parent);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Gets the parent command object of the specified command.
+     * 
+     * @param clazz The command class to check
+     * @return The parent command object or {@link Optional#empty()} if the
+     *         specified command does not have a parent command, or if the
+     *         parent command could not be found.
+     */
+    public static Optional<Command> getParentObject(Class<? extends Command> clazz) {
+        Optional<Class<? extends Command>> parentClass = getParent(clazz);
+        if (parentClass.isPresent()) {
+            return CommandRegistry.getCommand(parentClass.get());
         }
         return Optional.empty();
     }
