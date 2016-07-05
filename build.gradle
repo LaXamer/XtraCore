@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'maven'
     id 'net.minecrell.licenser' version '0.2'
-    id 'net.ellune.blossom' version '1.0.1'
+    id 'ninja.miserable.blossom' version '1.0.1'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
 
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.spongepowered:spongeapi:4.1.0"
+    compile "org.spongepowered:spongeapi:5.0.0-SNAPSHOT"
     compile "org.reflections:reflections:0.9.10"
     compile "org.javassist:javassist:3.20.0-GA"
     compile "com.github.Laxamer:LaxFile:2.0.1"

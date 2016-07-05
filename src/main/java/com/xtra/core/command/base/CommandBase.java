@@ -39,7 +39,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.api.command.source.ConsoleSource;
-import org.spongepowered.api.command.source.LocatedSource;
 import org.spongepowered.api.command.source.ProxySource;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.command.source.RemoteSource;
@@ -209,8 +208,6 @@ public abstract class CommandBase<T extends CommandSource>
             return Optional.of(Text.of(TextColors.RED, "Only a command block may execute this command!"));
         } else if (type.equals(ConsoleSource.class) && !(source instanceof ConsoleSource)) {
             return Optional.of(Text.of(TextColors.RED, "You must be the console to execute this command!"));
-        } else if (type.equals(LocatedSource.class) && !(source instanceof LocatedSource)) {
-            return Optional.of(Text.of(TextColors.RED, "Only a command source with a location may execute this command!"));
         } else if (type.equals(ProxySource.class) && !(source instanceof ProxySource)) {
             return Optional.of(Text.of(TextColors.RED, "Only proxy sources may execute this command!"));
         } else if (type.equals(RconSource.class) && !(source instanceof RconSource)) {
