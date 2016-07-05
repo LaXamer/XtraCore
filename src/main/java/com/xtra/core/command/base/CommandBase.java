@@ -142,7 +142,7 @@ public abstract class CommandBase<T extends CommandSource>
                             src.sendMessage(e.getText());
                         } catch (Exception e2) {
                             src.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-                            entry.getKey().getLogger().log(e2);
+                            this.entry.getKey().getLogger().log(e2);
                         }
                     }).async().submit(this.entry.getKey().getPlugin());
 
