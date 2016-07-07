@@ -27,15 +27,12 @@ package com.xtra.core.world.direction;
 
 import org.spongepowered.api.util.Direction;
 
-public class DirectionHandler {
+import com.xtra.api.world.direction.DirectionHandler;
 
-    /**
-     * Gets a cardinal direction from the specified yaw value.
-     * 
-     * @param yaw The yaw value
-     * @return The cardinal direction for the specified yaw value
-     */
-    public static Direction getCardinalDirectionFromYaw(double yaw) {
+public class DirectionHandlerImpl implements DirectionHandler {
+
+    @Override
+    public Direction getCardinalDirectionFromYaw(double yaw) {
         if ((yaw >= 135 && yaw <= 225) || (yaw <= -135 && yaw >= -225)) {
             return Direction.NORTH;
         } else if ((yaw >= -135 && yaw <= -45) || (yaw >= 225 && yaw <= 315)) {
@@ -48,13 +45,8 @@ public class DirectionHandler {
         return Direction.NONE;
     }
 
-    /**
-     * Gets the cardinal left direction from the specified cardinal direction.
-     * 
-     * @param direction The cardinal direction
-     * @return The left cardinal direction from the specified cardinal direction
-     */
-    public static Direction getCardinalLeft(Direction direction) {
+    @Override
+    public Direction getCardinalLeft(Direction direction) {
         if (direction.equals(Direction.NORTH)) {
             return Direction.WEST;
         } else if (direction.equals(Direction.EAST)) {
@@ -67,14 +59,8 @@ public class DirectionHandler {
         return Direction.NONE;
     }
 
-    /**
-     * Gets the cardinal right direction from the specified cardinal direction.
-     * 
-     * @param direction The cardinal direction
-     * @return The right cardinal direction from the specified cardinal
-     *         direction
-     */
-    public static Direction getCardinalRight(Direction direction) {
+    @Override
+    public Direction getCardinalRight(Direction direction) {
         if (direction.equals(Direction.NORTH)) {
             return Direction.EAST;
         } else if (direction.equals(Direction.EAST)) {

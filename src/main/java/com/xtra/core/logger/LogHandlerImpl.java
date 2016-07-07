@@ -23,31 +23,36 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.ban;
+package com.xtra.core.logger;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.ban.Ban;
+import com.xtra.api.logger.LogHandler;
+import com.xtra.api.logger.Logger;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 
-public class BanHandler {
+public class LogHandlerImpl implements LogHandler {
 
-    /**
-     * Gets the ban reason for the specified profile. Will return
-     * {@link Optional#empty()} if one does not exist.
-     * 
-     * @param profile The profile to get the ban reason from
-     * @return The reason, or {@link Optional#empty()} if one is not available
-     */
-    public static Optional<Text> getBanReason(GameProfile profile) {
-        BanService service = Sponge.getServiceManager().provide(BanService.class).get();
-        Optional<Ban.Profile> optionalBan = service.getBanFor(profile);
-        if (optionalBan.isPresent()) {
-            return optionalBan.get().getReason();
+    private Map<Logger, XtraCorePluginContainer> loggers = new HashMap<>();
+
+    public Logger create(XtraCorePluginContainer container) {
+        // We know what we pass in will be an implementation
+        XtraCorePluginContainerImpl impl = (XtraCorePluginContainerImpl) container;
+        Logger logger = new LoggerImpl(impl);
+        impl.setLogger(logger);
+        loggers.put(logger, impl);
+        return logger;
+    }
+
+    @Override
+    public Logger getLogger(Class<?> clazz) {
+        for (Map.Entry<Logger, XtraCorePluginContainer> logger : this.loggers.entrySet()) {
+            if (logger.getValue().getPlugin().getClass().equals(clazz)) {
+                return logger.getKey();
+            }
         }
-        return Optional.empty();
+        return null;
     }
 }

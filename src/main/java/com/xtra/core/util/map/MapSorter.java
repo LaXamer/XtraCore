@@ -31,8 +31,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.xtra.core.command.runnable.CommandRunnable;
-import com.xtra.core.command.runnable.RunAt;
+import com.xtra.api.command.annotation.RunAt;
+import com.xtra.api.command.runnable.CommandRunnable;
 import com.xtra.core.util.runnable.TripleRunnable;
 
 public class MapSorter {

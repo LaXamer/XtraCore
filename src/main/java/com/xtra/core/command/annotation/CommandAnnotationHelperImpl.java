@@ -27,33 +27,29 @@ package com.xtra.core.command.annotation;
 
 import java.util.Optional;
 
-import com.xtra.core.command.Command;
-import com.xtra.core.command.base.EmptyCommand;
-import com.xtra.core.registry.CommandRegistry;
+import com.xtra.api.command.Command;
+import com.xtra.api.command.annotation.CommandAnnotationHelper;
+import com.xtra.api.command.annotation.RegisterCommand;
+import com.xtra.api.util.command.EmptyCommand;
+import com.xtra.core.CoreImpl;
 
 /**
  * A helper class that gets information from any command annotations.
  */
-public class CommandAnnotationInfo {
+public class CommandAnnotationHelperImpl implements CommandAnnotationHelper {
 
-    /**
-     * Returns if the command is an async command.
-     * 
-     * @param clazz The command class to check
-     * @return If the command is async
-     */
-    public static boolean isAsync(Class<? extends Command> clazz) {
+    @Override
+    public boolean isAsync(Class<? extends Command> clazz) {
         return clazz.getAnnotation(RegisterCommand.class).async();
     }
 
-    /**
-     * Gets the parent command of the specified command.
-     * 
-     * @param clazz The command class to check
-     * @return The parent command or {@link Optional#empty()} if the specified
-     *         command does not have a parent command
-     */
-    public static Optional<Class<? extends Command>> getParent(Class<? extends Command> clazz) {
+    @Override
+    public boolean hasParent(Class<? extends Command> clazz) {
+        return clazz.getAnnotation(RegisterCommand.class).childOf() != EmptyCommand.class;
+    }
+
+    @Override
+    public Optional<Class<? extends Command>> getParent(Class<? extends Command> clazz) {
         Class<? extends Command> parent = clazz.getAnnotation(RegisterCommand.class).childOf();
         if (!parent.equals(EmptyCommand.class)) {
             return Optional.of(parent);
@@ -61,18 +57,11 @@ public class CommandAnnotationInfo {
         return Optional.empty();
     }
 
-    /**
-     * Gets the parent command object of the specified command.
-     * 
-     * @param clazz The command class to check
-     * @return The parent command object or {@link Optional#empty()} if the
-     *         specified command does not have a parent command, or if the
-     *         parent command could not be found.
-     */
-    public static Optional<Command> getParentObject(Class<? extends Command> clazz) {
+    @Override
+    public Optional<Command> getParentObject(Class<? extends Command> clazz) {
         Optional<Class<? extends Command>> parentClass = getParent(clazz);
         if (parentClass.isPresent()) {
-            return CommandRegistry.getCommand(parentClass.get());
+            return CoreImpl.instance.getCommandRegistry().getCommand(parentClass.get());
         }
         return Optional.empty();
     }

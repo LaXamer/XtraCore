@@ -29,14 +29,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import com.xtra.core.command.Command;
-import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.text.HelpPaginationHandler;
+import com.xtra.api.command.Command;
+import com.xtra.api.command.annotation.RegisterCommand;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.core.text.HelpPaginationHandlerImpl;
 import com.xtra.core.util.store.CommandStore;
 
 /**
@@ -44,10 +42,10 @@ import com.xtra.core.util.store.CommandStore;
  */
 public class CommandHelper {
 
-    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
+    private XtraCorePluginContainer container;
 
-    public CommandHelper(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
-        this.entry = entry;
+    public CommandHelper(XtraCorePluginContainer entry) {
+        this.container = entry;
     }
 
     /**
@@ -58,12 +56,12 @@ public class CommandHelper {
      * @return The child commands of the specified command
      */
     public Set<Command> getChildCommands(Command command) {
-        this.entry.getKey().getLogger().log("Getting the child commands for the command: " + command.aliases()[0]);
+        this.container.getLogger().log("Getting the child commands for the command: " + command.aliases()[0]);
         Set<Command> childCommands = new HashSet<>();
-        for (Command cmd : entry.getKey().getCommandHandler().getCommands()) {
+        for (Command cmd : container.getCommandHandler().get().getCommands()) {
             Command parentCommand = getParentCommand(cmd);
             if (parentCommand != null && parentCommand.equals(command)) {
-                this.entry.getKey().getLogger().log("Child command found! Child command is: " + cmd.aliases()[0]);
+                this.container.getLogger().log("Child command found! Child command is: " + cmd.aliases()[0]);
                 childCommands.add(cmd);
             }
         }
@@ -77,7 +75,7 @@ public class CommandHelper {
      * @return The parent command
      */
     public Command getParentCommand(Command command) {
-        this.entry.getKey().getLogger().log("Getting the parent command for the command: '" + command.aliases()[0] + "'.");
+        this.container.getLogger().log("Getting the parent command for the command: '" + command.aliases()[0] + "'.");
         Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
         Command parentCommand2 = getEquivalentCommand(parentCommand);
         return parentCommand2;
@@ -91,7 +89,7 @@ public class CommandHelper {
      * @return The command object for the specified class
      */
     public Command getEquivalentCommand(Class<? extends Command> clazz) {
-        for (Command cmd : this.entry.getKey().getCommandHandler().getCommands()) {
+        for (Command cmd : this.container.getCommandHandler().get().getCommands()) {
             if (clazz.isInstance(cmd)) {
                 return cmd;
             }
@@ -99,13 +97,13 @@ public class CommandHelper {
         return null;
     }
 
-    public List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationHandler.CommandOrdering ordering) {
+    public List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationHandlerImpl.CommandOrdering ordering) {
         List<CommandStore> commandStore = new ArrayList<>(contentsStore);
-        if (ordering.equals(HelpPaginationHandler.CommandOrdering.A_Z)) {
+        if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.A_Z)) {
             Collections.sort(commandStore);
             return commandStore;
         }
-        if (ordering.equals(HelpPaginationHandler.CommandOrdering.Z_A)) {
+        if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.Z_A)) {
             Collections.sort(commandStore);
             Collections.reverse(commandStore);
             return commandStore;
@@ -114,11 +112,11 @@ public class CommandHelper {
         Set<Command> topCommands = new HashSet<>();
         for (CommandStore commandStore2 : commandStore) {
             if (commandStore2.childOf() != null) {
-                if (ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_A_Z)
-                        || ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
                     topCommands.add(commandStore2.childOf());
-                } else if (ordering.equals(HelpPaginationHandler.CommandOrdering.CHILD_COMMANDS_FIRST_A_Z)
-                        || ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                } else if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.CHILD_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
                     topCommands.add(commandStore2.command());
                 } else {
                     topCommands.add(commandStore2.childOf());
@@ -144,9 +142,9 @@ public class CommandHelper {
         Collections.sort(topCmds);
         Collections.sort(commandStore);
         // If z-a, reverse the sorting
-        if (ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)
-                || ordering.equals(HelpPaginationHandler.CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)
-                || ordering.equals(HelpPaginationHandler.CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
+        if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)
+                || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)
+                || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
             Collections.reverse(topCmds);
             Collections.reverse(commandStore);
         }

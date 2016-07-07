@@ -25,8 +25,8 @@
 
 package com.xtra.core.util.runnable;
 
-import com.xtra.core.command.runnable.CommandRunnable;
-import com.xtra.core.command.runnable.RunAt;
+import com.xtra.api.command.annotation.RunAt;
+import com.xtra.api.command.runnable.CommandRunnable;
 
 // Because Integer is final
 @SuppressWarnings("all")

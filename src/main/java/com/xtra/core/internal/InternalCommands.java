@@ -40,11 +40,10 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
+import com.xtra.api.command.Command;
+import com.xtra.api.command.annotation.RegisterCommand;
+import com.xtra.core.CoreImpl;
 import com.xtra.core.XtraCore;
-import com.xtra.core.command.Command;
-import com.xtra.core.command.annotation.CommandAnnotationInfo;
-import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.registry.CommandRegistry;
 
 public class InternalCommands {
 
@@ -80,7 +79,7 @@ public class InternalCommands {
                     // and we have to match the parent command so that we do not
                     // accidentally hit a child command from another plugin.
                     String command = args.<String>getOne("command").get();
-                    for (Command command2 : CommandRegistry.getAllCommands()) {
+                    for (Command command2 : CoreImpl.instance.getCommandRegistry().getAllCommands()) {
                         for (String alias : command2.aliases()) {
                             // If there is a space, assume user wants to specify
                             // a child command
@@ -96,8 +95,8 @@ public class InternalCommands {
                                 // Now we can check if the child command is the
                                 // alias.
                                 if (alias.equalsIgnoreCase(childCommand)) {
-                                    Command parentCommand2 =
-                                            CommandRegistry.getCommand(command2.getClass().getAnnotation(RegisterCommand.class).childOf()).get();
+                                    Command parentCommand2 = CoreImpl.instance.getCommandRegistry()
+                                            .getCommand(command2.getClass().getAnnotation(RegisterCommand.class).childOf()).get();
                                     for (String alias2 : parentCommand2.aliases()) {
                                         if (parentCommand.equalsIgnoreCase(alias2)) {
                                             sendCommandInfo(src, command2, parentCommand2);
@@ -175,7 +174,7 @@ public class InternalCommands {
                         Text.of(TextColors.BLUE, "Description: ", TextColors.GREEN, description),
                         Text.of(TextColors.BLUE, "Usage: ", TextColors.GREEN, usage),
                         Text.of(TextColors.BLUE, "Is async: ", TextColors.GREEN,
-                                CommandAnnotationInfo.isAsync(command.getClass()) ? "True." : "False."),
+                                CoreImpl.instance.getCommandAnnotationHelper().isAsync(command.getClass()) ? "True." : "False."),
                         parentCommand != null ? Text.of(TextColors.BLUE, "Parent command: ", TextColors.GREEN, parentCommand.aliases()[0])
                                 : Text.of(TextColors.GREEN, "No parent command."))
                 .sendTo(source);

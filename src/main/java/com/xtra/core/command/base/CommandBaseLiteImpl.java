@@ -25,8 +25,6 @@
 
 package com.xtra.core.command.base;
 
-import java.util.Map;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -36,40 +34,38 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 
-import com.xtra.core.command.Command;
-import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.registry.CommandRegistry;
+import com.xtra.api.command.annotation.RegisterCommand;
+import com.xtra.api.command.base.CommandBaseLite;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.api.util.command.CommandBaseLiteExecutor;
+import com.xtra.core.CoreImpl;
 
-public abstract class CommandBaseLite implements Command {
-
-    public abstract CommandResult executeCommand(CommandSource src, CommandContext args) throws Exception;
+public abstract class CommandBaseLiteImpl implements CommandBaseLiteExecutor {
 
     @Override
-    public CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
-        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = CommandRegistry.getContainerForCommand(this.getClass()).get();
-        if (this.getClass().getAnnotation(RegisterCommand.class).async()) {
+    public CommandResult execute(CommandBaseLite base, CommandSource source, CommandContext args) throws CommandException {
+        XtraCorePluginContainer container = CoreImpl.instance.getCommandRegistry().getEntry(base.getClass()).get().getValue();
+        if (base.getClass().getAnnotation(RegisterCommand.class).async()) {
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
                         try {
-                            this.executeCommand(source, args);
+                            base.executeCommand(source, args);
                         } catch (TextMessageException e) {
                             source.sendMessage(e.getText());
                         } catch (Exception e2) {
                             source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-                            entry.getKey().getLogger().log(e2);
+                            container.getLogger().log(e2);
                         }
-                    }).async().submit(entry.getKey().getPlugin());
+                    }).async().submit(container.getPlugin());
             return CommandResult.success();
         } else {
             try {
-                return this.executeCommand(source, args);
+                return base.executeCommand(source, args);
             } catch (TextMessageException e) {
                 source.sendMessage(e.getText());
             } catch (Exception e2) {
                 source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-                entry.getKey().getLogger().log(e2);
+                container.getLogger().log(e2);
             }
         }
         return CommandResult.empty();

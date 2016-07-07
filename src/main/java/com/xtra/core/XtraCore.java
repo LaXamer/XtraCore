@@ -25,6 +25,7 @@
 
 package com.xtra.core;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -32,21 +33,29 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
-import com.xtra.core.config.Config;
-import com.xtra.core.config.annotation.DoNotReload;
+import com.xtra.api.Core;
+import com.xtra.api.command.base.CommandBase;
+import com.xtra.api.command.base.CommandBaseLite;
+import com.xtra.api.config.Config;
+import com.xtra.api.config.annotation.DoNotReload;
+import com.xtra.api.config.base.ConfigBase;
+import com.xtra.core.command.base.CommandBaseImpl;
+import com.xtra.core.command.base.CommandBaseLiteImpl;
+import com.xtra.core.config.base.ConfigBaseImpl;
 import com.xtra.core.internal.InternalCommands;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.registry.ConfigRegistry;
-import com.xtra.core.util.log.Logger;
+import com.xtra.core.logger.LoggerImpl;
 
 @Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwesomeMan34"}, description = Internals.DESCRIPTION)
 public class XtraCore {
 
     @Listener(order = Order.FIRST)
     public void onPreInit(GamePreInitializationEvent event) {
-        Internals.globalLogger = new Logger();
+        Internals.globalLogger = new LoggerImpl();
         Internals.globalLogger.log("======================================================");
         Internals.globalLogger.log("Initializing XtraCore version " + Internals.VERSION);
+
+        this.provideImplementations();
     }
 
     @Listener
@@ -56,11 +65,22 @@ public class XtraCore {
 
     @Listener
     public void onReload(GameReloadEvent event) {
-        for (Config config : ConfigRegistry.getAllConfigs()) {
+        for (Config config : CoreImpl.instance.getConfigRegistry().getAllConfigs()) {
             // If there is no DoNotReload annotation, then reload.
             if (config.getClass().getAnnotation(DoNotReload.class) == null) {
                 config.load();
             }
+        }
+    }
+
+    private void provideImplementations() {
+        try {
+            FieldUtils.writeStaticField(Core.class, "CORE", new CoreImpl(), true);
+            FieldUtils.writeStaticField(CommandBase.class, "BASE", new CommandBaseImpl() {}, true);
+            FieldUtils.writeStaticField(CommandBaseLite.class, "BASE", new CommandBaseLiteImpl() {}, true);
+            FieldUtils.writeStaticField(ConfigBase.class, "BASE", new ConfigBaseImpl() {}, true);
+        } catch (Exception e) {
+            Internals.globalLogger.log(e);
         }
     }
 }

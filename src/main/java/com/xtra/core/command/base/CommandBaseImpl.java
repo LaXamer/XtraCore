@@ -25,7 +25,6 @@
 
 package com.xtra.core.command.base;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,40 +48,33 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 
-import com.xtra.core.command.Command;
-import com.xtra.core.command.CommandPhaseChecker;
-import com.xtra.core.command.CommandSourceChecker;
-import com.xtra.core.command.CommandSourceGeneric;
-import com.xtra.core.command.CommandStateChecker;
-import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.command.runnable.CommandPhase;
-import com.xtra.core.command.runnable.CommandRunnable;
-import com.xtra.core.command.runnable.CommandRunnableResult;
-import com.xtra.core.command.runnable.RunAt;
-import com.xtra.core.command.state.CommandState;
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.registry.CommandRegistry;
+import com.xtra.api.command.annotation.RegisterCommand;
+import com.xtra.api.command.annotation.RunAt;
+import com.xtra.api.command.base.CommandBase;
+import com.xtra.api.command.runnable.CommandPhase;
+import com.xtra.api.command.runnable.CommandRunnable;
+import com.xtra.api.command.runnable.CommandRunnableResult;
+import com.xtra.api.command.state.CommandState;
+import com.xtra.api.util.command.CommandBaseExecutor;
+import com.xtra.core.CoreImpl;
+import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 import com.xtra.core.util.map.MapSorter;
 import com.xtra.core.util.store.CommandStore;
 
-public abstract class CommandBase<T extends CommandSource>
-        implements Command, CommandSourceGeneric, CommandSourceChecker, CommandPhaseChecker, CommandStateChecker {
+public abstract class CommandBaseImpl implements CommandBaseExecutor {
 
-    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
+    private XtraCorePluginContainerImpl container;
     private Map<CommandRunnable, RunAt> map;
 
-    public abstract CommandResult executeCommand(T src, CommandContext args) throws Exception;
-
     @Override
-    public final CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
-        // Get the plugin containers
-        this.entry = CommandRegistry.getContainerForCommand(this.getClass()).get();
+    public CommandResult execute(CommandBase commandBase, Class<?> targetSource, CommandSource source, CommandContext args)
+            throws CommandException {
+        this.container = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(commandBase.getClass()).get().getValue();
         // Start again with an empty map
         this.map = new HashMap<>();
         // If there is a command runnable set for this class, get them
-        if (this.entry.getValue().commandRunnables.keySet().contains(this.getClass())) {
-            Collection<CommandRunnable> runnables = this.entry.getValue().commandRunnables.get(this.getClass());
+        if (this.container.commandRunnables.keySet().contains(this.getClass())) {
+            Collection<CommandRunnable> runnables = this.container.commandRunnables.get(commandBase.getClass());
             try {
                 for (CommandRunnable runnable : runnables) {
                     // Put the command runnable as well as the RunAt annotation
@@ -92,7 +84,7 @@ public abstract class CommandBase<T extends CommandSource>
                 }
             } catch (NoSuchMethodException | SecurityException e) {
                 // Should never really happen
-                this.entry.getKey().getLogger().log(e);
+                this.container.getLogger().log(e);
             }
         }
         if (!this.map.isEmpty()) {
@@ -112,18 +104,11 @@ public abstract class CommandBase<T extends CommandSource>
             return CommandResult.empty();
         }
 
-        // Ensure that the specified CommandSource from the generic is the
-        // source that executed this command
-        Class<?> type = this.getTargetCommandSource();
-        Optional<Text> isCorrectCommandSource = this.checkCommandSource(type, source);
+        Optional<Text> isCorrectCommandSource = this.checkCommandSource(commandBase.getClass(), source);
         if (isCorrectCommandSource.isPresent()) {
             source.sendMessage(isCorrectCommandSource.get());
             return CommandResult.empty();
         }
-
-        // It's safe to cast it now that we've checked
-        @SuppressWarnings("unchecked")
-        T src = (T) source;
 
         // Execute any runnables set for 'START'
         Optional<CommandRunnableResult> checkRunnablesStart = this.checkPhase(CommandPhase.START, source, args);
@@ -132,18 +117,18 @@ public abstract class CommandBase<T extends CommandSource>
         }
 
         // Check if our command is async. If so, then run it asynchronously
-        if (this.getClass().getAnnotation(RegisterCommand.class).async()) {
+        if (commandBase.getClass().getAnnotation(RegisterCommand.class).async()) {
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
                         try {
-                            this.executeCommand(src, args);
+                            commandBase.executeCommand(source, args);
                         } catch (TextMessageException e) {
-                            src.sendMessage(e.getText());
+                            source.sendMessage(e.getText());
                         } catch (Exception e2) {
-                            src.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-                            this.entry.getKey().getLogger().log(e2);
+                            source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
+                            this.container.getLogger().log(e2);
                         }
-                    }).async().submit(this.entry.getKey().getPlugin());
+                    }).async().submit(this.container.getPlugin());
 
             // Execute any runnables set for 'POST'. Note that the result is
             // effectively ignored.
@@ -152,45 +137,22 @@ public abstract class CommandBase<T extends CommandSource>
         }
 
         try {
-            CommandResult result = this.executeCommand(src, args);
+            CommandResult result = commandBase.executeCommand(source, args);
             // Execute any runnables set for 'POST'. Note that the result is
             // effectively ignored.
             this.checkPhase(CommandPhase.POST, source, args);
             return result;
         } catch (TextMessageException e) {
-            src.sendMessage(e.getText());
+            source.sendMessage(e.getText());
         } catch (Exception e2) {
-            src.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-            this.entry.getKey().getLogger().log(e2);
+            source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
+            this.container.getLogger().log(e2);
         }
         // If errored
         return CommandResult.empty();
     }
 
-    @Override
-    public Class<?> getTargetCommandSource() {
-        // Iterate through the methods to find executeCommand()
-        Class<?> type = null;
-        for (Method method : this.getClass().getMethods()) {
-            // Find our executeCommand method
-            if (method.getName().equals("executeCommand")) {
-                // Find one without type erasure :S
-                if (!method.getParameterTypes()[0].equals(CommandSource.class)) {
-                    type = method.getParameterTypes()[0];
-                    break;
-                }
-            }
-        }
-        // It is possible that CommandSource was specified, so if we didn't find
-        // one, then use CommandSource as a default.
-        if (type == null) {
-            type = CommandSource.class;
-        }
-        return type;
-    }
-
-    @Override
-    public Optional<Text> checkCommandSource(Class<?> type, CommandSource source) {
+    private Optional<Text> checkCommandSource(Class<?> type, CommandSource source) {
         // If it's CommandSource, don't bother with the checks below.
         if (type.equals(CommandSource.class)) {
             return Optional.empty();
@@ -220,8 +182,7 @@ public abstract class CommandBase<T extends CommandSource>
         return Optional.empty();
     }
 
-    @Override
-    public Optional<CommandRunnableResult> checkPhase(CommandPhase phase, CommandSource source, CommandContext args) {
+    private Optional<CommandRunnableResult> checkPhase(CommandPhase phase, CommandSource source, CommandContext args) {
         for (Map.Entry<CommandRunnable, RunAt> runnableEntry : this.map.entrySet()) {
             // Check if the runnable's phase is equal to the current phase
             if (runnableEntry.getValue().phase().equals(phase)) {
@@ -239,9 +200,8 @@ public abstract class CommandBase<T extends CommandSource>
         return Optional.empty();
     }
 
-    @Override
-    public boolean checkCommandState() {
-        for (CommandStore store : this.entry.getValue().commandStores) {
+    private boolean checkCommandState() {
+        for (CommandStore store : this.container.commandStores) {
             if (store.command().getClass().equals(this.getClass())) {
                 return store.state().equals(CommandState.ENABLED);
             }

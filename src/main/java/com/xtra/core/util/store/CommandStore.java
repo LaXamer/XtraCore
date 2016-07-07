@@ -29,8 +29,8 @@ import javax.annotation.Nullable;
 
 import org.spongepowered.api.command.spec.CommandSpec;
 
-import com.xtra.core.command.Command;
-import com.xtra.core.command.state.CommandState;
+import com.xtra.api.command.Command;
+import com.xtra.api.command.state.CommandState;
 
 /**
  * Ties together a command and its appropriate command spec builder.
@@ -40,7 +40,6 @@ public class CommandStore implements Comparable<CommandStore> {
     private Command command;
     private CommandSpec.Builder commandSpecBuilder;
     private Command childOf;
-    private boolean ignore = false;
     private CommandState state = CommandState.ENABLED;
 
     public CommandStore(Command commandBase, CommandSpec.Builder commandSpecBuilder, @Nullable Command childOf) {
@@ -59,14 +58,6 @@ public class CommandStore implements Comparable<CommandStore> {
 
     public Command childOf() {
         return this.childOf;
-    }
-
-    public boolean ignore() {
-        return this.ignore;
-    }
-
-    public void setIgnore(boolean ignore) {
-        this.ignore = ignore;
     }
 
     public CommandState state() {

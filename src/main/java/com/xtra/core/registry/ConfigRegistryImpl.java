@@ -30,26 +30,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.google.common.collect.Maps;
-import com.xtra.core.config.Config;
-import com.xtra.core.config.annotation.RegisterConfig;
+import com.xtra.api.config.Config;
+import com.xtra.api.config.annotation.RegisterConfig;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.api.registry.ConfigRegistry;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.util.log.LogHandler;
 
-public class ConfigRegistry {
+public class ConfigRegistryImpl implements ConfigRegistry {
 
-    private static Map<Config, XtraCorePluginContainer> globalConfigs = new HashMap<>();
+    private Map<Config, XtraCorePluginContainer> globalConfigs = new HashMap<>();
 
-    public static void add(Config config, XtraCorePluginContainer container) {
-        LogHandler.getGlobalLogger()
+    public void add(Config config, XtraCorePluginContainer container) {
+        Internals.globalLogger
                 .log("Adding config '" + config.getClass().getAnnotation(RegisterConfig.class).configName() + "' to the global config registry!");
-        globalConfigs.put(config, container);
+        this.globalConfigs.put(config, container);
     }
 
-    public static Optional<Config> getConfig(Class<? extends Config> clazz) {
-        for (Config config : globalConfigs.keySet()) {
+    public Optional<Config> getConfig(Class<? extends Config> clazz) {
+        for (Config config : this.globalConfigs.keySet()) {
             if (config.getClass().equals(clazz)) {
                 return Optional.of(config);
             }
@@ -57,8 +55,8 @@ public class ConfigRegistry {
         return Optional.empty();
     }
 
-    public static Optional<Map.Entry<Config, XtraCorePluginContainer>> getEntry(Class<? extends Config> clazz) {
-        for (Map.Entry<Config, XtraCorePluginContainer> entry : globalConfigs.entrySet()) {
+    public Optional<Map.Entry<Config, XtraCorePluginContainer>> getEntry(Class<? extends Config> clazz) {
+        for (Map.Entry<Config, XtraCorePluginContainer> entry : this.globalConfigs.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 return Optional.of(entry);
             }
@@ -66,21 +64,11 @@ public class ConfigRegistry {
         return Optional.empty();
     }
 
-    public static Optional<Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer>>
-            getContainersForConfig(Class<? extends Config> clazz) {
-        for (Map.Entry<Config, XtraCorePluginContainer> entry : globalConfigs.entrySet()) {
-            if (entry.getKey().getClass().equals(clazz)) {
-                return Optional.of(Maps.immutableEntry(entry.getValue(), Internals.plugins.get(entry.getValue())));
-            }
-        }
-        return Optional.empty();
+    public Set<Config> getAllConfigs() {
+        return this.globalConfigs.keySet();
     }
 
-    public static Set<Config> getAllConfigs() {
-        return globalConfigs.keySet();
-    }
-
-    public static Map<Config, XtraCorePluginContainer> getAllConfigMappings() {
-        return globalConfigs;
+    public Map<Config, XtraCorePluginContainer> getAllConfigMappings() {
+        return this.globalConfigs;
     }
 }

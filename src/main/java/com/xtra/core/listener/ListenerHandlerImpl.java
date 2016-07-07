@@ -25,28 +25,34 @@
 
 package com.xtra.core.listener;
 
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.spongepowered.api.Sponge;
 
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.plugin.XtraCorePluginHandler;
-import com.xtra.core.util.log.LogHandler;
+import com.xtra.api.listener.ListenerHandler;
+import com.xtra.core.CoreImpl;
+import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 
-public class ListenerHandler {
+public class ListenerHandlerImpl implements ListenerHandler {
 
-    /**
-     * Automatically scans and registers plugin listeners.
-     * 
-     * @param plugin The plugin
-     */
-    public static void registerListeners(Object plugin) {
-        LogHandler.getGlobalLogger().log("Registering listeners for " + plugin.getClass().getName());
-        Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry = XtraCorePluginHandler.getEntryContainerUnchecked(plugin);
-        entry.getKey().getLogger().log("======================================================");
-        for (Object listener : entry.getValue().scanner.getPluginListeners()) {
-            Sponge.getEventManager().registerListeners(entry.getKey().getPlugin(), listener);
+    private Set<Class<?>> listenerClasses = new HashSet<>();
+
+    public void registerListeners(Object plugin) {
+        Internals.globalLogger.log("Registering listeners for " + plugin.getClass().getName());
+        XtraCorePluginContainerImpl container =
+                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(plugin.getClass());
+        container.getLogger().log("======================================================");
+        for (Object listener : container.scanner.getPluginListeners()) {
+            this.listenerClasses.add(listener.getClass());
+            Sponge.getEventManager().registerListeners(container.getPlugin(), listener);
         }
+    }
+
+    @Override
+    public Collection<Class<?>> getListenerClasses() {
+        return this.listenerClasses;
     }
 }

@@ -26,55 +26,48 @@
 package com.xtra.core.config;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.plugin.XtraCorePluginHandler;
-import com.xtra.core.registry.ConfigRegistry;
-import com.xtra.core.util.log.LogHandler;
+import com.xtra.api.Core;
+import com.xtra.api.config.Config;
+import com.xtra.api.config.ConfigHandler;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.core.CoreImpl;
+import com.xtra.core.internal.Internals;
+import com.xtra.core.plugin.XtraCorePluginContainerImpl;
+import com.xtra.core.registry.ConfigRegistryImpl;
 
-public class ConfigHandler {
+public class ConfigHandlerImpl implements ConfigHandler {
 
     private Set<Config> configs = new HashSet<>();
 
-    private ConfigHandler() {
+    private ConfigHandlerImpl() {
     }
 
-    /**
-     * Creates and initializes a {@link ConfigHandler}.
-     * 
-     * @return The new config handler
-     */
     public static ConfigHandler create(Object plugin) {
-        return new ConfigHandler().init(XtraCorePluginHandler.getEntryContainerUnchecked(plugin));
+        return new ConfigHandlerImpl().init(Core.getPluginHandler().getContainerUnchecked(plugin.getClass()));
     }
 
-    private ConfigHandler init(Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry) {
-        LogHandler.getGlobalLogger().log("======================================================");
-        LogHandler.getGlobalLogger().log("Initializing config handler for " + entry.getKey().getPlugin().getClass().getName());
-        entry.getKey().getLogger().log("======================================================");
-        this.configs = entry.getValue().scanner.getConfigs();
+    private ConfigHandlerImpl init(XtraCorePluginContainer container) {
+        Internals.globalLogger.log("======================================================");
+        Internals.globalLogger.log("Initializing config handler for " + container.getPlugin().getClass().getName());
+        container.getLogger().log("======================================================");
+        XtraCorePluginContainerImpl implContainer = (XtraCorePluginContainerImpl) container;
+        this.configs = implContainer.scanner.getConfigs();
 
-        entry.getKey().getLogger().log("======================================================");
-        entry.getKey().getLogger().log("Initializing the configs!");
+        container.getLogger().log("======================================================");
+        container.getLogger().log("Initializing the configs!");
+        implContainer.setConfigHandler(this);
+        ConfigRegistryImpl implRegistry = (ConfigRegistryImpl) CoreImpl.instance.getConfigRegistry();
         for (Config config : this.configs) {
-            ConfigRegistry.add(config, entry.getKey());
+            implRegistry.add(config, container);
             config.init();
         }
-        entry.getValue().setConfigHandler(this);
         return this;
     }
 
-    /**
-     * Gets the specified config object.
-     * 
-     * @param clazz The class of the config
-     * @return {@link Optional#empty()} if the specifed config could not be
-     *         found
-     */
+    @Override
     public Optional<Config> getConfig(Class<? extends Config> clazz) {
         for (Config config : this.configs) {
             if (clazz.isInstance(config)) {
@@ -84,6 +77,7 @@ public class ConfigHandler {
         return Optional.empty();
     }
 
+    @Override
     public Set<Config> getConfigs() {
         return this.configs;
     }

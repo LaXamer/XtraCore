@@ -25,14 +25,10 @@
 
 package com.xtra.core.internal;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.xtra.core.command.Command;
-import com.xtra.core.config.Config;
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.util.log.Logger;
+import com.xtra.api.command.Command;
+import com.xtra.api.config.Config;
+import com.xtra.api.logger.Logger;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 
 /**
  * This is an internal class for storing various information that should only
@@ -43,7 +39,6 @@ public class Internals {
 
     public static final String VERSION = "@project.version@";
     public static final String DESCRIPTION = "A unifying plugin utility backend.";
-    public static Map<XtraCorePluginContainer, XtraCoreInternalPluginContainer> plugins = new HashMap<>();
     public static final String LOG_DIRECTORY = "/logs/xtracore-logs";
     public static Logger globalLogger;
 
@@ -62,14 +57,14 @@ public class Internals {
     public static Object checkIfAlreadyExists(XtraCorePluginContainer container, Class<?> clazz)
             throws InstantiationException, IllegalAccessException {
         if (container.getCommandHandler() != null) {
-            for (Command command : container.getCommandHandler().getCommands()) {
+            for (Command command : container.getCommandHandler().get().getCommands()) {
                 if (clazz.equals(command.getClass())) {
                     return command;
                 }
             }
         }
         if (container.getConfigHandler() != null) {
-            for (Config config : container.getConfigHandler().getConfigs()) {
+            for (Config config : container.getConfigHandler().get().getConfigs()) {
                 if (clazz.equals(config.getClass())) {
                     return config;
                 }

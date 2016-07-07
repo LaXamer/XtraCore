@@ -26,49 +26,86 @@
 package com.xtra.core.plugin;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+
+import org.spongepowered.api.plugin.PluginContainer;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.xtra.core.command.Command;
-import com.xtra.core.command.CommandHandler;
-import com.xtra.core.command.runnable.CommandRunnable;
-import com.xtra.core.command.runnable.CommandRunnableHandler;
-import com.xtra.core.config.ConfigHandler;
-import com.xtra.core.text.HelpPaginationHandler;
+import com.xtra.api.command.Command;
+import com.xtra.api.command.CommandHandler;
+import com.xtra.api.command.runnable.CommandRunnable;
+import com.xtra.api.config.ConfigHandler;
+import com.xtra.api.logger.Logger;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.api.text.HelpPaginationHandler;
 import com.xtra.core.util.ReflectionScanner;
-import com.xtra.core.util.log.Logger;
 import com.xtra.core.util.store.CommandStore;
 
-public class XtraCoreInternalPluginContainer {
+public class XtraCorePluginContainerImpl implements XtraCorePluginContainer {
 
-    public XtraCorePluginContainer container;
+    // Internals
     public Set<CommandStore> commandStores = new HashSet<>();
     public Multimap<Class<? extends Command>, CommandRunnable> commandRunnables = ArrayListMultimap.create();
     public ReflectionScanner scanner;
+    // API
+    private Object plugin;
+    private PluginContainer pluginContainer;
+    private Logger logger;
+    // Defaults
+    private Optional<CommandHandler> commandHandler = Optional.empty();
+    private Optional<ConfigHandler> configHandler = Optional.empty();
+    private Optional<HelpPaginationHandler> helpPaginationHandler = Optional.empty();
 
-    public XtraCoreInternalPluginContainer(XtraCorePluginContainer container) {
-        this.container = container;
-        this.scanner = ReflectionScanner.create(container);
+    public XtraCorePluginContainerImpl(Object plugin, PluginContainer pluginContainer) {
+        this.plugin = plugin;
+        this.pluginContainer = pluginContainer;
+    }
+
+    @Override
+    public Object getPlugin() {
+        return this.plugin;
+    }
+
+    @Override
+    public PluginContainer getPluginContainer() {
+        return this.pluginContainer;
+    }
+    
+    @Override
+    public Logger getLogger() {
+        return this.logger;
+    }
+
+    @Override
+    public Optional<CommandHandler> getCommandHandler() {
+        return this.commandHandler;
+    }
+
+    @Override
+    public Optional<ConfigHandler> getConfigHandler() {
+        return this.configHandler;
+    }
+
+    @Override
+    public Optional<HelpPaginationHandler> getHelpPaginationHandler() {
+        return this.helpPaginationHandler;
     }
 
     public void setLogger(Logger logger) {
-        this.container.logger = logger;
+        this.logger = logger;
     }
 
     public void setCommandHandler(CommandHandler commandHandler) {
-        this.container.commandHandler = commandHandler;
+        this.commandHandler = Optional.of(commandHandler);
     }
 
     public void setConfigHandler(ConfigHandler configHandler) {
-        this.container.configHandler = configHandler;
-    }
-
-    public void setCommandRunnableHandler(CommandRunnableHandler commandRunnableHandler) {
-        this.container.commandRunnableHandler = commandRunnableHandler;
+        this.configHandler = Optional.of(configHandler);
     }
 
     public void setHelpPaginationHandler(HelpPaginationHandler helpPaginationHandler) {
-        this.container.helpPaginationHandler = helpPaginationHandler;
+        this.helpPaginationHandler = Optional.of(helpPaginationHandler);
     }
 }

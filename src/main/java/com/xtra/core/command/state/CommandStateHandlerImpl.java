@@ -23,28 +23,37 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command;
+package com.xtra.core.command.state;
 
 import java.util.Optional;
 
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import com.xtra.api.command.Command;
+import com.xtra.api.command.state.CommandState;
+import com.xtra.api.command.state.CommandStateHandler;
+import com.xtra.core.CoreImpl;
+import com.xtra.core.plugin.XtraCorePluginContainerImpl;
+import com.xtra.core.util.store.CommandStore;
 
-import com.xtra.core.command.runnable.CommandPhase;
-import com.xtra.core.command.runnable.CommandRunnable;
-import com.xtra.core.command.runnable.CommandRunnableResult;
+public class CommandStateHandlerImpl implements CommandStateHandler {
 
-public interface CommandPhaseChecker {
+    @Override
+    public void setState(Class<? extends Command> clazz, CommandState state) {
+        XtraCorePluginContainerImpl impl = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(clazz).get().getValue();
+        for (CommandStore store : impl.commandStores) {
+            if (store.command().getClass().equals(clazz)) {
+                store.setState(state);
+            }
+        }
+    }
 
-    /**
-     * Checks if there are {@link CommandRunnable}s for the specified
-     * {@link CommandPhase}.
-     * 
-     * @param phase The command phase to check
-     * @param source The command source of the command
-     * @param args The command arguments
-     * @return {@link Optional#empty()} if no runnables were found or if the
-     *         runnables had specified 'keepRunning'.
-     */
-    Optional<CommandRunnableResult> checkPhase(CommandPhase phase, CommandSource source, CommandContext args);
+    @Override
+    public Optional<CommandState> getState(Class<? extends Command> clazz) {
+        XtraCorePluginContainerImpl impl = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(clazz).get().getValue();
+        for (CommandStore store : impl.commandStores) {
+            if (store.command().getClass().equals(clazz)) {
+                return Optional.of(store.state());
+            }
+        }
+        return Optional.empty();
+    }
 }

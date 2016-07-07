@@ -29,13 +29,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
-import com.xtra.core.config.Config;
-import com.xtra.core.config.annotation.RegisterConfig;
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.registry.ConfigRegistry;
+import com.xtra.api.config.annotation.RegisterConfig;
+import com.xtra.api.config.base.ConfigBase;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.api.util.config.ConfigExecutor;
+import com.xtra.core.CoreImpl;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -44,18 +43,20 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 /**
  * A base class for a config implementation.
  */
-public abstract class ConfigBase implements Config {
+public abstract class ConfigBaseImpl implements ConfigExecutor {
 
-    private Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer> entry;
+    private XtraCorePluginContainer entry;
     private ConfigurationLoader<CommentedConfigurationNode> loader;
     private CommentedConfigurationNode rootNode;
+    private ConfigBase base;
 
     @Override
-    public void init() {
-        this.entry = ConfigRegistry.getContainersForConfig(this.getClass()).get();
-        RegisterConfig rc = this.getClass().getAnnotation(RegisterConfig.class);
+    public void init(ConfigBase base) {
+        this.base = base;
+        this.entry = CoreImpl.instance.getConfigRegistry().getEntry(base.getClass()).get().getValue();
+        RegisterConfig rc = this.base.getClass().getAnnotation(RegisterConfig.class);
 
-        this.entry.getKey().getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
+        this.entry.getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
 
         HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
         Path dir;
@@ -66,7 +67,7 @@ public abstract class ConfigBase implements Config {
             dir = Paths.get(System.getProperty("user.dir"), "/config/");
             this.checkExists(dir);
         } else {
-            dir = Paths.get(System.getProperty("user.dir"), "/config/" + this.entry.getKey().getPluginContainer().getId());
+            dir = Paths.get(System.getProperty("user.dir"), "/config/" + this.entry.getPluginContainer().getId());
             this.checkExists(dir);
         }
         Path configPath = dir.resolve(rc.configName() + ".conf");
@@ -74,9 +75,9 @@ public abstract class ConfigBase implements Config {
         loaderBuilder.setPath(configPath);
         this.loader = loaderBuilder.build();
         if (!exists) {
-            this.entry.getKey().getLogger().log("Configuration currently does not exist. Creating...");
+            this.entry.getLogger().log("Configuration currently does not exist. Creating...");
             this.rootNode = loader.createEmptyNode();
-            this.populate();
+            this.base.populate();
             this.save();
         }
         this.load();
@@ -97,7 +98,7 @@ public abstract class ConfigBase implements Config {
         try {
             rootNode = loader.load();
         } catch (IOException e) {
-            this.entry.getKey().getLogger().log(e);
+            this.entry.getLogger().log(e);
         }
     }
 
@@ -106,7 +107,7 @@ public abstract class ConfigBase implements Config {
         try {
             loader.save(rootNode);
         } catch (IOException e) {
-            this.entry.getKey().getLogger().log(e);
+            this.entry.getLogger().log(e);
         }
     }
 

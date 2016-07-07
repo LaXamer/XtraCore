@@ -23,42 +23,26 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.command.state;
+package com.xtra.core.ban;
 
 import java.util.Optional;
 
-import com.xtra.core.command.Command;
-import com.xtra.core.registry.CommandRegistry;
-import com.xtra.core.util.store.CommandStore;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.ban.Ban;
 
-public class CommandStateHandler {
+import com.xtra.api.ban.BanHandler;
 
-    /**
-     * Sets the {@link CommandState} for the specified command.
-     * 
-     * @param clazz The class of the command
-     * @param state The new state of the command
-     */
-    public static void setState(Class<? extends Command> clazz, CommandState state) {
-        for (CommandStore store : CommandRegistry.getContainerForCommand(clazz).get().getValue().commandStores) {
-            if (store.command().getClass().equals(clazz)) {
-                store.setState(state);
-            }
-        }
-    }
+public class BanHandlerImpl implements BanHandler {
 
-    /**
-     * Gets the {@link CommandState} for the specified command.
-     * 
-     * @param clazz The class of the command
-     * @return {@link Optional#empty()} is the command could not be found,
-     *         otherwise the command state
-     */
-    public static Optional<CommandState> getState(Class<? extends Command> clazz) {
-        for (CommandStore store : CommandRegistry.getContainerForCommand(clazz).get().getValue().commandStores) {
-            if (store.command().getClass().equals(clazz)) {
-                return Optional.of(store.state());
-            }
+    @Override
+    public Optional<Text> getBanReason(GameProfile profile) {
+        BanService service = Sponge.getServiceManager().provide(BanService.class).get();
+        Optional<Ban.Profile> optionalBan = service.getBanFor(profile);
+        if (optionalBan.isPresent()) {
+            return optionalBan.get().getReason();
         }
         return Optional.empty();
     }

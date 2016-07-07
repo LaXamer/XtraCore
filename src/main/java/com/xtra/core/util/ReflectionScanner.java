@@ -36,12 +36,12 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.plugin.Plugin;
 
-import com.xtra.core.command.Command;
-import com.xtra.core.command.annotation.RegisterCommand;
-import com.xtra.core.config.Config;
-import com.xtra.core.config.annotation.RegisterConfig;
+import com.xtra.api.command.Command;
+import com.xtra.api.command.annotation.RegisterCommand;
+import com.xtra.api.config.Config;
+import com.xtra.api.config.annotation.RegisterConfig;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCorePluginContainer;
 
 /**
  * A class that uses reflection to scan a plugin for information, such as the

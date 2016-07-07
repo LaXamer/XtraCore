@@ -1,0 +1,3 @@
+[submodule "XtraAPI"]
+	path = XtraAPI
+	url = https://github.com/XtraStudio/XtraAPI.git

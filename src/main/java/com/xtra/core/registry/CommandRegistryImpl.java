@@ -30,24 +30,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.google.common.collect.Maps;
-import com.xtra.core.command.Command;
+import com.xtra.api.command.Command;
+import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.api.registry.CommandRegistry;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCoreInternalPluginContainer;
-import com.xtra.core.plugin.XtraCorePluginContainer;
-import com.xtra.core.util.log.LogHandler;
+import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 
-public class CommandRegistry {
+public class CommandRegistryImpl implements CommandRegistry {
     
-    private static Map<Command, XtraCorePluginContainer> globalCommands = new HashMap<>();
+    private Map<Command, XtraCorePluginContainer> globalCommands = new HashMap<>();
 
-    public static void add(Command command, XtraCorePluginContainer container) {
-        LogHandler.getGlobalLogger().log("Adding command '" + command.aliases()[0] + "' to the global command registry!");
-        globalCommands.put(command, container);
+    public void add(Command command, XtraCorePluginContainerImpl container) {
+        Internals.globalLogger.log("Adding command '" + command.aliases()[0] + "' to the global command registry!");
+        this.globalCommands.put(command, container);
     }
 
-    public static Optional<Command> getCommand(Class<? extends Command> clazz) {
-        for (Command command : globalCommands.keySet()) {
+    public Optional<Command> getCommand(Class<? extends Command> clazz) {
+        for (Command command : this.globalCommands.keySet()) {
             if (command.getClass().equals(clazz)) {
                 return Optional.of(command);
             }
@@ -55,8 +54,8 @@ public class CommandRegistry {
         return Optional.empty();
     }
 
-    public static Optional<Map.Entry<Command, XtraCorePluginContainer>> getEntry(Class<? extends Command> clazz) {
-        for (Map.Entry<Command, XtraCorePluginContainer> entry : globalCommands.entrySet()) {
+    public Optional<Map.Entry<Command, XtraCorePluginContainer>> getEntry(Class<? extends Command> clazz) {
+        for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 return Optional.of(entry);
             }
@@ -64,21 +63,11 @@ public class CommandRegistry {
         return Optional.empty();
     }
 
-    public static Optional<Map.Entry<XtraCorePluginContainer, XtraCoreInternalPluginContainer>>
-            getContainerForCommand(Class<? extends Command> clazz) {
-        for (Map.Entry<Command, XtraCorePluginContainer> entry : globalCommands.entrySet()) {
-            if (entry.getKey().getClass().equals(clazz)) {
-                return Optional.of(Maps.immutableEntry(entry.getValue(), Internals.plugins.get(entry.getValue())));
-            }
-        }
-        return Optional.empty();
+    public Set<Command> getAllCommands() {
+        return this.globalCommands.keySet();
     }
 
-    public static Set<Command> getAllCommands() {
-        return globalCommands.keySet();
-    }
-
-    public static Map<Command, XtraCorePluginContainer> getAllCommandMappings() {
-        return globalCommands;
+    public Map<Command, XtraCorePluginContainer> getAllCommandMappings() {
+        return this.globalCommands;
     }
 }

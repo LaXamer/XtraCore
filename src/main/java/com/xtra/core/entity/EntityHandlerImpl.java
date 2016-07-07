@@ -41,33 +41,20 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 
+import com.xtra.api.entity.EntityHandler;
+
 /**
  * A class for convenient entity handling methods.
  */
-public class EntityHandler {
+public class EntityHandlerImpl implements EntityHandler {
 
-    /**
-     * Creates and spawns an entity, handling all checks, and returns if the
-     * entity spawned successfully.
-     * 
-     * @param loc The spawn location
-     * @param type The type of the entity
-     * @return If the entity spawned successfully
-     */
-    public static boolean spawnEntity(Location<World> loc, EntityType type) {
+    @Override
+    public boolean spawnEntity(Location<World> loc, EntityType type) {
         return spawnEntity(loc, type, SpawnTypes.PLUGIN);
     }
 
-    /**
-     * Creates and spawns an entity, handling all checks, and returns if the
-     * entity spawned successfully.
-     * 
-     * @param loc The spawn location
-     * @param type The type of the entity
-     * @param spawnType The spawn type
-     * @return If the entity spawned successfully
-     */
-    public static boolean spawnEntity(Location<World> loc, EntityType type, SpawnType spawnType) {
+    @Override
+    public boolean spawnEntity(Location<World> loc, EntityType type, SpawnType spawnType) {
         Extent extent = loc.getExtent();
         Optional<Entity> optional = extent.createEntity(type, loc.getPosition());
         if (optional.isPresent()) {
@@ -77,55 +64,23 @@ public class EntityHandler {
         return false;
     }
 
-    /**
-     * Spawns an item with a default spawn cause of {@link SpawnTypes#PLUGIN}
-     * and a quantity of one.
-     * 
-     * @param loc The location to spawn the item in
-     * @param type The item type to spawn in
-     * @return If the item spawned successfully
-     */
-    public static boolean spawnItem(Location<World> loc, ItemType type) {
+    @Override
+    public boolean spawnItem(Location<World> loc, ItemType type) {
         return spawnItem(loc, type, SpawnTypes.PLUGIN, 1);
     }
 
-    /**
-     * Spawns an item with the specified spawn type as its spawn cause, with a
-     * default quantity of one.
-     * 
-     * @param loc The location to spawn the item in
-     * @param type The item type to spawn in
-     * @param spawnType The spawn type
-     * @return If the item spawned successfully
-     */
-    public static boolean spawnItem(Location<World> loc, ItemType type, SpawnType spawnType) {
+    @Override
+    public boolean spawnItem(Location<World> loc, ItemType type, SpawnType spawnType) {
         return spawnItem(loc, type, spawnType, 1);
     }
 
-    /**
-     * Spawns an item with the specified quantity and a default spawn cause of
-     * {@link SpawnTypes#PLUGIN}.
-     * 
-     * @param loc The location to spawn the item in
-     * @param type The item type to spawn in
-     * @param quantity The number to spawn in
-     * @return If the item spawned successfully
-     */
-    public static boolean spawnItem(Location<World> loc, ItemType type, int quantity) {
+    @Override
+    public boolean spawnItem(Location<World> loc, ItemType type, int quantity) {
         return spawnItem(loc, type, SpawnTypes.PLUGIN, quantity);
     }
 
-    /**
-     * Spawns an item with the specified location, type, spawn type, and
-     * quantity.
-     * 
-     * @param loc The location to spawn the item in
-     * @param type The item type to spawn in
-     * @param spawnType The spawn type
-     * @param quantity The number to spawn in
-     * @return If the item spawned successfully
-     */
-    public static boolean spawnItem(Location<World> loc, ItemType type, SpawnType spawnType, int quantity) {
+    @Override
+    public boolean spawnItem(Location<World> loc, ItemType type, SpawnType spawnType, int quantity) {
         Extent extent = loc.getExtent();
         Optional<Entity> optional = extent.createEntity(EntityTypes.ITEM, loc.getPosition());
         if (optional.isPresent()) {

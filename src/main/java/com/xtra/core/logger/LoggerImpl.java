@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.util.log;
+package com.xtra.core.logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,15 +35,16 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 
 import com.laxamer.file.FileUtils;
+import com.xtra.api.logger.Logger;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCorePluginContainer;
+import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 
-public class Logger {
+public class LoggerImpl implements Logger {
 
     private File logFile;
-    private XtraCorePluginContainer container;
+    private XtraCorePluginContainerImpl container;
 
-    public Logger(XtraCorePluginContainer container) {
+    public LoggerImpl(XtraCorePluginContainerImpl container) {
         this.container = container;
         File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
         this.logFile = new File(directory + "/" + container.getPluginContainer().getId() + ".log");
@@ -61,7 +62,7 @@ public class Logger {
     /**
      * Creates a global XtraCore logger.
      */
-    public Logger() {
+    public LoggerImpl() {
         File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -125,9 +126,5 @@ public class Logger {
                 Sponge.getServer().getConsole().sendMessage(Text.of(stackTrace));
             }
         }
-    }
-
-    public enum Level {
-        DEBUG, INFO, WARNING, ERROR;
     }
 }
