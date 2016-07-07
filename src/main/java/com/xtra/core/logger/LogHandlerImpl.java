@@ -27,6 +27,7 @@ package com.xtra.core.logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.xtra.api.logger.LogHandler;
 import com.xtra.api.logger.Logger;
@@ -47,12 +48,12 @@ public class LogHandlerImpl implements LogHandler {
     }
 
     @Override
-    public Logger getLogger(Class<?> clazz) {
+    public Optional<Logger> getLogger(Class<?> clazz) {
         for (Map.Entry<Logger, XtraCorePluginContainer> logger : this.loggers.entrySet()) {
             if (logger.getValue().getPlugin().getClass().equals(clazz)) {
-                return logger.getKey();
+                return Optional.of(logger.getKey());
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

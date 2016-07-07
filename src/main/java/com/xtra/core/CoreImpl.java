@@ -80,7 +80,8 @@ public class CoreImpl implements ICore {
 
     public XtraCorePluginContainer initialize(Object plugin) {
         // Create a plugin container
-        XtraCorePluginContainerImpl containerImpl = (XtraCorePluginContainerImpl) this.pluginHandler.add(plugin);
+        XtraCorePluginHandlerImpl handlerImpl = (XtraCorePluginHandlerImpl) this.pluginHandler;
+        XtraCorePluginContainerImpl containerImpl = (XtraCorePluginContainerImpl) handlerImpl.add(plugin);
         LogHandlerImpl log = (LogHandlerImpl) this.logHandler;
         // Create a logger for the plugin
         Logger logger = log.create(containerImpl);

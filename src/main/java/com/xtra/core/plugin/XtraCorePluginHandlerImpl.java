@@ -42,7 +42,6 @@ public class XtraCorePluginHandlerImpl implements XtraCorePluginHandler {
 
     private Set<XtraCorePluginContainer> containers = new HashSet<>();
 
-    @Override
     public XtraCorePluginContainer add(Object plugin) {
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
