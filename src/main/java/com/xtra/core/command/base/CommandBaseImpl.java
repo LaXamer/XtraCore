@@ -61,11 +61,12 @@ import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 import com.xtra.core.util.map.MapSorter;
 import com.xtra.core.util.store.CommandStore;
 
-public abstract class CommandBaseImpl implements CommandBaseExecutor {
+public class CommandBaseImpl implements CommandBaseExecutor {
 
     private XtraCorePluginContainerImpl container;
     private Map<CommandRunnable, RunAt> map;
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public CommandResult execute(CommandBase commandBase, Class<?> targetSource, CommandSource source, CommandContext args)
             throws CommandException {

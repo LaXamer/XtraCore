@@ -76,9 +76,9 @@ public class XtraCore {
     private void provideImplementations() {
         try {
             FieldUtils.writeStaticField(Core.class, "CORE", new CoreImpl(), true);
-            FieldUtils.writeStaticField(CommandBase.class, "BASE", new CommandBaseImpl() {}, true);
-            FieldUtils.writeStaticField(CommandBaseLite.class, "BASE", new CommandBaseLiteImpl() {}, true);
-            FieldUtils.writeStaticField(ConfigBase.class, "BASE", new ConfigBaseImpl() {}, true);
+            FieldUtils.writeStaticField(CommandBase.class, "BASE", new CommandBaseImpl(), true);
+            FieldUtils.writeStaticField(CommandBaseLite.class, "BASE", new CommandBaseLiteImpl(), true);
+            FieldUtils.writeStaticField(ConfigBase.class, "BASE", new ConfigBaseImpl(), true);
         } catch (Exception e) {
             Internals.globalLogger.log(e);
         }

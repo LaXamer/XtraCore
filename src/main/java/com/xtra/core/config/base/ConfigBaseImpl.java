@@ -43,7 +43,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 /**
  * A base class for a config implementation.
  */
-public abstract class ConfigBaseImpl implements ConfigExecutor {
+public class ConfigBaseImpl implements ConfigExecutor {
 
     private XtraCorePluginContainer entry;
     private ConfigurationLoader<CommentedConfigurationNode> loader;

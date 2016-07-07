@@ -40,7 +40,7 @@ import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.util.command.CommandBaseLiteExecutor;
 import com.xtra.core.CoreImpl;
 
-public abstract class CommandBaseLiteImpl implements CommandBaseLiteExecutor {
+public class CommandBaseLiteImpl implements CommandBaseLiteExecutor {
 
     @Override
     public CommandResult execute(CommandBaseLite base, CommandSource source, CommandContext args) throws CommandException {
