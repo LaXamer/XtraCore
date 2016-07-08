@@ -79,14 +79,17 @@ public class LoggerImpl implements Logger {
         }
     }
 
+    @Override
     public void log(String message) {
         this.log(Level.INFO, message);
     }
 
+    @Override
     public void log(Throwable cause) {
         this.log(Level.ERROR, cause);
     }
 
+    @Override
     public void log(Level level, String message) {
         FileUtils.writeToFile(this.logFile,
                 "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
@@ -105,6 +108,7 @@ public class LoggerImpl implements Logger {
         }
     }
 
+    @Override
     public void log(Level level, Throwable cause) {
         FileUtils.writeToFile(this.logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: "
                 + cause.getMessage() + FileUtils.lineSeparator);

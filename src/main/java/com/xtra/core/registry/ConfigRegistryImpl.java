@@ -46,6 +46,7 @@ public class ConfigRegistryImpl implements ConfigRegistry {
         this.globalConfigs.put(config, container);
     }
 
+    @Override
     public Optional<Config> getConfig(Class<? extends Config> clazz) {
         for (Config config : this.globalConfigs.keySet()) {
             if (config.getClass().equals(clazz)) {
@@ -55,6 +56,7 @@ public class ConfigRegistryImpl implements ConfigRegistry {
         return Optional.empty();
     }
 
+    @Override
     public Optional<Map.Entry<Config, XtraCorePluginContainer>> getEntry(Class<? extends Config> clazz) {
         for (Map.Entry<Config, XtraCorePluginContainer> entry : this.globalConfigs.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
@@ -64,10 +66,12 @@ public class ConfigRegistryImpl implements ConfigRegistry {
         return Optional.empty();
     }
 
+    @Override
     public Set<Config> getAllConfigs() {
         return this.globalConfigs.keySet();
     }
 
+    @Override
     public Map<Config, XtraCorePluginContainer> getAllConfigMappings() {
         return this.globalConfigs;
     }

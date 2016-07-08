@@ -47,6 +47,7 @@ public class CommandRegistryImpl implements CommandRegistry {
         this.globalCommands.put(command, container);
     }
 
+    @Override
     public Optional<Command> getCommand(Class<? extends Command> clazz) {
         for (Command command : this.globalCommands.keySet()) {
             if (command.getClass().equals(clazz)) {
@@ -56,6 +57,7 @@ public class CommandRegistryImpl implements CommandRegistry {
         return Optional.empty();
     }
 
+    @Override
     public Optional<Map.Entry<Command, XtraCorePluginContainer>> getEntry(Class<? extends Command> clazz) {
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
@@ -65,15 +67,18 @@ public class CommandRegistryImpl implements CommandRegistry {
         return Optional.empty();
     }
 
+    @Override
     public Set<Command> getAllCommands() {
         return this.globalCommands.keySet();
     }
 
+    @Override
     public Map<Command, XtraCorePluginContainer> getAllCommandMappings() {
         return this.globalCommands;
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public void addRunnables(CommandRunnable runnable, Class<? extends Command>... classes) {
         for (Class<? extends Command> clazz : classes) {
             for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
@@ -84,6 +89,7 @@ public class CommandRegistryImpl implements CommandRegistry {
         }
     }
 
+    @Override
     public boolean doesCommandHaveRunnable(Class<? extends Command> clazz) {
         for (Command command : this.globalCommands.keySet()) {
             if (command.getClass().equals(clazz)) {
@@ -93,6 +99,7 @@ public class CommandRegistryImpl implements CommandRegistry {
         return false;
     }
 
+    @Override
     public void removeRunnables(Class<? extends Command> clazz) {
         for (Command command : this.globalCommands.keySet()) {
             if (command.getClass().equals(clazz)) {
@@ -101,6 +108,7 @@ public class CommandRegistryImpl implements CommandRegistry {
         }
     }
 
+    @Override
     public void setState(Class<? extends Command> clazz, CommandState state) {
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
@@ -109,6 +117,7 @@ public class CommandRegistryImpl implements CommandRegistry {
         }
     }
 
+    @Override
     public Optional<CommandState> getState(Class<? extends Command> clazz) {
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
