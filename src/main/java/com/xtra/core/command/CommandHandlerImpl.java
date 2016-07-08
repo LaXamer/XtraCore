@@ -70,7 +70,7 @@ public class CommandHandlerImpl implements CommandHandler {
     private CommandHandlerImpl init(XtraCorePluginContainerImpl entry) {
         this.container = entry;
         Internals.globalLogger.log("======================================================");
-        Internals.globalLogger.log("Initializing command handler for " + entry.getPlugin().getClass().getName());
+        Internals.globalLogger.log("Initializing command handler for " + entry.getPluginContainer().getName());
 
         this.container.getLogger().log("======================================================");
         this.commands = this.container.scanner.getCommands();

@@ -227,7 +227,7 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
         @Override
         public HelpPaginationHandler build() {
             Internals.globalLogger.log("======================================================");
-            Internals.globalLogger.log("Initializing help pagination handler for " + container.getPlugin().getClass().getName());
+            Internals.globalLogger.log("Initializing help pagination handler for " + container.getPluginContainer().getName());
             container.getLogger().log("======================================================");
             container.getLogger().log("Initializing the help pagination handler!");
             container.setHelpPaginationHandler(instance);
