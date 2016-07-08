@@ -78,6 +78,7 @@ public class CoreImpl implements ICore {
         instance = this;
     }
 
+    @Override
     public XtraCorePluginContainer initialize(Object plugin) {
         // Create a plugin container
         XtraCorePluginHandlerImpl handlerImpl = (XtraCorePluginHandlerImpl) this.pluginHandler;
@@ -95,6 +96,7 @@ public class CoreImpl implements ICore {
         return containerImpl;
     }
 
+    @Override
     public CommandHandler createCommandHandler(Class<?> clazz) {
         XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getCommandHandler().isPresent()) {
@@ -103,6 +105,7 @@ public class CoreImpl implements ICore {
         return CommandHandlerImpl.create(clazz);
     }
 
+    @Override
     public Optional<CommandHandler> getCommandHandler(Class<?> clazz) {
         XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getCommandHandler().isPresent()) {
@@ -111,6 +114,7 @@ public class CoreImpl implements ICore {
         return Optional.empty();
     }
 
+    @Override
     public ConfigHandler createConfigHandler(Class<?> clazz) {
         XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getConfigHandler().isPresent()) {
@@ -119,6 +123,7 @@ public class CoreImpl implements ICore {
         return ConfigHandlerImpl.create(clazz);
     }
 
+    @Override
     public Optional<ConfigHandler> getConfigHandler(Class<?> clazz) {
         XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getConfigHandler().isPresent()) {
@@ -127,6 +132,7 @@ public class CoreImpl implements ICore {
         return Optional.empty();
     }
 
+    @Override
     public ListenerHandler createListenerHandler(Class<?> clazz) {
         for (Map.Entry<XtraCorePluginContainer, ListenerHandler> listenerHandler : this.listenerHandlers.entrySet()) {
             if (listenerHandler.getKey().getPlugin().getClass().equals(clazz)) {
@@ -138,6 +144,7 @@ public class CoreImpl implements ICore {
         return listenerHandler;
     }
 
+    @Override
     public Optional<ListenerHandler> getListenerHandler(Class<?> clazz) {
         for (Map.Entry<XtraCorePluginContainer, ListenerHandler> listenerHandler : this.listenerHandlers.entrySet()) {
             if (listenerHandler.getKey().getPlugin().getClass().equals(clazz)) {
@@ -147,11 +154,13 @@ public class CoreImpl implements ICore {
         return Optional.empty();
     }
 
+    @Override
     public HelpPaginationHandler.Builder createHelpPaginationBuilder(Object plugin) {
         HelpPaginationHandlerImpl impl = new HelpPaginationHandlerImpl();
         return impl.new Builder(impl, plugin);
     }
 
+    @Override
     public Optional<HelpPaginationHandler> getHelpPaginationHandler(Class<?> clazz) {
         for (Map.Entry<XtraCorePluginContainer, HelpPaginationHandler> entry : this.paginationHandlers.entrySet()) {
             if (entry.getKey().getPlugin().getClass().equals(clazz)) {
@@ -161,35 +170,48 @@ public class CoreImpl implements ICore {
         return Optional.empty();
     }
 
+    @Override
     public BanHandler getBanHandler() {
         return this.banHandler;
     }
 
+    @Override
     public CommandAnnotationHelper getCommandAnnotationHelper() {
         return this.annotationHelper;
     }
 
+    @Override
     public EntityHandler getEntityHandler() {
         return this.entityHandler;
     }
 
+    @Override
     public LogHandler getLogHandler() {
         return this.logHandler;
     }
 
+    @Override
     public XtraCorePluginHandler getPluginHandler() {
         return this.pluginHandler;
     }
 
+    @Override
     public CommandRegistry getCommandRegistry() {
         return this.commandRegistry;
     }
 
+    @Override
     public ConfigRegistry getConfigRegistry() {
         return this.configRegistry;
     }
 
+    @Override
     public DirectionHandler getDirectionHandler() {
         return this.directionHandler;
+    }
+
+    @Override
+    public String getVersion() {
+        return Internals.VERSION;
     }
 }
