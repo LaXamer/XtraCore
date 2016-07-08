@@ -30,16 +30,25 @@ import java.util.Optional;
 import com.xtra.api.command.Command;
 import com.xtra.api.command.state.CommandState;
 import com.xtra.api.command.state.CommandStateHandler;
-import com.xtra.core.CoreImpl;
+import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 import com.xtra.core.util.store.CommandStore;
 
 public class CommandStateHandlerImpl implements CommandStateHandler {
 
+    private XtraCorePluginContainerImpl container;
+
+    public static CommandStateHandlerImpl create(XtraCorePluginContainerImpl container) {
+        Internals.globalLogger.log("Initializing the command state handler for " + container.getPlugin().getClass().getName());
+
+        CommandStateHandlerImpl handler = new CommandStateHandlerImpl();
+        handler.container = container;
+        return handler;
+    }
+
     @Override
     public void setState(Class<? extends Command> clazz, CommandState state) {
-        XtraCorePluginContainerImpl impl = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(clazz).get().getValue();
-        for (CommandStore store : impl.commandStores) {
+        for (CommandStore store : this.container.commandStores) {
             if (store.command().getClass().equals(clazz)) {
                 store.setState(state);
             }
@@ -48,8 +57,7 @@ public class CommandStateHandlerImpl implements CommandStateHandler {
 
     @Override
     public Optional<CommandState> getState(Class<? extends Command> clazz) {
-        XtraCorePluginContainerImpl impl = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(clazz).get().getValue();
-        for (CommandStore store : impl.commandStores) {
+        for (CommandStore store : this.container.commandStores) {
             if (store.command().getClass().equals(clazz)) {
                 return Optional.of(store.state());
             }

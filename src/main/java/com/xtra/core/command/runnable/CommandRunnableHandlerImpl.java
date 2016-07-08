@@ -37,9 +37,6 @@ public class CommandRunnableHandlerImpl implements CommandRunnableHandler {
 
     private XtraCorePluginContainerImpl container;
 
-    private CommandRunnableHandlerImpl() {
-    }
-
     public static CommandRunnableHandlerImpl create(XtraCorePluginContainerImpl container) {
         Internals.globalLogger.log("Initializing the command runnable handler for " + container.getPlugin().getClass().getName());
 

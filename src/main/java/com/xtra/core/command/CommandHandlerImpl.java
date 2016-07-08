@@ -95,7 +95,7 @@ public class CommandHandlerImpl implements CommandHandler {
         }
 
         this.runnableHandler = CommandRunnableHandlerImpl.create(entry);
-        this.stateHandler = new CommandStateHandlerImpl();
+        this.stateHandler = CommandStateHandlerImpl.create(entry);
         return this;
     }
 
