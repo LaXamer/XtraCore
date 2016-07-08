@@ -45,8 +45,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
     private ConfigHandlerImpl() {
     }
 
-    public static ConfigHandler create(Object plugin) {
-        return new ConfigHandlerImpl().init(Core.getPluginHandler().getContainerUnchecked(plugin.getClass()));
+    public static ConfigHandler create(Class<?> clazz) {
+        return new ConfigHandlerImpl().init(Core.getPluginHandler().getContainerUnchecked(clazz));
     }
 
     private ConfigHandlerImpl init(XtraCorePluginContainer container) {

@@ -40,10 +40,10 @@ public class ListenerHandlerImpl implements ListenerHandler {
 
     private Set<Class<?>> listenerClasses = new HashSet<>();
 
-    public void registerListeners(Object plugin) {
-        Internals.globalLogger.log("Registering listeners for " + plugin.getClass().getName());
+    public void registerListeners(Class<?> clazz) {
+        Internals.globalLogger.log("Registering listeners for " + clazz.getName());
         XtraCorePluginContainerImpl container =
-                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(plugin.getClass());
+                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
         container.getLogger().log("======================================================");
         for (Object listener : container.scanner.getPluginListeners()) {
             this.listenerClasses.add(listener.getClass());

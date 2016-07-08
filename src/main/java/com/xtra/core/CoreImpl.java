@@ -95,15 +95,15 @@ public class CoreImpl implements ICore {
         return containerImpl;
     }
 
-    public CommandHandler provideCommandHandler(Object plugin) {
-        XtraCorePluginContainer container = this.pluginHandler.getContainer(plugin.getClass()).get();
+    public CommandHandler createCommandHandler(Class<?> clazz) {
+        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getCommandHandler().isPresent()) {
             return container.getCommandHandler().get();
         }
-        return CommandHandlerImpl.create(plugin);
+        return CommandHandlerImpl.create(clazz);
     }
 
-    public Optional<CommandHandler> provideCommandHandler(Class<?> clazz) {
+    public Optional<CommandHandler> getCommandHandler(Class<?> clazz) {
         XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getCommandHandler().isPresent()) {
             return Optional.of(container.getCommandHandler().get());
@@ -111,15 +111,15 @@ public class CoreImpl implements ICore {
         return Optional.empty();
     }
 
-    public ConfigHandler provideConfigHandler(Object plugin) {
-        XtraCorePluginContainer container = this.pluginHandler.getContainer(plugin.getClass()).get();
+    public ConfigHandler createConfigHandler(Class<?> clazz) {
+        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getConfigHandler().isPresent()) {
             return container.getConfigHandler().get();
         }
-        return ConfigHandlerImpl.create(plugin);
+        return ConfigHandlerImpl.create(clazz);
     }
 
-    public Optional<ConfigHandler> provideConfigHandler(Class<?> clazz) {
+    public Optional<ConfigHandler> getConfigHandler(Class<?> clazz) {
         XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
         if (container.getConfigHandler().isPresent()) {
             return Optional.of(container.getConfigHandler().get());
@@ -127,18 +127,18 @@ public class CoreImpl implements ICore {
         return Optional.empty();
     }
 
-    public ListenerHandler provideListenerHandler(Object plugin) {
+    public ListenerHandler createListenerHandler(Class<?> clazz) {
         for (Map.Entry<XtraCorePluginContainer, ListenerHandler> listenerHandler : this.listenerHandlers.entrySet()) {
-            if (listenerHandler.getKey().getPlugin().equals(plugin)) {
+            if (listenerHandler.getKey().getPlugin().getClass().equals(clazz)) {
                 return listenerHandler.getValue();
             }
         }
         ListenerHandlerImpl listenerHandler = new ListenerHandlerImpl();
-        listenerHandler.registerListeners(plugin);
+        listenerHandler.registerListeners(clazz);
         return listenerHandler;
     }
 
-    public Optional<ListenerHandler> provideListenerHandler(Class<?> clazz) {
+    public Optional<ListenerHandler> getListenerHandler(Class<?> clazz) {
         for (Map.Entry<XtraCorePluginContainer, ListenerHandler> listenerHandler : this.listenerHandlers.entrySet()) {
             if (listenerHandler.getKey().getPlugin().getClass().equals(clazz)) {
                 return Optional.of(listenerHandler.getValue());

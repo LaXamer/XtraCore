@@ -62,9 +62,9 @@ public class CommandHandlerImpl implements CommandHandler {
     private CommandHandlerImpl() {
     }
 
-    public static CommandHandlerImpl create(Object plugin) {
+    public static CommandHandlerImpl create(Class<?> clazz) {
         return new CommandHandlerImpl()
-                .init((XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(plugin.getClass()));
+                .init((XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz));
     }
 
     private CommandHandlerImpl init(XtraCorePluginContainerImpl entry) {
