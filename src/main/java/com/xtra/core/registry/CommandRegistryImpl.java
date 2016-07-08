@@ -31,6 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.xtra.api.command.Command;
+import com.xtra.api.command.runnable.CommandRunnable;
+import com.xtra.api.command.state.CommandState;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.registry.CommandRegistry;
 import com.xtra.core.internal.Internals;
@@ -69,5 +71,50 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     public Map<Command, XtraCorePluginContainer> getAllCommandMappings() {
         return this.globalCommands;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void addRunnables(CommandRunnable runnable, Class<? extends Command>... classes) {
+        for (Class<? extends Command> clazz : classes) {
+            for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
+                if (entry.getKey().getClass().equals(clazz)) {
+                    entry.getValue().getCommandHandler().get().getCommandRunnableHandler().add(runnable, classes);
+                }
+            }
+        }
+    }
+
+    public boolean doesCommandHaveRunnable(Class<? extends Command> clazz) {
+        for (Command command : this.globalCommands.keySet()) {
+            if (command.getClass().equals(clazz)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void removeRunnables(Class<? extends Command> clazz) {
+        for (Command command : this.globalCommands.keySet()) {
+            if (command.getClass().equals(clazz)) {
+                this.globalCommands.remove(command);
+            }
+        }
+    }
+
+    public void setState(Class<? extends Command> clazz, CommandState state) {
+        for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
+            if (entry.getKey().getClass().equals(clazz)) {
+                entry.getValue().getCommandHandler().get().getCommandStateHandler().setState(clazz, state);
+            }
+        }
+    }
+
+    public Optional<CommandState> getState(Class<? extends Command> clazz) {
+        for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
+            if (entry.getKey().getClass().equals(clazz)) {
+                return Optional.of(entry.getValue().getCommandHandler().get().getCommandStateHandler().getState(clazz).get());
+            }
+        }
+        return Optional.empty();
     }
 }
