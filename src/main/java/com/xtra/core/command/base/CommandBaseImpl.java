@@ -25,6 +25,7 @@
 
 package com.xtra.core.command.base;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +45,7 @@ import org.spongepowered.api.command.source.RemoteSource;
 import org.spongepowered.api.command.source.SignSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.vehicle.minecart.CommandBlockMinecart;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
@@ -63,6 +65,7 @@ import com.xtra.core.util.store.CommandStore;
 
 public class CommandBaseImpl implements CommandBaseExecutor {
 
+    private CommandBase<?> base;
     private XtraCorePluginContainerImpl container;
     private Map<CommandRunnable, RunAt> map;
 
@@ -71,17 +74,36 @@ public class CommandBaseImpl implements CommandBaseExecutor {
     public CommandResult execute(CommandBase commandBase, Class<?> targetSource, CommandSource source, CommandContext args)
             throws CommandException {
         this.container = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(commandBase.getClass()).get().getValue();
+        this.base = commandBase;
         // Start again with an empty map
         this.map = new HashMap<>();
         // If there is a command runnable set for this class, get them
-        if (this.container.commandRunnables.keySet().contains(this.getClass())) {
+        if (this.container.commandRunnables.keySet().contains(commandBase.getClass())) {
             Collection<CommandRunnable> runnables = this.container.commandRunnables.get(commandBase.getClass());
             try {
                 for (CommandRunnable runnable : runnables) {
                     // Put the command runnable as well as the RunAt annotation
                     // into our mapping
-                    this.map.put(runnable,
-                            runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class));
+                    RunAt runAt = runnable.getClass().getMethod("run", CommandSource.class, CommandContext.class).getAnnotation(RunAt.class);
+                    if (runAt == null) {
+                        // If RunAt wasn't specified, use defaults
+                        runAt = new RunAt() {
+
+                            @Override
+                            public Class<? extends Annotation> annotationType() {
+                                return RunAt.class;
+                            }
+                            @Override
+                            public int priority() {
+                                return 1000;
+                            }
+                            @Override
+                            public CommandPhase phase() {
+                                return CommandPhase.START;
+                            }
+                        };
+                    }
+                    this.map.put(runnable, runAt);
                 }
             } catch (NoSuchMethodException | SecurityException e) {
                 // Should never really happen
@@ -119,10 +141,18 @@ public class CommandBaseImpl implements CommandBaseExecutor {
 
         // Check if our command is async. If so, then run it asynchronously
         if (commandBase.getClass().getAnnotation(RegisterCommand.class).async()) {
+            // Create a synchronous task to be executed after the asynchronous
+            // command has completed
+            Task.Builder postTask = Sponge.getScheduler().createTaskBuilder().execute(
+                    task -> {
+                        this.checkPhase(CommandPhase.POST, source, args);
+                    });
+
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
                         try {
                             commandBase.executeCommand(source, args);
+                            postTask.submit(this.container.getPlugin());
                         } catch (TextMessageException e) {
                             source.sendMessage(e.getText());
                         } catch (Exception e2) {
@@ -131,9 +161,6 @@ public class CommandBaseImpl implements CommandBaseExecutor {
                         }
                     }).async().submit(this.container.getPlugin());
 
-            // Execute any runnables set for 'POST'. Note that the result is
-            // effectively ignored.
-            this.checkPhase(CommandPhase.POST, source, args);
             return CommandResult.success();
         }
 
@@ -203,7 +230,7 @@ public class CommandBaseImpl implements CommandBaseExecutor {
 
     private boolean checkCommandState() {
         for (CommandStore store : this.container.commandStores) {
-            if (store.command().getClass().equals(this.getClass())) {
+            if (store.command().getClass().equals(this.base.getClass())) {
                 return store.state().equals(CommandState.ENABLED);
             }
         }

@@ -30,11 +30,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+
 import com.xtra.api.config.annotation.RegisterConfig;
 import com.xtra.api.config.base.ConfigBase;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.util.config.ConfigExecutor;
+import com.xtra.api.util.config.ConfigStore;
 import com.xtra.core.CoreImpl;
+import com.xtra.core.internal.Internals;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -45,79 +49,84 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
  */
 public class ConfigBaseImpl implements ConfigExecutor {
 
-    private XtraCorePluginContainer entry;
-    private ConfigurationLoader<CommentedConfigurationNode> loader;
-    private CommentedConfigurationNode rootNode;
-    private ConfigBase base;
-
     @Override
     public void init(ConfigBase base) {
-        this.base = base;
-        this.entry = CoreImpl.instance.getConfigRegistry().getEntry(base.getClass()).get().getValue();
-        RegisterConfig rc = this.base.getClass().getAnnotation(RegisterConfig.class);
+        try {
+            XtraCorePluginContainer container = CoreImpl.instance.getConfigRegistry().getEntry(base.getClass()).get().getValue();
+            RegisterConfig rc = base.getClass().getAnnotation(RegisterConfig.class);
 
-        this.entry.getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
+            container.getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
 
-        HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
-        Path dir;
-        // The file is created automatically, however we need to know if we need
-        // to populate it or not
-        boolean exists;
-        if (rc.sharedRoot()) {
-            dir = Paths.get(System.getProperty("user.dir"), "/config/");
-            this.checkExists(dir);
-        } else {
-            dir = Paths.get(System.getProperty("user.dir"), "/config/" + this.entry.getPluginContainer().getId());
-            this.checkExists(dir);
-        }
-        Path configPath = dir.resolve(rc.configName() + ".conf");
-        exists = Files.exists(configPath);
-        loaderBuilder.setPath(configPath);
-        this.loader = loaderBuilder.build();
-        if (!exists) {
-            this.entry.getLogger().log("Configuration currently does not exist. Creating...");
-            this.rootNode = loader.createEmptyNode();
-            this.base.populate();
-            this.save();
-        }
-        this.load();
-    }
-
-    private void checkExists(Path dir) {
-        if (!Files.exists(dir)) {
-            try {
-                Files.createDirectories(dir);
-            } catch (IOException e) {
-                e.printStackTrace();
+            HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
+            Path dir;
+            // The file is created automatically, however we need to know if we
+            // need
+            // to populate it or not
+            boolean exists;
+            if (rc.sharedRoot()) {
+                dir = Paths.get(System.getProperty("user.dir"), "/config/");
+                this.checkExists(dir);
+            } else {
+                dir = Paths.get(System.getProperty("user.dir"), "/config/" + container.getPluginContainer().getId());
+                this.checkExists(dir);
             }
+            Path configPath = dir.resolve(rc.configName() + ".conf");
+            exists = Files.exists(configPath);
+            loaderBuilder.setPath(configPath);
+            ConfigurationLoader<CommentedConfigurationNode> loader = loaderBuilder.build();
+            CommentedConfigurationNode rootNode;
+            if (!exists) {
+                container.getLogger().log("Configuration file '" + rc.configName() + "' currently does not exist. Creating...");
+                Files.createFile(configPath);
+                rootNode = loader.createEmptyNode();
+                // Here we add the new, empty node and store it
+                ConfigStore store = new ConfigStore(container, loader, rootNode, base);
+                FieldUtils.writeField(base, "store", store, true);
+
+                base.populate();
+                this.save(store);
+            } else {
+                rootNode = loader.load();
+                // Here we load the root node and store it
+                ConfigStore store = new ConfigStore(container, loader, rootNode, base);
+                FieldUtils.writeField(base, "store", store, true);
+            }
+        } catch (Exception e) {
+            Internals.globalLogger.log(e);
+        }
+    }
+
+    private void checkExists(Path dir) throws IOException {
+        if (!Files.exists(dir)) {
+            Files.createDirectories(dir);
         }
     }
 
     @Override
-    public void load() {
+    public void load(ConfigStore store) {
         try {
-            rootNode = loader.load();
+            store.rootNode = store.loader.load();
         } catch (IOException e) {
-            this.entry.getLogger().log(e);
+            store.entry.getLogger().log(e);
         }
     }
 
     @Override
-    public void save() {
+    public void save(ConfigStore store) {
         try {
-            loader.save(rootNode);
+            store.loader.save(store.rootNode);
         } catch (IOException e) {
-            this.entry.getLogger().log(e);
+            store.entry.getLogger().log(e);
         }
     }
 
     @Override
-    public ConfigurationLoader<CommentedConfigurationNode> loader() {
-        return this.loader;
+    public ConfigurationLoader<CommentedConfigurationNode> loader(ConfigStore store) {
+        return store.loader;
     }
 
     @Override
-    public CommentedConfigurationNode rootNode() {
-        return this.rootNode;
+    public CommentedConfigurationNode rootNode(ConfigStore store) {
+        return store.rootNode;
     }
 }
