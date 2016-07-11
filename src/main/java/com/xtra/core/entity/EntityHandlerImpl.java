@@ -34,7 +34,6 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.Location;
@@ -49,11 +48,6 @@ import com.xtra.api.entity.EntityHandler;
 public class EntityHandlerImpl implements EntityHandler {
 
     @Override
-    public boolean spawnEntity(Location<World> loc, EntityType type) {
-        return spawnEntity(loc, type, SpawnTypes.PLUGIN);
-    }
-
-    @Override
     public boolean spawnEntity(Location<World> loc, EntityType type, SpawnType spawnType) {
         Extent extent = loc.getExtent();
         Optional<Entity> optional = extent.createEntity(type, loc.getPosition());
@@ -62,21 +56,6 @@ public class EntityHandlerImpl implements EntityHandler {
                     Cause.source(EntitySpawnCause.builder().entity(optional.get()).type(spawnType).build()).build());
         }
         return false;
-    }
-
-    @Override
-    public boolean spawnItem(Location<World> loc, ItemType type) {
-        return spawnItem(loc, type, SpawnTypes.PLUGIN, 1);
-    }
-
-    @Override
-    public boolean spawnItem(Location<World> loc, ItemType type, SpawnType spawnType) {
-        return spawnItem(loc, type, spawnType, 1);
-    }
-
-    @Override
-    public boolean spawnItem(Location<World> loc, ItemType type, int quantity) {
-        return spawnItem(loc, type, SpawnTypes.PLUGIN, quantity);
     }
 
     @Override

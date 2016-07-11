@@ -91,9 +91,9 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public boolean doesCommandHaveRunnable(Class<? extends Command> clazz) {
-        for (Command command : this.globalCommands.keySet()) {
-            if (command.getClass().equals(clazz)) {
-                return true;
+        for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
+            if (entry.getKey().getClass().equals(clazz)) {
+                return entry.getValue().getCommandHandler().get().getCommandRunnableHandler().doesCommandHaveRunnable(clazz);
             }
         }
         return false;
@@ -101,9 +101,9 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public void removeRunnables(Class<? extends Command> clazz) {
-        for (Command command : this.globalCommands.keySet()) {
-            if (command.getClass().equals(clazz)) {
-                this.globalCommands.remove(command);
+        for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
+            if (entry.getKey().getClass().equals(clazz)) {
+                entry.getValue().getCommandHandler().get().getCommandRunnableHandler().removeRunnables(clazz);
             }
         }
     }
