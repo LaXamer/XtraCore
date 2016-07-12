@@ -58,7 +58,7 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
     private Text padding;
     private List<Text> contents;
     private List<Command> commands;
-    private List<Class<? extends Command>> ignoredCommands;
+    private List<Class<? extends Command>> ignoredCommands = new ArrayList<>();
     private TextColor commandColor;
     private TextColor descriptionColor;
     private ChildBehavior childBehavior;
@@ -119,48 +119,57 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
         if (this.commandOrdering == null) {
             this.commandOrdering = CommandOrdering.A_Z;
         }
+        if (this.commandColor == null) {
+            this.commandColor = TextColors.GOLD;
+        }
+        if (this.descriptionColor == null) {
+            this.descriptionColor = TextColors.GREEN;
+        }
         this.container.getLogger().log("Using settings:");
         this.container.getLogger().log("Child behavior: " + this.childBehavior);
         this.container.getLogger().log("Command ordering: " + this.commandOrdering);
         this.container.getLogger().log("Command color: " + this.commandColor.getName());
         this.container.getLogger().log("Description color: " + this.descriptionColor.getName());
         List<CommandStore> commandStores = this.helper.orderContents(this.container.commandStores, this.commandOrdering);
-        for (CommandStore command : commandStores) {
-            if (!this.ignoredCommands.contains(command.command().getClass())) {
-                Command cmd = command.command();
+        for (CommandStore store : commandStores) {
+            if (!this.ignoredCommands.contains(store.command().getClass())) {
+                Command cmd = store.command();
                 Command parentCommand = this.helper.getParentCommand(cmd);
                 String commandString = null;
-                switch (this.childBehavior) {
-                    case IGNORE_PARENT:
-                        // If the child commands is empty, then this is not a
-                        // parent command
-                        if (this.helper.getChildCommands(command.command()).isEmpty()) {
-                            commandString = "/" + cmd.aliases()[0];
-                        }
-                        break;
-                    case IGNORE_CHILD:
-                        // If the parent is null, then there is no parent
-                        // command. Therefore this command is not a child.
+                if (this.childBehavior.equals(ChildBehavior.IGNORE_PARENT)) {
+                    // If the child commands is empty, then this is not a
+                    // parent command
+                    if (this.helper.getChildCommands(store.command()).isEmpty()) {
                         if (parentCommand == null) {
                             commandString = "/" + cmd.aliases()[0];
+                        } else {
+                            commandString = "/" + parentCommand.aliases()[0] + " " + cmd.aliases()[0];
                         }
-                        break;
-                    case BOTH:
-                        // Don't ignore anything
-                        commandString = parentCommand != null ? "/" + parentCommand.aliases()[0] + " " + cmd.aliases()[0] : "/" + cmd.aliases()[0];
-                        break;
+                    } else {
+                        continue;
+                    }
+                } else if (this.childBehavior.equals(ChildBehavior.IGNORE_CHILD)) {
+                    // If the parent is null, then there is no parent
+                    // command. Therefore this command is not a child.
+                    if (parentCommand == null) {
+                        commandString = "/" + cmd.aliases()[0];
+                    } else {
+                        continue;
+                    }
+                } else if (this.childBehavior.equals(ChildBehavior.BOTH)) {
+                    // Don't ignore anything
+                    commandString = parentCommand != null ? "/" + parentCommand.aliases()[0] + " " + cmd.aliases()[0] : "/" + cmd.aliases()[0];
                 }
-                if (command.command().usage() != null) {
-                    commandString += " " + command.command().usage();
+
+                if (store.command().usage() != null) {
+                    commandString += " " + store.command().usage();
                 }
-                TextColor commandColor = this.commandColor != null ? this.commandColor : TextColors.GREEN;
-                TextColor descriptionColor = this.descriptionColor != null ? this.descriptionColor : TextColors.GOLD;
                 this.container.getLogger().log("Adding command string: " + commandString);
                 if (cmd.description() != null) {
                     this.container.getLogger().log("Adding command description: " + cmd.description());
-                    this.contents.add(Text.of(commandColor, commandString, " - ", descriptionColor, cmd.description()));
+                    this.contents.add(Text.of(this.commandColor, commandString, " - ", this.descriptionColor, cmd.description()));
                 } else {
-                    this.contents.add(Text.of(commandColor, commandString));
+                    this.contents.add(Text.of(this.commandColor, commandString));
                 }
             }
         }
@@ -170,7 +179,7 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
     }
 
     private void setDefaults() {
-        this.container.getLogger().log("Setting the help pagination handler default values.");
+        this.container.getLogger().log("Setting the pagination default values.");
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {

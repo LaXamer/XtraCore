@@ -34,6 +34,9 @@ import java.util.Set;
 import com.xtra.api.command.Command;
 import com.xtra.api.command.annotation.RegisterCommand;
 import com.xtra.api.plugin.XtraCorePluginContainer;
+import com.xtra.api.text.HelpPaginationHandler.CommandOrdering;
+import com.xtra.api.util.exceptions.XtraCoreException;
+import com.xtra.core.internal.Internals;
 import com.xtra.core.text.HelpPaginationHandlerImpl;
 import com.xtra.core.util.store.CommandStore;
 
@@ -99,58 +102,70 @@ public class CommandHelper {
     }
 
     public List<CommandStore> orderContents(Set<CommandStore> contentsStore, HelpPaginationHandlerImpl.CommandOrdering ordering) {
-        List<CommandStore> commandStore = new ArrayList<>(contentsStore);
-        if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.A_Z)) {
-            Collections.sort(commandStore);
-            return commandStore;
+        List<CommandStore> commandStores = new ArrayList<>(contentsStore);
+        if (ordering.equals(CommandOrdering.DEFAULT)) {
+            return commandStores;
         }
-        if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.Z_A)) {
-            Collections.sort(commandStore);
-            Collections.reverse(commandStore);
-            return commandStore;
+        if (ordering.equals(CommandOrdering.A_Z)) {
+            Collections.sort(commandStores);
+            return commandStores;
+        }
+        if (ordering.equals(CommandOrdering.Z_A)) {
+            Collections.sort(commandStores);
+            Collections.reverse(commandStores);
+            return commandStores;
         }
 
         Set<Command> topCommands = new HashSet<>();
-        for (CommandStore commandStore2 : commandStore) {
+        for (CommandStore commandStore2 : commandStores) {
             if (commandStore2.childOf() != null) {
-                if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_A_Z)
-                        || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                if (ordering.equals(CommandOrdering.PARENT_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
                     topCommands.add(commandStore2.childOf());
-                } else if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.CHILD_COMMANDS_FIRST_A_Z)
-                        || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)) {
+                } else if (ordering.equals(CommandOrdering.CHILD_COMMANDS_FIRST_A_Z)
+                        || ordering.equals(CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)) {
+                    topCommands.add(commandStore2.command());
+                } else if (ordering.equals(CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_A_Z)
+                        || ordering.equals(CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
+                    topCommands.add(commandStore2.childOf());
                     topCommands.add(commandStore2.command());
                 } else {
-                    topCommands.add(commandStore2.childOf());
-                    topCommands.add(commandStore2.command());
+                    Internals.globalLogger.log(new XtraCoreException(
+                            "Could not find an appropriate command order for the command ordering. Returning the default list."));
+                    return commandStores;
                 }
             }
         }
         // Get the command stores for these commands
         List<CommandStore> topCmds = new ArrayList<>();
         for (Command command : topCommands) {
-            for (CommandStore commandStore2 : commandStore) {
-                if (commandStore2.command().equals(command)) {
-                    topCmds.add(commandStore2);
+            for (CommandStore commandStore : commandStores) {
+                if (commandStore.command().equals(command)) {
+                    topCmds.add(commandStore);
                 }
             }
         }
-        // Remove the top commands, we will append the contents store without
-        // the top commands to the list later, as the top commands are to come
-        // first in the list
-        commandStore.removeAll(topCommands);
 
         // Sort them
         Collections.sort(topCmds);
-        Collections.sort(commandStore);
+        Collections.sort(commandStores);
+
         // If z-a, reverse the sorting
-        if (ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)
-                || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)
-                || ordering.equals(HelpPaginationHandlerImpl.CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
+        if (ordering.equals(CommandOrdering.PARENT_COMMANDS_FIRST_Z_A)
+                || ordering.equals(CommandOrdering.CHILD_COMMANDS_FIRST_Z_A)
+                || ordering.equals(CommandOrdering.PARENT_AND_CHILD_FIRST_NON_LAST_Z_A)) {
             Collections.reverse(topCmds);
-            Collections.reverse(commandStore);
+            Collections.reverse(commandStores);
         }
-        // Append these to the end now
-        topCmds.addAll(commandStore);
-        return topCmds;
+
+        // Now create a new list based from the other two lists
+        List<CommandStore> newList = new ArrayList<>();
+        newList.addAll(topCmds);
+        for (CommandStore commandStore : commandStores) {
+            if (!newList.contains(commandStore)) {
+                newList.add(commandStore);
+            }
+        }
+        return newList;
     }
 }
