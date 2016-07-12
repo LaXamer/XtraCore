@@ -37,6 +37,7 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.xtra.api.command.Command;
+import com.xtra.api.text.ContentEntry;
 import com.xtra.api.text.HelpPaginationHandler;
 import com.xtra.core.CoreImpl;
 import com.xtra.core.internal.Internals;
@@ -56,8 +57,7 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
     private PaginationList.Builder paginationBuilder;
     private Text title;
     private Text padding;
-    private List<Text> contents;
-    private List<Command> commands;
+    private List<ContentEntry> contents;
     private List<Class<? extends Command>> ignoredCommands = new ArrayList<>();
     private TextColor commandColor;
     private TextColor descriptionColor;
@@ -91,17 +91,12 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
     }
 
     @Override
-    public Collection<Command> getCommands() {
-        return this.commands;
-    }
-
-    @Override
     public Collection<Class<? extends Command>> getIgnoredCommands() {
         return this.ignoredCommands;
     }
 
     @Override
-    public List<Text> getContents() {
+    public List<ContentEntry> getContents() {
         return this.contents;
     }
 
@@ -167,13 +162,20 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
                 this.container.getLogger().log("Adding command string: " + commandString);
                 if (cmd.description() != null) {
                     this.container.getLogger().log("Adding command description: " + cmd.description());
-                    this.contents.add(Text.of(this.commandColor, commandString, " - ", this.descriptionColor, cmd.description()));
+                    this.contents
+                            .add(new ContentEntryImpl(cmd, Text.of(this.commandColor, commandString, " - ", this.descriptionColor, cmd.description()),
+                                    Text.of(this.commandColor, commandString), Text.of(this.descriptionColor, cmd.description())));
                 } else {
-                    this.contents.add(Text.of(this.commandColor, commandString));
+                    this.contents.add(
+                            new ContentEntryImpl(cmd, Text.of(this.commandColor, commandString), Text.of(this.commandColor, commandString), null));
                 }
             }
         }
-        this.paginationBuilder.contents(this.contents);
+        List<Text> textContents = new ArrayList<>();
+        for (ContentEntry entry : this.contents) {
+            textContents.add(entry.getCompleteText());
+        }
+        this.paginationBuilder.contents(textContents);
         this.container.getLogger().log("Help pagination list contents generated!");
         return this;
     }
