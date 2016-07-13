@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -40,6 +41,7 @@ import com.xtra.api.command.Command;
 import com.xtra.api.text.ContentEntry;
 import com.xtra.api.text.HelpPaginationHandler;
 import com.xtra.core.CoreImpl;
+import com.xtra.core.event.XtraCoreHelpPaginationHandlerInitializedEventImpl;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 import com.xtra.core.util.CommandHelper;
@@ -199,9 +201,9 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
 
     public class Builder implements HelpPaginationHandler.Builder {
 
-        public Builder(HelpPaginationHandlerImpl impl, Object plugin) {
+        public Builder(HelpPaginationHandlerImpl impl, Class<?> clazz) {
             instance = impl;
-            container = (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(plugin.getClass());
+            container = (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
         }
 
         @Override
@@ -246,7 +248,7 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
             instance.paginationBuilder = PaginationList.builder();
             instance.generateContents();
             instance.setDefaults();
-            CoreImpl.instance.paginationHandlers.put(container, instance);
+            Sponge.getEventManager().post(new XtraCoreHelpPaginationHandlerInitializedEventImpl(container, instance));
             return instance;
         }
     }

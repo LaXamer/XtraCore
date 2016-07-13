@@ -23,37 +23,14 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.listener;
+package com.xtra.core.event;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import com.xtra.api.event.XtraCorePluginInitializedEvent;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 
-import org.spongepowered.api.Sponge;
+public class XtraCorePluginInitializedEventImpl extends XtraCorePluginContainerEventImpl implements XtraCorePluginInitializedEvent {
 
-import com.xtra.api.listener.ListenerHandler;
-import com.xtra.core.CoreImpl;
-import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCorePluginContainerImpl;
-
-public class ListenerHandlerImpl implements ListenerHandler {
-
-    private Set<Class<?>> listenerClasses = new HashSet<>();
-
-    public void registerListeners(Class<?> clazz) {
-        Internals.globalLogger.log("Registering listeners for " + clazz.getName());
-        XtraCorePluginContainerImpl container =
-                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
-        container.getLogger().log("======================================================");
-        for (Object listener : container.scanner.getPluginListeners()) {
-            this.listenerClasses.add(listener.getClass());
-            Sponge.getEventManager().registerListeners(container.getPlugin(), listener);
-        }
-        container.setListenerHandler(this);
-    }
-
-    @Override
-    public Collection<Class<?>> getListenerClasses() {
-        return this.listenerClasses;
+    public XtraCorePluginInitializedEventImpl(XtraCorePluginContainer container) {
+        super(container);
     }
 }

@@ -23,37 +23,24 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.listener;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+package com.xtra.core.event;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.Cause;
 
-import com.xtra.api.listener.ListenerHandler;
-import com.xtra.core.CoreImpl;
-import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCorePluginContainerImpl;
+import com.xtra.api.event.XtraCoreInitializationEvent;
+import com.xtra.core.XtraCore;
 
-public class ListenerHandlerImpl implements ListenerHandler {
+public class XtraCoreInitializationEventImpl implements XtraCoreInitializationEvent {
 
-    private Set<Class<?>> listenerClasses = new HashSet<>();
+    private Cause cause;
 
-    public void registerListeners(Class<?> clazz) {
-        Internals.globalLogger.log("Registering listeners for " + clazz.getName());
-        XtraCorePluginContainerImpl container =
-                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
-        container.getLogger().log("======================================================");
-        for (Object listener : container.scanner.getPluginListeners()) {
-            this.listenerClasses.add(listener.getClass());
-            Sponge.getEventManager().registerListeners(container.getPlugin(), listener);
-        }
-        container.setListenerHandler(this);
+    public XtraCoreInitializationEventImpl(XtraCore instance) {
+        this.cause = Cause.source(Sponge.getPluginManager().fromInstance(instance).get()).build();
     }
 
     @Override
-    public Collection<Class<?>> getListenerClasses() {
-        return this.listenerClasses;
+    public Cause getCause() {
+        return this.cause;
     }
 }

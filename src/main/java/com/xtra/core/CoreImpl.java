@@ -25,9 +25,9 @@
 
 package com.xtra.core;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+
+import org.spongepowered.api.Sponge;
 
 import com.xtra.api.ICore;
 import com.xtra.api.ban.BanHandler;
@@ -49,6 +49,10 @@ import com.xtra.core.command.CommandHandlerImpl;
 import com.xtra.core.command.annotation.CommandAnnotationHelperImpl;
 import com.xtra.core.config.ConfigHandlerImpl;
 import com.xtra.core.entity.EntityHandlerImpl;
+import com.xtra.core.event.XtraCoreCommandHandlerInitializedEventImpl;
+import com.xtra.core.event.XtraCoreConfigHandlerInitializedEventImpl;
+import com.xtra.core.event.XtraCoreListenerHandlerInitializedEventImpl;
+import com.xtra.core.event.XtraCorePluginInitializedEventImpl;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.listener.ListenerHandlerImpl;
 import com.xtra.core.logger.LogHandlerImpl;
@@ -63,11 +67,9 @@ import com.xtra.core.world.direction.DirectionHandlerImpl;
 public class CoreImpl implements ICore {
 
     public static CoreImpl instance;
-    public Map<XtraCorePluginContainer, HelpPaginationHandler> paginationHandlers = new HashMap<>();
     private BanHandler banHandler = new BanHandlerImpl();
     private CommandAnnotationHelper annotationHelper = new CommandAnnotationHelperImpl();
     private EntityHandler entityHandler = new EntityHandlerImpl();
-    private Map<XtraCorePluginContainer, ListenerHandler> listenerHandlers = new HashMap<>();
     private LogHandler logHandler = new LogHandlerImpl();
     private XtraCorePluginHandler pluginHandler = new XtraCorePluginHandlerImpl();
     private CommandRegistry commandRegistry = new CommandRegistryImpl();
@@ -93,6 +95,7 @@ public class CoreImpl implements ICore {
         Internals.globalLogger.log("Initializing plugin class " + plugin.getClass().getName());
 
         containerImpl.scanner = ReflectionScanner.create(containerImpl);
+        Sponge.getEventManager().post(new XtraCorePluginInitializedEventImpl(containerImpl));
         return containerImpl;
     }
 
@@ -102,16 +105,14 @@ public class CoreImpl implements ICore {
         if (container.getCommandHandler().isPresent()) {
             return container.getCommandHandler().get();
         }
-        return CommandHandlerImpl.create(clazz);
+        CommandHandler handler = CommandHandlerImpl.create(clazz);
+        Sponge.getEventManager().post(new XtraCoreCommandHandlerInitializedEventImpl(container, handler));
+        return handler;
     }
 
     @Override
     public Optional<CommandHandler> getCommandHandler(Class<?> clazz) {
-        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
-        if (container.getCommandHandler().isPresent()) {
-            return Optional.of(container.getCommandHandler().get());
-        }
-        return Optional.empty();
+        return this.pluginHandler.getContainer(clazz).get().getCommandHandler();
     }
 
     @Override
@@ -120,54 +121,42 @@ public class CoreImpl implements ICore {
         if (container.getConfigHandler().isPresent()) {
             return container.getConfigHandler().get();
         }
-        return ConfigHandlerImpl.create(clazz);
+        ConfigHandler handler = ConfigHandlerImpl.create(clazz);
+        Sponge.getEventManager().post(new XtraCoreConfigHandlerInitializedEventImpl(container, handler));
+        return handler;
     }
 
     @Override
     public Optional<ConfigHandler> getConfigHandler(Class<?> clazz) {
-        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
-        if (container.getConfigHandler().isPresent()) {
-            return Optional.of(container.getConfigHandler().get());
-        }
-        return Optional.empty();
+        return this.pluginHandler.getContainer(clazz).get().getConfigHandler();
     }
 
     @Override
     public ListenerHandler createListenerHandler(Class<?> clazz) {
-        for (Map.Entry<XtraCorePluginContainer, ListenerHandler> listenerHandler : this.listenerHandlers.entrySet()) {
-            if (listenerHandler.getKey().getPlugin().getClass().equals(clazz)) {
-                return listenerHandler.getValue();
-            }
+        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
+        if (container.getListenerHandler().isPresent()) {
+            return container.getListenerHandler().get();
         }
-        ListenerHandlerImpl listenerHandler = new ListenerHandlerImpl();
-        listenerHandler.registerListeners(clazz);
-        return listenerHandler;
+        ListenerHandlerImpl handler = new ListenerHandlerImpl();
+        handler.registerListeners(clazz);
+        Sponge.getEventManager().post(new XtraCoreListenerHandlerInitializedEventImpl(container, handler));
+        return handler;
     }
 
     @Override
     public Optional<ListenerHandler> getListenerHandler(Class<?> clazz) {
-        for (Map.Entry<XtraCorePluginContainer, ListenerHandler> listenerHandler : this.listenerHandlers.entrySet()) {
-            if (listenerHandler.getKey().getPlugin().getClass().equals(clazz)) {
-                return Optional.of(listenerHandler.getValue());
-            }
-        }
-        return Optional.empty();
+        return this.pluginHandler.getContainer(clazz).get().getListenerHandler();
     }
 
     @Override
-    public HelpPaginationHandler.Builder createHelpPaginationBuilder(Object plugin) {
+    public HelpPaginationHandler.Builder createHelpPaginationBuilder(Class<?> clazz) {
         HelpPaginationHandlerImpl impl = new HelpPaginationHandlerImpl();
-        return impl.new Builder(impl, plugin);
+        return impl.new Builder(impl, clazz);
     }
 
     @Override
     public Optional<HelpPaginationHandler> getHelpPaginationHandler(Class<?> clazz) {
-        for (Map.Entry<XtraCorePluginContainer, HelpPaginationHandler> entry : this.paginationHandlers.entrySet()) {
-            if (entry.getKey().getPlugin().getClass().equals(clazz)) {
-                return Optional.of(entry.getValue());
-            }
-        }
-        return Optional.empty();
+        return this.pluginHandler.getContainer(clazz).get().getHelpPaginationHandler();
     }
 
     @Override

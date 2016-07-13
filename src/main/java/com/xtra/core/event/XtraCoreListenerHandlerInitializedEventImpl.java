@@ -23,37 +23,34 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.listener;
+package com.xtra.core.event;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 
-import org.spongepowered.api.Sponge;
-
+import com.xtra.api.event.XtraCoreListenerHandlerInitializedEvent;
 import com.xtra.api.listener.ListenerHandler;
-import com.xtra.core.CoreImpl;
-import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCorePluginContainerImpl;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 
-public class ListenerHandlerImpl implements ListenerHandler {
+public class XtraCoreListenerHandlerInitializedEventImpl extends XtraCorePluginContainerEventImpl
+        implements XtraCoreListenerHandlerInitializedEvent {
 
-    private Set<Class<?>> listenerClasses = new HashSet<>();
+    private ListenerHandler handler;
+    private Cause cause;
 
-    public void registerListeners(Class<?> clazz) {
-        Internals.globalLogger.log("Registering listeners for " + clazz.getName());
-        XtraCorePluginContainerImpl container =
-                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
-        container.getLogger().log("======================================================");
-        for (Object listener : container.scanner.getPluginListeners()) {
-            this.listenerClasses.add(listener.getClass());
-            Sponge.getEventManager().registerListeners(container.getPlugin(), listener);
-        }
-        container.setListenerHandler(this);
+    public XtraCoreListenerHandlerInitializedEventImpl(XtraCorePluginContainer container, ListenerHandler handler) {
+        super(container);
+        this.handler = handler;
+        this.cause = Cause.of(NamedCause.owner(container), NamedCause.source(handler));
     }
 
     @Override
-    public Collection<Class<?>> getListenerClasses() {
-        return this.listenerClasses;
+    public Cause getCause() {
+        return this.cause;
+    }
+
+    @Override
+    public ListenerHandler getListenerHandler() {
+        return this.handler;
     }
 }

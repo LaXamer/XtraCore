@@ -37,6 +37,7 @@ import com.xtra.api.command.Command;
 import com.xtra.api.command.CommandHandler;
 import com.xtra.api.command.runnable.CommandRunnable;
 import com.xtra.api.config.ConfigHandler;
+import com.xtra.api.listener.ListenerHandler;
 import com.xtra.api.logger.Logger;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.text.HelpPaginationHandler;
@@ -56,6 +57,7 @@ public class XtraCorePluginContainerImpl implements XtraCorePluginContainer {
     // Defaults
     private Optional<CommandHandler> commandHandler = Optional.empty();
     private Optional<ConfigHandler> configHandler = Optional.empty();
+    private Optional<ListenerHandler> listenerHandler = Optional.empty();
     private Optional<HelpPaginationHandler> helpPaginationHandler = Optional.empty();
 
     public XtraCorePluginContainerImpl(Object plugin, PluginContainer pluginContainer) {
@@ -89,6 +91,11 @@ public class XtraCorePluginContainerImpl implements XtraCorePluginContainer {
     }
 
     @Override
+    public Optional<ListenerHandler> getListenerHandler() {
+        return this.listenerHandler;
+    }
+
+    @Override
     public Optional<HelpPaginationHandler> getHelpPaginationHandler() {
         return this.helpPaginationHandler;
     }
@@ -103,6 +110,10 @@ public class XtraCorePluginContainerImpl implements XtraCorePluginContainer {
 
     public void setConfigHandler(ConfigHandler configHandler) {
         this.configHandler = Optional.of(configHandler);
+    }
+
+    public void setListenerHandler(ListenerHandler listenerHandler) {
+        this.listenerHandler = Optional.of(listenerHandler);
     }
 
     public void setHelpPaginationHandler(HelpPaginationHandler helpPaginationHandler) {

@@ -23,37 +23,34 @@
  * SOFTWARE.
  */
 
-package com.xtra.core.listener;
+package com.xtra.core.event;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 
-import org.spongepowered.api.Sponge;
+import com.xtra.api.config.ConfigHandler;
+import com.xtra.api.event.XtraCoreConfigHandlerInitializedEvent;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 
-import com.xtra.api.listener.ListenerHandler;
-import com.xtra.core.CoreImpl;
-import com.xtra.core.internal.Internals;
-import com.xtra.core.plugin.XtraCorePluginContainerImpl;
+public class XtraCoreConfigHandlerInitializedEventImpl extends XtraCorePluginContainerEventImpl
+        implements XtraCoreConfigHandlerInitializedEvent {
 
-public class ListenerHandlerImpl implements ListenerHandler {
+    private ConfigHandler handler;
+    private Cause cause;
 
-    private Set<Class<?>> listenerClasses = new HashSet<>();
-
-    public void registerListeners(Class<?> clazz) {
-        Internals.globalLogger.log("Registering listeners for " + clazz.getName());
-        XtraCorePluginContainerImpl container =
-                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
-        container.getLogger().log("======================================================");
-        for (Object listener : container.scanner.getPluginListeners()) {
-            this.listenerClasses.add(listener.getClass());
-            Sponge.getEventManager().registerListeners(container.getPlugin(), listener);
-        }
-        container.setListenerHandler(this);
+    public XtraCoreConfigHandlerInitializedEventImpl(XtraCorePluginContainer container, ConfigHandler handler) {
+        super(container);
+        this.handler = handler;
+        this.cause = Cause.of(NamedCause.owner(container), NamedCause.source(handler));
     }
 
     @Override
-    public Collection<Class<?>> getListenerClasses() {
-        return this.listenerClasses;
+    public Cause getCause() {
+        return this.cause;
+    }
+
+    @Override
+    public ConfigHandler getConfigHandler() {
+        return this.handler;
     }
 }
