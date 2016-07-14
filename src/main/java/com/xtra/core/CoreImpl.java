@@ -101,7 +101,7 @@ public class CoreImpl implements ICore {
 
     @Override
     public CommandHandler createCommandHandler(Class<?> clazz) {
-        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
+        XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
         if (container.getCommandHandler().isPresent()) {
             return container.getCommandHandler().get();
         }
@@ -112,12 +112,16 @@ public class CoreImpl implements ICore {
 
     @Override
     public Optional<CommandHandler> getCommandHandler(Class<?> clazz) {
-        return this.pluginHandler.getContainer(clazz).get().getCommandHandler();
+        Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
+        if (!container.isPresent()) {
+            return Optional.empty();
+        }
+        return container.get().getCommandHandler();
     }
 
     @Override
     public ConfigHandler createConfigHandler(Class<?> clazz) {
-        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
+        XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
         if (container.getConfigHandler().isPresent()) {
             return container.getConfigHandler().get();
         }
@@ -128,12 +132,16 @@ public class CoreImpl implements ICore {
 
     @Override
     public Optional<ConfigHandler> getConfigHandler(Class<?> clazz) {
-        return this.pluginHandler.getContainer(clazz).get().getConfigHandler();
+        Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
+        if (!container.isPresent()) {
+            return Optional.empty();
+        }
+        return container.get().getConfigHandler();
     }
 
     @Override
     public ListenerHandler createListenerHandler(Class<?> clazz) {
-        XtraCorePluginContainer container = this.pluginHandler.getContainer(clazz).get();
+        XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
         if (container.getListenerHandler().isPresent()) {
             return container.getListenerHandler().get();
         }
@@ -145,7 +153,11 @@ public class CoreImpl implements ICore {
 
     @Override
     public Optional<ListenerHandler> getListenerHandler(Class<?> clazz) {
-        return this.pluginHandler.getContainer(clazz).get().getListenerHandler();
+        Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
+        if (!container.isPresent()) {
+            return Optional.empty();
+        }
+        return container.get().getListenerHandler();
     }
 
     @Override
@@ -156,7 +168,11 @@ public class CoreImpl implements ICore {
 
     @Override
     public Optional<HelpPaginationHandler> getHelpPaginationHandler(Class<?> clazz) {
-        return this.pluginHandler.getContainer(clazz).get().getHelpPaginationHandler();
+        Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
+        if (!container.isPresent()) {
+            return Optional.empty();
+        }
+        return container.get().getHelpPaginationHandler();
     }
 
     @Override
