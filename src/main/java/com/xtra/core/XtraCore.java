@@ -48,7 +48,7 @@ import com.xtra.core.internal.InternalCommands;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.logger.LoggerImpl;
 
-@Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwesomeMan34"}, description = Internals.DESCRIPTION)
+@Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwsomeMan34"}, description = Internals.DESCRIPTION)
 public class XtraCore {
 
     @Listener(order = Order.FIRST)

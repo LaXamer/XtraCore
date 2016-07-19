@@ -27,14 +27,15 @@ package com.xtra.core.logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 
-import com.laxamer.file.FileUtils;
 import com.xtra.api.logger.Logger;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCorePluginContainerImpl;
@@ -43,19 +44,21 @@ public class LoggerImpl implements Logger {
 
     private File logFile;
     private XtraCorePluginContainerImpl container;
+    private SimpleDateFormat format = new SimpleDateFormat();
+    private String lineSeparator = System.getProperty("line.separator");
 
     public LoggerImpl(XtraCorePluginContainerImpl container) {
-        this.container = container;
-        File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
-        this.logFile = new File(directory + "/" + container.getPluginContainer().getId() + ".log");
-        if (!logFile.exists()) {
-            try {
+        try {
+            this.container = container;
+            File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
+            this.logFile = new File(directory + "/" + container.getPluginContainer().getId() + ".log");
+            if (!logFile.exists()) {
                 logFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                FileUtils.writeStringToFile(logFile, "", StandardCharsets.UTF_8, false);
             }
-        } else {
-            FileUtils.wipeFile(logFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -63,36 +66,31 @@ public class LoggerImpl implements Logger {
      * Creates a global XtraCore logger.
      */
     public LoggerImpl() {
-        File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        this.logFile = new File(directory + "/xtracore.log");
-        if (!logFile.exists()) {
-            try {
-                logFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            File directory = new File(System.getProperty("user.dir") + Internals.LOG_DIRECTORY);
+            if (!directory.exists()) {
+                directory.mkdirs();
             }
-        } else {
-            FileUtils.wipeFile(logFile);
+            this.logFile = new File(directory + "/xtracore.log");
+            if (!logFile.exists()) {
+                logFile.createNewFile();
+            } else {
+                FileUtils.writeStringToFile(logFile, "", StandardCharsets.UTF_8, false);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    }
-
-    @Override
-    public void log(String message) {
-        this.log(Level.INFO, message);
-    }
-
-    @Override
-    public void log(Throwable cause) {
-        this.log(Level.ERROR, cause);
     }
 
     @Override
     public void log(Level level, String message) {
-        FileUtils.writeToFile(this.logFile,
-                "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: " + message + FileUtils.lineSeparator);
+        try {
+            FileUtils.writeStringToFile(this.logFile,
+                    "[" + this.format.format(new Date()) + "] " + "[" + level + "]: " + message + this.lineSeparator, StandardCharsets.UTF_8, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (level.equals(Level.WARNING)) {
             if (container != null) {
                 this.container.getPluginContainer().getLogger().warn(message);
@@ -110,10 +108,15 @@ public class LoggerImpl implements Logger {
 
     @Override
     public void log(Level level, Throwable cause) {
-        FileUtils.writeToFile(this.logFile, "[" + new SimpleDateFormat("h:mm:ss").format(new Date()) + "] " + "[" + level + "]: "
-                + cause.getMessage() + FileUtils.lineSeparator);
         String stackTrace = ExceptionUtils.getStackTrace(cause);
-        FileUtils.writeToFile(logFile, stackTrace);
+        try {
+            FileUtils.writeStringToFile(this.logFile,
+                    "[" + this.format.format(new Date()) + "] " + "[" + level + "]: " + cause.getMessage() + this.lineSeparator,
+                    StandardCharsets.UTF_8, true);
+            FileUtils.writeStringToFile(this.logFile, stackTrace, StandardCharsets.UTF_8, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         if (level.equals(Level.WARNING)) {
             if (container != null) {
