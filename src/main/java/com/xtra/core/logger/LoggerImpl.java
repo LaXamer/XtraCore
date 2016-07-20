@@ -44,7 +44,7 @@ public class LoggerImpl implements Logger {
 
     private File logFile;
     private XtraCorePluginContainerImpl container;
-    private SimpleDateFormat format = new SimpleDateFormat();
+    private SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
     private String lineSeparator = System.getProperty("line.separator");
 
     public LoggerImpl(XtraCorePluginContainerImpl container) {

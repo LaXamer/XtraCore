@@ -56,14 +56,14 @@ public class Internals {
      */
     public static Object checkIfAlreadyExists(XtraCorePluginContainer container, Class<?> clazz)
             throws InstantiationException, IllegalAccessException {
-        if (container.getCommandHandler() != null) {
+        if (container.getCommandHandler().isPresent()) {
             for (Command command : container.getCommandHandler().get().getCommands()) {
                 if (clazz.equals(command.getClass())) {
                     return command;
                 }
             }
         }
-        if (container.getConfigHandler() != null) {
+        if (container.getConfigHandler().isPresent()) {
             for (Config config : container.getConfigHandler().get().getConfigs()) {
                 if (clazz.equals(config.getClass())) {
                     return config;
