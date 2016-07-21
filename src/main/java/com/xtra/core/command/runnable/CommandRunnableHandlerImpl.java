@@ -79,9 +79,4 @@ public class CommandRunnableHandlerImpl implements CommandRunnableHandler {
     public void removeRunnables(Class<? extends Command> clazz) {
         this.container.commandRunnables.removeAll(clazz);
     }
-
-    @Override
-    public void removeAllRunnables() {
-        this.container.commandRunnables.clear();
-    }
 }
