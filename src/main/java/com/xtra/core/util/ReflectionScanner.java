@@ -119,19 +119,23 @@ public class ReflectionScanner {
     public Set<Object> getPluginListeners() {
         this.container.getLogger().log("Using reflection to access and register the listeners...");
         Set<Method> methods = this.reflections.getMethodsAnnotatedWith(Listener.class);
-        Set<Object> listenerClasses = new HashSet<>();
+        Set<Class<?>> listenerClasses = new HashSet<>();
         for (Method method : methods) {
+            if (method.getDeclaringClass().getAnnotation(Plugin.class) == null && !listenerClasses.contains(method.getDeclaringClass())) {
+                this.container.getLogger().log("Registering method listener:");
+                this.container.getLogger().log(method.toString());
+                listenerClasses.add(method.getDeclaringClass());
+            }
+        }
+        Set<Object> listenerObject = new HashSet<>();
+        for (Class<?> listenerClass : listenerClasses) {
             try {
-                if (method.getDeclaringClass().getAnnotation(Plugin.class) == null) {
-                    this.container.getLogger().log("Registering method listener:");
-                    this.container.getLogger().log(method.toString());
-                    listenerClasses.add(Internals.checkIfAlreadyExists(this.container, method.getDeclaringClass()));
-                }
+                listenerObject.add(Internals.checkIfAlreadyExists(this.container, listenerClass));
             } catch (InstantiationException | IllegalAccessException e) {
                 this.container.getLogger().log(e);
             }
         }
         this.container.getLogger().log("Listeners added.");
-        return listenerClasses;
+        return listenerObject;
     }
 }
