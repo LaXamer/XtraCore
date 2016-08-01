@@ -25,6 +25,8 @@
 
 package com.xtra.core.plugin;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -55,6 +57,7 @@ public class XtraCorePluginHandlerImpl implements XtraCorePluginHandler {
 
     @Override
     public Optional<XtraCorePluginContainer> getContainer(Class<?> clazz) {
+        checkNotNull(clazz, "Container class cannot be null!");
         for (XtraCorePluginContainer container : this.containers) {
             if (container.getPlugin().getClass().equals(clazz)) {
                 return Optional.of(container);
@@ -65,6 +68,7 @@ public class XtraCorePluginHandlerImpl implements XtraCorePluginHandler {
 
     @Override
     public XtraCorePluginContainer getContainerUnchecked(Class<?> clazz) {
+        checkNotNull(clazz, "Container class cannot be null!");
         for (XtraCorePluginContainer container : this.containers) {
             if (container.getPlugin().getClass().equals(clazz)) {
                 return container;

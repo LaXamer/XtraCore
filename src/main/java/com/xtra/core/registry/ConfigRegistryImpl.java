@@ -25,6 +25,8 @@
 
 package com.xtra.core.registry;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +50,7 @@ public class ConfigRegistryImpl implements ConfigRegistry {
 
     @Override
     public Optional<Config> getConfig(Class<? extends Config> clazz) {
+        checkNotNull(clazz, "Config class cannot be null!");
         for (Config config : this.globalConfigs.keySet()) {
             if (config.getClass().equals(clazz)) {
                 return Optional.of(config);
@@ -58,6 +61,7 @@ public class ConfigRegistryImpl implements ConfigRegistry {
 
     @Override
     public Optional<Map.Entry<Config, XtraCorePluginContainer>> getEntry(Class<? extends Config> clazz) {
+        checkNotNull(clazz, "Config class cannot be null!");
         for (Map.Entry<Config, XtraCorePluginContainer> entry : this.globalConfigs.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 return Optional.of(entry);

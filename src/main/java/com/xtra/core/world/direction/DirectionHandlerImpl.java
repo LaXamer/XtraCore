@@ -25,6 +25,8 @@
 
 package com.xtra.core.world.direction;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.api.util.Direction;
 
 import com.xtra.api.world.direction.DirectionHandler;
@@ -47,6 +49,7 @@ public class DirectionHandlerImpl implements DirectionHandler {
 
     @Override
     public Direction getCardinalLeft(Direction direction) {
+        checkNotNull(direction, "Direction cannot be null!");
         if (direction.equals(Direction.NORTH)) {
             return Direction.WEST;
         } else if (direction.equals(Direction.EAST)) {
@@ -61,6 +64,7 @@ public class DirectionHandlerImpl implements DirectionHandler {
 
     @Override
     public Direction getCardinalRight(Direction direction) {
+        checkNotNull(direction, "Direction cannot be null!");
         if (direction.equals(Direction.NORTH)) {
             return Direction.EAST;
         } else if (direction.equals(Direction.EAST)) {

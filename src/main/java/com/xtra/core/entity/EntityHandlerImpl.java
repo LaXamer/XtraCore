@@ -25,6 +25,8 @@
 
 package com.xtra.core.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Optional;
 
 import org.spongepowered.api.data.key.Keys;
@@ -49,6 +51,9 @@ public class EntityHandlerImpl implements EntityHandler {
 
     @Override
     public boolean spawnEntity(Location<World> loc, EntityType type, SpawnType spawnType) {
+        checkNotNull(loc, "Location cannot be null!");
+        checkNotNull(type, "Entity type cannot be null!");
+        checkNotNull(spawnType, "Spawn type cannot be null!");
         Extent extent = loc.getExtent();
         Optional<Entity> optional = extent.createEntity(type, loc.getPosition());
         if (optional.isPresent()) {
@@ -60,6 +65,9 @@ public class EntityHandlerImpl implements EntityHandler {
 
     @Override
     public boolean spawnItem(Location<World> loc, ItemType type, SpawnType spawnType, int quantity) {
+        checkNotNull(loc, "Location cannot be null!");
+        checkNotNull(type, "Item type cannot be null!");
+        checkNotNull(spawnType, "Spawn type cannot be null!");
         Extent extent = loc.getExtent();
         Optional<Entity> optional = extent.createEntity(EntityTypes.ITEM, loc.getPosition());
         if (optional.isPresent()) {

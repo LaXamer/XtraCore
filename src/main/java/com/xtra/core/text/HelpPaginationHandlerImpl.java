@@ -68,10 +68,6 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
     // For the builder
     private HelpPaginationHandlerImpl instance;
 
-    // For the builder
-    public HelpPaginationHandlerImpl() {
-    }
-
     @Override
     public PaginationList getList() {
         return this.paginationBuilder.build();

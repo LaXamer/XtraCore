@@ -25,6 +25,8 @@
 
 package com.xtra.core.config.annotation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Optional;
 
 import com.xtra.api.config.Config;
@@ -36,6 +38,7 @@ public class ConfigAnnotationHelperImpl implements ConfigAnnotationHelper {
 
     @Override
     public boolean isSharedRoot(Class<? extends Config> clazz) {
+        checkNotNull(clazz, "Config class cannot be null!");
         if (clazz.isAnnotationPresent(RegisterConfig.class)) {
             return clazz.getAnnotation(RegisterConfig.class).sharedRoot();
         }
@@ -44,6 +47,7 @@ public class ConfigAnnotationHelperImpl implements ConfigAnnotationHelper {
 
     @Override
     public Optional<String> getName(Class<? extends Config> clazz) {
+        checkNotNull(clazz, "Config class cannot be null!");
         if (clazz.isAnnotationPresent(RegisterConfig.class)) {
             return Optional.of(clazz.getAnnotation(RegisterConfig.class).configName());
         }
@@ -52,6 +56,7 @@ public class ConfigAnnotationHelperImpl implements ConfigAnnotationHelper {
 
     @Override
     public boolean doesReload(Class<? extends Config> clazz) {
+        checkNotNull(clazz, "Config class cannot be null!");
         if (clazz.isAnnotationPresent(DoNotReload.class)) {
             return true;
         }

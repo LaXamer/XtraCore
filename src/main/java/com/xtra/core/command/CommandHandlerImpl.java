@@ -25,6 +25,8 @@
 
 package com.xtra.core.command;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,6 +39,7 @@ import com.xtra.api.command.CommandHandler;
 import com.xtra.api.command.annotation.RegisterCommand;
 import com.xtra.api.command.runnable.CommandRunnableHandler;
 import com.xtra.api.command.state.CommandStateHandler;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.util.command.EmptyCommand;
 import com.xtra.core.CoreImpl;
 import com.xtra.core.command.runnable.CommandRunnableHandlerImpl;
@@ -62,9 +65,8 @@ public class CommandHandlerImpl implements CommandHandler {
     private CommandHandlerImpl() {
     }
 
-    public static CommandHandlerImpl create(Class<?> clazz) {
-        return new CommandHandlerImpl()
-                .init((XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz));
+    public static CommandHandlerImpl create(XtraCorePluginContainer container) {
+        return new CommandHandlerImpl().init((XtraCorePluginContainerImpl) container);
     }
 
     private CommandHandlerImpl init(XtraCorePluginContainerImpl entry) {
@@ -158,6 +160,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
     @Override
     public Optional<Command> getCommand(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         for (Command command : this.commands) {
             if (clazz.isInstance(command)) {
                 return Optional.of(command);

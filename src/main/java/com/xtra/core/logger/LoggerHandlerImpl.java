@@ -25,6 +25,8 @@
 
 package com.xtra.core.logger;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -66,6 +68,7 @@ public class LoggerHandlerImpl implements LoggerHandler {
 
     @Override
     public Optional<Logger> getLogger(Class<?> clazz) {
+        checkNotNull(clazz, "Logger class cannot be null!");
         Optional<XtraCorePluginContainer> container = CoreImpl.instance.getPluginHandler().getContainer(clazz);
         if (container.isPresent()) {
             return Optional.of(container.get().getLogger());

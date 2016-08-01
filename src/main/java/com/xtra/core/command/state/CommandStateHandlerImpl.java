@@ -25,6 +25,8 @@
 
 package com.xtra.core.command.state;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Optional;
 
 import com.xtra.api.command.Command;
@@ -48,6 +50,8 @@ public class CommandStateHandlerImpl implements CommandStateHandler {
 
     @Override
     public void setState(Class<? extends Command> clazz, CommandState state) {
+        checkNotNull(clazz, "Command class cannot be null!");
+        checkNotNull(state, "Command state cannot be null!");
         for (CommandStore store : this.container.commandStores) {
             if (store.command().getClass().equals(clazz)) {
                 store.setState(state);
@@ -57,6 +61,7 @@ public class CommandStateHandlerImpl implements CommandStateHandler {
 
     @Override
     public Optional<CommandState> getState(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         for (CommandStore store : this.container.commandStores) {
             if (store.command().getClass().equals(clazz)) {
                 return Optional.of(store.state());

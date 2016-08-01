@@ -128,7 +128,7 @@ public class CommandBaseImpl implements CommandBaseExecutor {
             return CommandResult.empty();
         }
 
-        Optional<Text> isCorrectCommandSource = this.checkCommandSource(commandBase.getClass(), source);
+        Optional<Text> isCorrectCommandSource = this.checkCommandSource(targetSource, source);
         if (isCorrectCommandSource.isPresent()) {
             source.sendMessage(isCorrectCommandSource.get());
             return CommandResult.empty();

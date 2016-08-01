@@ -25,11 +25,12 @@
 
 package com.xtra.core.config;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.xtra.api.Core;
 import com.xtra.api.config.Config;
 import com.xtra.api.config.ConfigHandler;
 import com.xtra.api.plugin.XtraCorePluginContainer;
@@ -45,8 +46,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
     private ConfigHandlerImpl() {
     }
 
-    public static ConfigHandler create(Class<?> clazz) {
-        return new ConfigHandlerImpl().init(Core.getPluginHandler().getContainerUnchecked(clazz));
+    public static ConfigHandler create(XtraCorePluginContainer container) {
+        return new ConfigHandlerImpl().init(container);
     }
 
     private ConfigHandlerImpl init(XtraCorePluginContainer container) {
@@ -68,6 +69,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
     @Override
     public Optional<Config> getConfig(Class<? extends Config> clazz) {
+        checkNotNull(clazz, "Config class cannot be null!");
         for (Config config : this.configs) {
             if (clazz.isInstance(config)) {
                 return Optional.of(config);

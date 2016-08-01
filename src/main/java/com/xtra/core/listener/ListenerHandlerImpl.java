@@ -32,7 +32,7 @@ import java.util.Set;
 import org.spongepowered.api.Sponge;
 
 import com.xtra.api.listener.ListenerHandler;
-import com.xtra.core.CoreImpl;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 
@@ -40,10 +40,12 @@ public class ListenerHandlerImpl implements ListenerHandler {
 
     private Set<Class<?>> listenerClasses = new HashSet<>();
 
-    public void registerListeners(Class<?> clazz) {
-        Internals.globalLogger.info("Registering listeners for " + clazz.getName());
-        XtraCorePluginContainerImpl container =
-                (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
+    public ListenerHandlerImpl(XtraCorePluginContainer container) {
+        this.registerListeners((XtraCorePluginContainerImpl) container);
+    }
+
+    public void registerListeners(XtraCorePluginContainerImpl container) {
+        Internals.globalLogger.info("Registering listeners for " + container.getPluginContainer().getId());
         for (Object listener : container.scanner.getPluginListeners()) {
             this.listenerClasses.add(listener.getClass());
             Sponge.getEventManager().registerListeners(container.getPlugin(), listener);

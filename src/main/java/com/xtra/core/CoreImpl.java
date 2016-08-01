@@ -25,6 +25,8 @@
 
 package com.xtra.core;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -85,6 +87,7 @@ public class CoreImpl implements ICore {
 
     @Override
     public XtraCorePluginContainer initialize(Object plugin) {
+        checkNotNull(plugin, "Plugin object cannot be null!");
         // Create a plugin container
         XtraCorePluginHandlerImpl handlerImpl = (XtraCorePluginHandlerImpl) this.pluginHandler;
         XtraCorePluginContainerImpl containerImpl = (XtraCorePluginContainerImpl) handlerImpl.add(plugin);
@@ -104,17 +107,19 @@ public class CoreImpl implements ICore {
 
     @Override
     public CommandHandler createCommandHandler(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
         if (container.getCommandHandler().isPresent()) {
             return container.getCommandHandler().get();
         }
-        CommandHandler handler = CommandHandlerImpl.create(clazz);
+        CommandHandler handler = CommandHandlerImpl.create(container);
         Sponge.getEventManager().post(new XtraCoreCommandHandlerInitializedEventImpl(container, handler));
         return handler;
     }
 
     @Override
     public Optional<CommandHandler> getCommandHandler(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
         if (!container.isPresent()) {
             return Optional.empty();
@@ -124,17 +129,19 @@ public class CoreImpl implements ICore {
 
     @Override
     public ConfigHandler createConfigHandler(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
         if (container.getConfigHandler().isPresent()) {
             return container.getConfigHandler().get();
         }
-        ConfigHandler handler = ConfigHandlerImpl.create(clazz);
+        ConfigHandler handler = ConfigHandlerImpl.create(container);
         Sponge.getEventManager().post(new XtraCoreConfigHandlerInitializedEventImpl(container, handler));
         return handler;
     }
 
     @Override
     public Optional<ConfigHandler> getConfigHandler(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
         if (!container.isPresent()) {
             return Optional.empty();
@@ -144,18 +151,19 @@ public class CoreImpl implements ICore {
 
     @Override
     public ListenerHandler createListenerHandler(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
         if (container.getListenerHandler().isPresent()) {
             return container.getListenerHandler().get();
         }
-        ListenerHandlerImpl handler = new ListenerHandlerImpl();
-        handler.registerListeners(clazz);
+        ListenerHandlerImpl handler = new ListenerHandlerImpl(container);
         Sponge.getEventManager().post(new XtraCoreListenerHandlerInitializedEventImpl(container, handler));
         return handler;
     }
 
     @Override
     public Optional<ListenerHandler> getListenerHandler(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
         if (!container.isPresent()) {
             return Optional.empty();
@@ -165,12 +173,14 @@ public class CoreImpl implements ICore {
 
     @Override
     public HelpPaginationHandler.Builder createHelpPaginationBuilder(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         HelpPaginationHandlerImpl impl = new HelpPaginationHandlerImpl();
         return impl.new Builder(impl, clazz);
     }
 
     @Override
     public Optional<HelpPaginationHandler> getHelpPaginationHandler(Class<?> clazz) {
+        checkNotNull(clazz, "Plugin class cannot be null!");
         Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
         if (!container.isPresent()) {
             return Optional.empty();

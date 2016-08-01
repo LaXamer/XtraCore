@@ -25,6 +25,8 @@
 
 package com.xtra.core.command.annotation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Optional;
 
 import com.xtra.api.command.Command;
@@ -40,6 +42,7 @@ public class CommandAnnotationHelperImpl implements CommandAnnotationHelper {
 
     @Override
     public boolean isAsync(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         if (clazz.isAnnotationPresent(RegisterCommand.class)) {
             return clazz.getAnnotation(RegisterCommand.class).async();
         }
@@ -48,6 +51,7 @@ public class CommandAnnotationHelperImpl implements CommandAnnotationHelper {
 
     @Override
     public boolean hasParent(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         if (clazz.isAnnotationPresent(RegisterCommand.class)) {
             return clazz.getAnnotation(RegisterCommand.class).childOf() != EmptyCommand.class;
         }
@@ -56,6 +60,7 @@ public class CommandAnnotationHelperImpl implements CommandAnnotationHelper {
 
     @Override
     public Optional<Class<? extends Command>> getParent(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         if (!clazz.isAnnotationPresent(RegisterCommand.class)) {
             return Optional.empty();
         }
@@ -69,6 +74,7 @@ public class CommandAnnotationHelperImpl implements CommandAnnotationHelper {
 
     @Override
     public Optional<Command> getParentObject(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         if (!clazz.isAnnotationPresent(RegisterCommand.class)) {
             return Optional.empty();
         }

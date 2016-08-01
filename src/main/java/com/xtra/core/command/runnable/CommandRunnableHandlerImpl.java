@@ -25,6 +25,8 @@
 
 package com.xtra.core.command.runnable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Arrays;
 
 import com.xtra.api.command.Command;
@@ -48,6 +50,7 @@ public class CommandRunnableHandlerImpl implements CommandRunnableHandler {
     @Override
     @SuppressWarnings("unchecked")
     public void add(CommandRunnable runnable, Class<? extends Command>... classes) {
+        checkNotNull(runnable, "Command runnable cannot be null!");
         for (Class<? extends Command> clazz : classes) {
             this.container.commandRunnables.put(clazz, runnable);
         }
@@ -55,6 +58,7 @@ public class CommandRunnableHandlerImpl implements CommandRunnableHandler {
 
     @Override
     public void addForAllCommands(CommandRunnable runnable) {
+        checkNotNull(runnable, "Command runnable cannot be null!");
         for (Command command : this.container.getCommandHandler().get().getCommands()) {
             this.container.commandRunnables.put(command.getClass(), runnable);
         }
@@ -63,6 +67,7 @@ public class CommandRunnableHandlerImpl implements CommandRunnableHandler {
     @Override
     @SuppressWarnings("unchecked")
     public void addForAllCommandsExcept(CommandRunnable runnable, Class<? extends Command>... classes) {
+        checkNotNull(runnable, "Command runnable cannot be null!");
         for (Command command : this.container.getCommandHandler().get().getCommands()) {
             if (!Arrays.asList(classes).contains(command.getClass())) {
                 this.container.commandRunnables.put(command.getClass(), runnable);

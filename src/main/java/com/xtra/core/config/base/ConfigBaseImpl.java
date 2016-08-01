@@ -107,7 +107,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
         try {
             store.rootNode = store.loader.load();
         } catch (IOException e) {
-            store.entry.getLogger().error("An exception has occ", e);
+            store.entry.getLogger().error("An exception has occurred while attempting to load a configuration file!", e);
         }
     }
 

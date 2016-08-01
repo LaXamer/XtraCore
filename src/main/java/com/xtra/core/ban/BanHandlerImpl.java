@@ -25,6 +25,8 @@
 
 package com.xtra.core.ban;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Optional;
 
 import org.spongepowered.api.Sponge;
@@ -39,6 +41,7 @@ public class BanHandlerImpl implements BanHandler {
 
     @Override
     public Optional<Text> getBanReason(GameProfile profile) {
+        checkNotNull(profile, "Game profile cannot be null!");
         BanService service = Sponge.getServiceManager().provide(BanService.class).get();
         Optional<Ban.Profile> optionalBan = service.getBanFor(profile);
         if (optionalBan.isPresent()) {

@@ -25,6 +25,8 @@
 
 package com.xtra.core.registry;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +51,7 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public Optional<Command> getCommand(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         for (Command command : this.globalCommands.keySet()) {
             if (command.getClass().equals(clazz)) {
                 return Optional.of(command);
@@ -59,6 +62,7 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public Optional<Map.Entry<Command, XtraCorePluginContainer>> getEntry(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class caannot be null!");
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 return Optional.of(entry);
@@ -80,6 +84,7 @@ public class CommandRegistryImpl implements CommandRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public void addRunnables(CommandRunnable runnable, Class<? extends Command>... classes) {
+        checkNotNull(runnable, "Command runnable cannot be null!");
         for (Class<? extends Command> clazz : classes) {
             for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
                 if (entry.getKey().getClass().equals(clazz)) {
@@ -91,6 +96,7 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public boolean doesCommandHaveRunnable(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 return entry.getValue().getCommandHandler().get().getCommandRunnableHandler().doesCommandHaveRunnable(clazz);
@@ -101,6 +107,7 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public void removeRunnables(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 entry.getValue().getCommandHandler().get().getCommandRunnableHandler().removeRunnables(clazz);
@@ -110,6 +117,8 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public void setState(Class<? extends Command> clazz, CommandState state) {
+        checkNotNull(clazz, "Command class cannot be null!");
+        checkNotNull(state, "Command state cannot be null!");
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 entry.getValue().getCommandHandler().get().getCommandStateHandler().setState(clazz, state);
@@ -119,6 +128,7 @@ public class CommandRegistryImpl implements CommandRegistry {
 
     @Override
     public Optional<CommandState> getState(Class<? extends Command> clazz) {
+        checkNotNull(clazz, "Command class cannot be null!");
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
                 return Optional.of(entry.getValue().getCommandHandler().get().getCommandStateHandler().getState(clazz).get());
