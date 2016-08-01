@@ -108,7 +108,7 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
     }
 
     private HelpPaginationHandlerImpl generateContents() {
-        this.container.getLogger().log("Generating the contents for the help pagination list!");
+        this.container.getLogger().info("Generating the contents for the help pagination list!");
         this.contents = new ArrayList<>();
         if (this.childBehavior == null) {
             this.childBehavior = ChildBehavior.BOTH;
@@ -122,11 +122,11 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
         if (this.descriptionColor == null) {
             this.descriptionColor = TextColors.GREEN;
         }
-        this.container.getLogger().log("Using settings:");
-        this.container.getLogger().log("Child behavior: " + this.childBehavior);
-        this.container.getLogger().log("Command ordering: " + this.commandOrdering);
-        this.container.getLogger().log("Command color: " + this.commandColor.getName());
-        this.container.getLogger().log("Description color: " + this.descriptionColor.getName());
+        this.container.getLogger().info("Using settings:");
+        this.container.getLogger().info("Child behavior: " + this.childBehavior);
+        this.container.getLogger().info("Command ordering: " + this.commandOrdering);
+        this.container.getLogger().info("Command color: " + this.commandColor.getName());
+        this.container.getLogger().info("Description color: " + this.descriptionColor.getName());
         List<CommandStore> commandStores = this.helper.orderContents(this.container.commandStores, this.commandOrdering);
         for (CommandStore store : commandStores) {
             if (!this.ignoredCommands.contains(store.command().getClass())) {
@@ -161,9 +161,9 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
                 if (store.command().usage() != null) {
                     commandString += " " + store.command().usage();
                 }
-                this.container.getLogger().log("Adding command string: " + commandString);
+                this.container.getLogger().info("Adding command string: " + commandString);
                 if (cmd.description() != null) {
-                    this.container.getLogger().log("Adding command description: " + cmd.description());
+                    this.container.getLogger().info("Adding command description: " + cmd.description());
                     this.contents
                             .add(new ContentEntryImpl(cmd, Text.of(this.commandColor, commandString, " - ", this.descriptionColor, cmd.description()),
                                     Text.of(this.commandColor, commandString), Text.of(this.descriptionColor, cmd.description())));
@@ -178,12 +178,12 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
             textContents.add(entry.getCompleteText());
         }
         this.paginationBuilder.contents(textContents);
-        this.container.getLogger().log("Help pagination list contents generated!");
+        this.container.getLogger().info("Help pagination list contents generated!");
         return this;
     }
 
     private void setDefaults() {
-        this.container.getLogger().log("Setting the pagination default values.");
+        this.container.getLogger().info("Setting the pagination default values.");
         if (this.title != null) {
             this.paginationBuilder.title(this.title);
         } else {
@@ -239,10 +239,10 @@ public class HelpPaginationHandlerImpl implements HelpPaginationHandler {
 
         @Override
         public HelpPaginationHandler build() {
-            Internals.globalLogger.log("======================================================");
-            Internals.globalLogger.log("Initializing help pagination handler for " + container.getPluginContainer().getName());
-            container.getLogger().log("======================================================");
-            container.getLogger().log("Initializing the help pagination handler!");
+            Internals.globalLogger.info(Internals.LOG_HEADER);
+            Internals.globalLogger.info("Initializing help pagination handler for " + container.getPluginContainer().getName());
+            container.getLogger().info(Internals.LOG_HEADER);
+            container.getLogger().info("Initializing the help pagination handler!");
             container.setHelpPaginationHandler(instance);
             instance.helper = new CommandHelper(instance.container);
             instance.paginationBuilder = PaginationList.builder();

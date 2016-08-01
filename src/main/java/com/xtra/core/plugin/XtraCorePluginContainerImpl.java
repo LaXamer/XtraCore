@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.slf4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -38,7 +39,6 @@ import com.xtra.api.command.CommandHandler;
 import com.xtra.api.command.runnable.CommandRunnable;
 import com.xtra.api.config.ConfigHandler;
 import com.xtra.api.listener.ListenerHandler;
-import com.xtra.api.logger.Logger;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.text.HelpPaginationHandler;
 import com.xtra.core.util.ReflectionScanner;

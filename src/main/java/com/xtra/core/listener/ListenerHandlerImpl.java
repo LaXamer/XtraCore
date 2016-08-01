@@ -41,10 +41,9 @@ public class ListenerHandlerImpl implements ListenerHandler {
     private Set<Class<?>> listenerClasses = new HashSet<>();
 
     public void registerListeners(Class<?> clazz) {
-        Internals.globalLogger.log("Registering listeners for " + clazz.getName());
+        Internals.globalLogger.info("Registering listeners for " + clazz.getName());
         XtraCorePluginContainerImpl container =
                 (XtraCorePluginContainerImpl) CoreImpl.instance.getPluginHandler().getContainerUnchecked(clazz);
-        container.getLogger().log("======================================================");
         for (Object listener : container.scanner.getPluginListeners()) {
             this.listenerClasses.add(listener.getClass());
             Sponge.getEventManager().registerListeners(container.getPlugin(), listener);

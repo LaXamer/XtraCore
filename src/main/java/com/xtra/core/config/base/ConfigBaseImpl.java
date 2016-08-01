@@ -55,7 +55,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
             XtraCorePluginContainer container = CoreImpl.instance.getConfigRegistry().getEntry(base.getClass()).get().getValue();
             RegisterConfig rc = base.getClass().getAnnotation(RegisterConfig.class);
 
-            container.getLogger().log("Initializing configuration for '" + rc.configName() + ".conf'.");
+            container.getLogger().info("Initializing configuration for '" + rc.configName() + ".conf'.");
 
             HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
             Path dir;
@@ -76,7 +76,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
             ConfigurationLoader<CommentedConfigurationNode> loader = loaderBuilder.build();
             CommentedConfigurationNode rootNode;
             if (!exists) {
-                container.getLogger().log("Configuration file '" + rc.configName() + "' currently does not exist. Creating...");
+                container.getLogger().info("Configuration file '" + rc.configName() + "' currently does not exist. Creating...");
                 Files.createFile(configPath);
                 rootNode = loader.createEmptyNode();
                 // Here we add the new, empty node and store it
@@ -92,7 +92,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
                 FieldUtils.writeField(base, "store", store, true);
             }
         } catch (Exception e) {
-            Internals.globalLogger.log(e);
+            Internals.globalLogger.error("An exception has occurred while attempting to initialize a configuration base!", e);
         }
     }
 
@@ -107,7 +107,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
         try {
             store.rootNode = store.loader.load();
         } catch (IOException e) {
-            store.entry.getLogger().log(e);
+            store.entry.getLogger().error("An exception has occ", e);
         }
     }
 
@@ -116,7 +116,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
         try {
             store.loader.save(store.rootNode);
         } catch (IOException e) {
-            store.entry.getLogger().log(e);
+            store.entry.getLogger().error("An exception has occurred while attempting to save a configuration file!", e);
         }
     }
 

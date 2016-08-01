@@ -69,25 +69,24 @@ public class CommandHandlerImpl implements CommandHandler {
 
     private CommandHandlerImpl init(XtraCorePluginContainerImpl entry) {
         this.container = entry;
-        Internals.globalLogger.log("======================================================");
-        Internals.globalLogger.log("Initializing command handler for " + entry.getPluginContainer().getName());
+        Internals.globalLogger.info(Internals.LOG_HEADER);
+        Internals.globalLogger.info("Initializing command handler for " + entry.getPluginContainer().getName());
 
-        this.container.getLogger().log("======================================================");
         this.commands = this.container.scanner.getCommands();
         this.container.setCommandHandler(this);
         this.helper = new CommandHelper(this.container);
-        this.container.getLogger().log("======================================================");
-        this.container.getLogger().log("Initializing the command handler!");
-        this.container.getLogger().log("Initializing the command specs for the commands...");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Initializing the command handler!");
+        this.container.getLogger().info("Initializing the command specs for the commands...");
 
         for (Command command : this.commands) {
             this.initializeCommandSpec(command);
         }
-        this.container.getLogger().log("======================================================");
-        this.container.getLogger().log("Adding any necessary child commands to the command specs!");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Adding any necessary child commands to the command specs!");
         this.addChildCommands();
-        this.container.getLogger().log("======================================================");
-        this.container.getLogger().log("Building and registering the commands!");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Building and registering the commands!");
         for (CommandStore command : this.container.commandStores) {
             this.buildAndRegisterCommand(command.commandSpecBuilder(), command.command());
             CommandRegistryImpl commandImpl = (CommandRegistryImpl) CoreImpl.instance.getCommandRegistry();
@@ -103,31 +102,31 @@ public class CommandHandlerImpl implements CommandHandler {
         // Create the initial CommandSpec builder
         CommandSpec.Builder specBuilder = CommandSpec.builder().executor(command);
 
-        this.container.getLogger().log("======================================================");
-        this.container.getLogger().log("Initializing the command spec for the command '" + command.aliases()[0] + "'.");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Initializing the command spec for the command '" + command.aliases()[0] + "'.");
 
         // In case null, do not use
         if (command.permission() != null) {
             specBuilder.permission(command.permission());
-            this.container.getLogger().log("Command permission: '" + command.permission() + "'");
+            this.container.getLogger().info("Command permission: '" + command.permission() + "'");
         }
         if (command.description() != null) {
             specBuilder.description(Text.of(command.description()));
-            this.container.getLogger().log("Command description: '" + command.description() + "'");
+            this.container.getLogger().info("Command description: '" + command.description() + "'");
         }
         if (command.args() != null) {
             if (command.args().length != 0) {
                 specBuilder.arguments(command.args());
-                this.container.getLogger().log("Command has " + command.args().length + " argument(s).");
+                this.container.getLogger().info("Command has " + command.args().length + " argument(s).");
             }
         }
 
         Command parentCommand = this.helper.getParentCommand(command);
         if (parentCommand != null) {
-            this.container.getLogger().log("Adding the command and its parent command to the command stores.");
+            this.container.getLogger().info("Adding the command and its parent command to the command stores.");
             this.container.commandStores.add(new CommandStore(command, specBuilder, parentCommand));
         } else {
-            this.container.getLogger().log("Parent command not found. Presuming command does not have one.");
+            this.container.getLogger().info("Parent command not found. Presuming command does not have one.");
             this.container.commandStores.add(new CommandStore(command, specBuilder, null));
         }
     }
@@ -140,7 +139,7 @@ public class CommandHandlerImpl implements CommandHandler {
                     // Iterate through to find the parent
                     for (CommandStore commandStore2 : this.container.commandStores) {
                         if (commandStore2.command().equals(commandStore.childOf())) {
-                            this.container.getLogger().log("Adding '" + commandStore.command().aliases()[0] + "' as a child command of '"
+                            this.container.getLogger().info("Adding '" + commandStore.command().aliases()[0] + "' as a child command of '"
                                     + commandStore2.command().aliases()[0] + "'");
                             commandStore2.commandSpecBuilder().child(commandStore.commandSpecBuilder().build(), commandStore.command().aliases());
                         }
@@ -152,7 +151,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
     private void buildAndRegisterCommand(CommandSpec.Builder commandSpec, Command command) {
         if (command.getClass().getAnnotation(RegisterCommand.class).childOf().equals(EmptyCommand.class)) {
-            this.container.getLogger().log("Building and registering the command: '" + command.aliases()[0] + "'");
+            this.container.getLogger().info("Building and registering the command: '" + command.aliases()[0] + "'");
             Sponge.getCommandManager().register(this.container.getPlugin(), commandSpec.build(), command.aliases());
         }
     }

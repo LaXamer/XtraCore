@@ -27,6 +27,7 @@ package com.xtra.core;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 
 import com.xtra.api.ICore;
@@ -36,8 +37,7 @@ import com.xtra.api.command.annotation.CommandAnnotationHelper;
 import com.xtra.api.config.ConfigHandler;
 import com.xtra.api.entity.EntityHandler;
 import com.xtra.api.listener.ListenerHandler;
-import com.xtra.api.logger.LogHandler;
-import com.xtra.api.logger.Logger;
+import com.xtra.api.logger.LoggerHandler;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.plugin.XtraCorePluginHandler;
 import com.xtra.api.registry.CommandRegistry;
@@ -55,7 +55,7 @@ import com.xtra.core.event.XtraCoreListenerHandlerInitializedEventImpl;
 import com.xtra.core.event.XtraCorePluginInitializedEventImpl;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.listener.ListenerHandlerImpl;
-import com.xtra.core.logger.LogHandlerImpl;
+import com.xtra.core.logger.LoggerHandlerImpl;
 import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 import com.xtra.core.plugin.XtraCorePluginHandlerImpl;
 import com.xtra.core.registry.CommandRegistryImpl;
@@ -70,11 +70,11 @@ public class CoreImpl implements ICore {
     private BanHandler banHandler = new BanHandlerImpl();
     private CommandAnnotationHelper annotationHelper = new CommandAnnotationHelperImpl();
     private EntityHandler entityHandler = new EntityHandlerImpl();
-    private LogHandler logHandler = new LogHandlerImpl();
     private XtraCorePluginHandler pluginHandler = new XtraCorePluginHandlerImpl();
     private CommandRegistry commandRegistry = new CommandRegistryImpl();
     private ConfigRegistry configRegistry = new ConfigRegistryImpl();
     private DirectionHandler directionHandler = new DirectionHandlerImpl();
+    private LoggerHandlerImpl loggerHandler = new LoggerHandlerImpl();
 
     public CoreImpl() {
         instance = this;
@@ -85,14 +85,14 @@ public class CoreImpl implements ICore {
         // Create a plugin container
         XtraCorePluginHandlerImpl handlerImpl = (XtraCorePluginHandlerImpl) this.pluginHandler;
         XtraCorePluginContainerImpl containerImpl = (XtraCorePluginContainerImpl) handlerImpl.add(plugin);
-        LogHandlerImpl log = (LogHandlerImpl) this.logHandler;
+        LoggerHandlerImpl log = (LoggerHandlerImpl) this.loggerHandler;
         // Create a logger for the plugin
         Logger logger = log.create(containerImpl);
-        logger.log("======================================================");
-        logger.log("Initializing with XtraCore version " + Internals.VERSION + "!");
+        logger.info(Internals.LOG_HEADER);
+        logger.info("Initializing with XtraCore version " + Internals.VERSION + "!");
 
-        Internals.globalLogger.log("======================================================");
-        Internals.globalLogger.log("Initializing plugin class " + plugin.getClass().getName());
+        Internals.globalLogger.info(Internals.LOG_HEADER);
+        Internals.globalLogger.info("Initializing plugin class " + plugin.getClass().getName());
 
         containerImpl.scanner = ReflectionScanner.create(containerImpl);
         Sponge.getEventManager().post(new XtraCorePluginInitializedEventImpl(containerImpl));
@@ -191,11 +191,6 @@ public class CoreImpl implements ICore {
     }
 
     @Override
-    public LogHandler getLogHandler() {
-        return this.logHandler;
-    }
-
-    @Override
     public XtraCorePluginHandler getPluginHandler() {
         return this.pluginHandler;
     }
@@ -213,6 +208,11 @@ public class CoreImpl implements ICore {
     @Override
     public DirectionHandler getDirectionHandler() {
         return this.directionHandler;
+    }
+
+    @Override
+    public LoggerHandler getLoggerHandler() {
+        return this.loggerHandler;
     }
 
     @Override

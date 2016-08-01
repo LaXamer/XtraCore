@@ -46,16 +46,18 @@ import com.xtra.core.config.base.ConfigBaseImpl;
 import com.xtra.core.event.XtraCoreInitializationEventImpl;
 import com.xtra.core.internal.InternalCommands;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.logger.LoggerImpl;
+import com.xtra.core.logger.LoggerHandlerImpl;
 
 @Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwsomeMan34"}, description = Internals.DESCRIPTION)
 public class XtraCore {
 
+    private CoreImpl core = new CoreImpl();
+
     @Listener(order = Order.FIRST)
     public void onPreInit(GamePreInitializationEvent event) {
-        Internals.globalLogger = new LoggerImpl();
-        Internals.globalLogger.log("======================================================");
-        Internals.globalLogger.log("Initializing XtraCore version " + Internals.VERSION);
+        ((LoggerHandlerImpl) this.core.getLoggerHandler()).createGlobal();
+        Internals.globalLogger.info(Internals.LOG_HEADER);
+        Internals.globalLogger.info("Initializing XtraCore version " + Internals.VERSION);
         Sponge.getEventManager().post(new XtraCoreInitializationEventImpl(this));
 
         this.provideImplementations();
@@ -78,12 +80,12 @@ public class XtraCore {
 
     private void provideImplementations() {
         try {
-            FieldUtils.writeStaticField(Core.class, "CORE", new CoreImpl(), true);
+            FieldUtils.writeStaticField(Core.class, "CORE", this.core, true);
             FieldUtils.writeStaticField(CommandBase.class, "BASE", new CommandBaseImpl(), true);
             FieldUtils.writeStaticField(CommandBaseLite.class, "BASE", new CommandBaseLiteImpl(), true);
             FieldUtils.writeStaticField(ConfigBase.class, "BASE", new ConfigBaseImpl(), true);
         } catch (Exception e) {
-            Internals.globalLogger.log(e);
+            Internals.globalLogger.error("An error has occurred while attempting to set the static API fields!", e);
         }
     }
 }

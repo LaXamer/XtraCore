@@ -25,9 +25,13 @@
 
 package com.xtra.core.internal;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.slf4j.Logger;
+
 import com.xtra.api.command.Command;
 import com.xtra.api.config.Config;
-import com.xtra.api.logger.Logger;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 
 /**
@@ -39,7 +43,8 @@ public class Internals {
 
     public static final String VERSION = "@project.version@";
     public static final String DESCRIPTION = "A unifying plugin utility backend.";
-    public static final String LOG_DIRECTORY = "/logs/xtracore-logs";
+    public static final Path LOG_DIRECTORY = Paths.get("logs", "xtracore-logs").toAbsolutePath();
+    public static final String LOG_HEADER = "======================================================";
     public static Logger globalLogger;
 
     /**

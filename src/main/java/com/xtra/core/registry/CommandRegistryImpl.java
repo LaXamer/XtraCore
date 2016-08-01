@@ -43,7 +43,7 @@ public class CommandRegistryImpl implements CommandRegistry {
     private Map<Command, XtraCorePluginContainer> globalCommands = new HashMap<>();
 
     public void add(Command command, XtraCorePluginContainerImpl container) {
-        Internals.globalLogger.log("Adding command '" + command.aliases()[0] + "' to the global command registry!");
+        Internals.globalLogger.info("Adding command '" + command.aliases()[0] + "' to the global command registry!");
         this.globalCommands.put(command, container);
     }
 

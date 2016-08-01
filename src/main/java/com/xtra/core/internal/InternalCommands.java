@@ -141,7 +141,7 @@ public class InternalCommands {
                             Text.of(TextColors.BLUE, "GitHub: ", TextColors.GREEN, TextActions.openUrl(new URL(url)), url))
                     .build();
         } catch (MalformedURLException e) {
-            Internals.globalLogger.log(e);
+            Internals.globalLogger.error("A MalformedURLException has occured while attempting to construct a URL!", e);
         }
     }
 

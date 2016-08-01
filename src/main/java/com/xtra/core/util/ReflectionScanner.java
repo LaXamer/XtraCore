@@ -69,7 +69,8 @@ public class ReflectionScanner {
      * @return A set of the commands
      */
     public Set<Command> getCommands() {
-        this.container.getLogger().log("Using reflection to access the registered commands...");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Using reflection to access the registered commands...");
         Set<Class<?>> classes = this.reflections.getTypesAnnotatedWith(RegisterCommand.class);
         Set<Command> commands = new HashSet<>();
 
@@ -78,14 +79,14 @@ public class ReflectionScanner {
                 Object o = oneClass.newInstance();
                 if (o instanceof Command) {
                     Command c = (Command) o;
-                    this.container.getLogger().log("Recognized command '" + c.aliases()[0] + "'! Adding to command list...");
+                    this.container.getLogger().info("Recognized command '" + c.aliases()[0] + "'! Adding to command list...");
                     commands.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                this.container.getLogger().log(e);
+                this.container.getLogger().error("An error has occurred while attempting to instantiate the commands!", e);
             }
         }
-        this.container.getLogger().log("Commands added.");
+        this.container.getLogger().info("Commands added.");
         return commands;
     }
 
@@ -95,7 +96,8 @@ public class ReflectionScanner {
      * @return A set of configs
      */
     public Set<Config> getConfigs() {
-        this.container.getLogger().log("Using reflection to access the registered configs...");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Using reflection to access the registered configs...");
         Set<Class<?>> classes = this.reflections.getTypesAnnotatedWith(RegisterConfig.class);
         Set<Config> configs = new HashSet<>();
 
@@ -104,26 +106,27 @@ public class ReflectionScanner {
                 Object o = oneClass.newInstance();
                 if (o instanceof Config) {
                     Config c = (Config) o;
-                    this.container.getLogger().log("Recognized config '" + c.getClass().getAnnotation(RegisterConfig.class).configName()
+                    this.container.getLogger().info("Recognized config '" + c.getClass().getAnnotation(RegisterConfig.class).configName()
                             + "'! Adding to config list...");
                     configs.add(c);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                this.container.getLogger().log(e);
+                this.container.getLogger().error("An error has occurred while attempting to instantiate the configs!", e);
             }
         }
-        this.container.getLogger().log("Configs added.");
+        this.container.getLogger().info("Configs added.");
         return configs;
     }
 
     public Set<Object> getPluginListeners() {
-        this.container.getLogger().log("Using reflection to access and register the listeners...");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Using reflection to access and register the listeners...");
         Set<Method> methods = this.reflections.getMethodsAnnotatedWith(Listener.class);
         Set<Class<?>> listenerClasses = new HashSet<>();
         for (Method method : methods) {
             if (method.getDeclaringClass().getAnnotation(Plugin.class) == null && !listenerClasses.contains(method.getDeclaringClass())) {
-                this.container.getLogger().log("Registering method listener:");
-                this.container.getLogger().log(method.toString());
+                this.container.getLogger().info("Registering method listener:");
+                this.container.getLogger().info(method.toString());
                 listenerClasses.add(method.getDeclaringClass());
             }
         }
@@ -132,10 +135,10 @@ public class ReflectionScanner {
             try {
                 listenerObject.add(Internals.checkIfAlreadyExists(this.container, listenerClass));
             } catch (InstantiationException | IllegalAccessException e) {
-                this.container.getLogger().log(e);
+                this.container.getLogger().error("An error has occurred while attempting to instantiate the listeners!", e);
             }
         }
-        this.container.getLogger().log("Listeners added.");
+        this.container.getLogger().info("Listeners added.");
         return listenerObject;
     }
 }

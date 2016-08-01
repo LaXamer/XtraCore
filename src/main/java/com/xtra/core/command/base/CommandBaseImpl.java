@@ -93,10 +93,12 @@ public class CommandBaseImpl implements CommandBaseExecutor {
                             public Class<? extends Annotation> annotationType() {
                                 return RunAt.class;
                             }
+
                             @Override
                             public int priority() {
                                 return 1000;
                             }
+
                             @Override
                             public CommandPhase phase() {
                                 return CommandPhase.START;
@@ -106,8 +108,7 @@ public class CommandBaseImpl implements CommandBaseExecutor {
                     this.map.put(runnable, runAt);
                 }
             } catch (NoSuchMethodException | SecurityException e) {
-                // Should never really happen
-                this.container.getLogger().log(e);
+                this.container.getLogger().error("An error has occurred while attempting to gather the RunAt's for the CommandRunnable's!", e);
             }
         }
         if (!this.map.isEmpty()) {
@@ -156,8 +157,9 @@ public class CommandBaseImpl implements CommandBaseExecutor {
                         } catch (TextMessageException e) {
                             source.sendMessage(e.getText());
                         } catch (Exception e2) {
-                            source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-                            this.container.getLogger().log(e2);
+                            source.sendMessage(Text.of(TextColors.RED, "An error has occurred while attempting to execute this command!"));
+                            this.container.getLogger()
+                                    .error("An exception has occurred while attempting to execute the command " + this.base.aliases()[0] + "!", e2);
                         }
                     }).async().submit(this.container.getPlugin());
 
@@ -173,8 +175,8 @@ public class CommandBaseImpl implements CommandBaseExecutor {
         } catch (TextMessageException e) {
             source.sendMessage(e.getText());
         } catch (Exception e2) {
-            source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-            this.container.getLogger().log(e2);
+            source.sendMessage(Text.of(TextColors.RED, "An error has occurred while attempting to execute this command."));
+            this.container.getLogger().error("An exception has occurred while attempting to execute the command " + this.base.aliases()[0] + "!", e2);
         }
         // If errored
         return CommandResult.empty();

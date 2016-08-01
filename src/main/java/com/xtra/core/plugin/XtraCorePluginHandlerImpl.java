@@ -45,8 +45,8 @@ public class XtraCorePluginHandlerImpl implements XtraCorePluginHandler {
     public XtraCorePluginContainer add(Object plugin) {
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
-            Internals.globalLogger.log(
-                    new XtraCoreException("Cannot find the plugin instance for " + plugin.getClass().getName() + "! Did you pass the wrong object?"));
+            Internals.globalLogger.error("Cannot find the plugin instance for " + plugin.getClass().getName() + "! Did you pass the wrong object?",
+                    new XtraCoreException());
         }
         XtraCorePluginContainerImpl container = new XtraCorePluginContainerImpl(plugin, optional.get());
         this.containers.add(container);
@@ -70,8 +70,8 @@ public class XtraCorePluginHandlerImpl implements XtraCorePluginHandler {
                 return container;
             }
         }
-        Internals.globalLogger.log(
-                new XtraCoreException("Cannot find the plugin container for " + clazz.getName() + "! Did you pass the wrong class?"));
+        Internals.globalLogger.error("Cannot find the plugin container for " + clazz.getName() + "! Did you pass the wrong class?",
+                new XtraCoreException());
         return null;
     }
 

@@ -39,7 +39,7 @@ public class CommandStateHandlerImpl implements CommandStateHandler {
     private XtraCorePluginContainerImpl container;
 
     public static CommandStateHandlerImpl create(XtraCorePluginContainerImpl container) {
-        Internals.globalLogger.log("Initializing the command state handler for " + container.getPluginContainer().getName());
+        Internals.globalLogger.info("Initializing the command state handler for " + container.getPluginContainer().getName());
 
         CommandStateHandlerImpl handler = new CommandStateHandlerImpl();
         handler.container = container;

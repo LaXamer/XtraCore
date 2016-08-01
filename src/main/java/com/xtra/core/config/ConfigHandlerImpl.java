@@ -50,14 +50,13 @@ public class ConfigHandlerImpl implements ConfigHandler {
     }
 
     private ConfigHandlerImpl init(XtraCorePluginContainer container) {
-        Internals.globalLogger.log("======================================================");
-        Internals.globalLogger.log("Initializing config handler for " + container.getPluginContainer().getName());
-        container.getLogger().log("======================================================");
+        Internals.globalLogger.info(Internals.LOG_HEADER);
+        Internals.globalLogger.info("Initializing config handler for " + container.getPluginContainer().getName());
         XtraCorePluginContainerImpl implContainer = (XtraCorePluginContainerImpl) container;
         this.configs = implContainer.scanner.getConfigs();
 
-        container.getLogger().log("======================================================");
-        container.getLogger().log("Initializing the configs!");
+        container.getLogger().info(Internals.LOG_HEADER);
+        container.getLogger().info("Initializing the configs!");
         implContainer.setConfigHandler(this);
         ConfigRegistryImpl implRegistry = (ConfigRegistryImpl) CoreImpl.instance.getConfigRegistry();
         for (Config config : this.configs) {

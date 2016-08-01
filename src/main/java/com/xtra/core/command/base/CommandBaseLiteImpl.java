@@ -53,8 +53,9 @@ public class CommandBaseLiteImpl implements CommandBaseLiteExecutor {
                         } catch (TextMessageException e) {
                             source.sendMessage(e.getText());
                         } catch (Exception e2) {
-                            source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-                            container.getLogger().log(e2);
+                            source.sendMessage(Text.of(TextColors.RED, "An error has occurred while attempting to execute this command."));
+                            container.getLogger()
+                                    .error("An exception has occurred while attempting to execute the command " + base.aliases()[0] + "!", e2);
                         }
                     }).async().submit(container.getPlugin());
             return CommandResult.success();
@@ -64,8 +65,8 @@ public class CommandBaseLiteImpl implements CommandBaseLiteExecutor {
             } catch (TextMessageException e) {
                 source.sendMessage(e.getText());
             } catch (Exception e2) {
-                source.sendMessage(Text.of(TextColors.RED, "An error has occured while attempting to execute this command."));
-                container.getLogger().log(e2);
+                source.sendMessage(Text.of(TextColors.RED, "An error has occurred while attempting to execute this command."));
+                container.getLogger().error("An exception has occurred while attempting to execute the command " + base.aliases()[0] + "!", e2);
             }
         }
         return CommandResult.empty();

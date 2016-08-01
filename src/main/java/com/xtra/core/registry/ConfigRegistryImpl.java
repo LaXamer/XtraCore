@@ -42,7 +42,7 @@ public class ConfigRegistryImpl implements ConfigRegistry {
 
     public void add(Config config, XtraCorePluginContainer container) {
         Internals.globalLogger
-                .log("Adding config '" + config.getClass().getAnnotation(RegisterConfig.class).configName() + "' to the global config registry!");
+                .info("Adding config '" + config.getClass().getAnnotation(RegisterConfig.class).configName() + "' to the global config registry!");
         this.globalConfigs.put(config, container);
     }
 

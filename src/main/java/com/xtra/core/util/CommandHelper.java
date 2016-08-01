@@ -35,7 +35,6 @@ import com.xtra.api.command.Command;
 import com.xtra.api.command.annotation.RegisterCommand;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.text.HelpPaginationHandler.CommandOrdering;
-import com.xtra.api.util.exceptions.XtraCoreException;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.text.HelpPaginationHandlerImpl;
 import com.xtra.core.util.store.CommandStore;
@@ -59,12 +58,12 @@ public class CommandHelper {
      * @return The child commands of the specified command
      */
     public Set<Command> getChildCommands(Command command) {
-        this.container.getLogger().log("Getting the child commands for the command: " + command.aliases()[0]);
+        this.container.getLogger().info("Getting the child commands for the command: " + command.aliases()[0]);
         Set<Command> childCommands = new HashSet<>();
         for (Command cmd : container.getCommandHandler().get().getCommands()) {
             Command parentCommand = getParentCommand(cmd);
             if (parentCommand != null && parentCommand.equals(command)) {
-                this.container.getLogger().log("Child command found! Child command is: " + cmd.aliases()[0]);
+                this.container.getLogger().info("Child command found! Child command is: " + cmd.aliases()[0]);
                 childCommands.add(cmd);
             }
         }
@@ -78,8 +77,8 @@ public class CommandHelper {
      * @return The parent command
      */
     public Command getParentCommand(Command command) {
-        this.container.getLogger().log("======================================================");
-        this.container.getLogger().log("Getting the parent command for the command: '" + command.aliases()[0] + "'.");
+        this.container.getLogger().info(Internals.LOG_HEADER);
+        this.container.getLogger().info("Getting the parent command for the command: '" + command.aliases()[0] + "'.");
         Class<? extends Command> parentCommand = command.getClass().getAnnotation(RegisterCommand.class).childOf();
         Command parentCommand2 = getEquivalentCommand(parentCommand);
         return parentCommand2;
@@ -130,8 +129,8 @@ public class CommandHelper {
                     topCommands.add(commandStore2.childOf());
                     topCommands.add(commandStore2.command());
                 } else {
-                    Internals.globalLogger.log(new XtraCoreException(
-                            "Could not find an appropriate command order for the command ordering. Returning the default list."));
+                    Internals.globalLogger.error("Could not find an appropriate command order for the command ordering. Returning the default list.",
+                            new IllegalArgumentException());
                     return commandStores;
                 }
             }
