@@ -40,16 +40,26 @@ public class CommandAnnotationHelperImpl implements CommandAnnotationHelper {
 
     @Override
     public boolean isAsync(Class<? extends Command> clazz) {
-        return clazz.getAnnotation(RegisterCommand.class).async();
+        if (clazz.isAnnotationPresent(RegisterCommand.class)) {
+            return clazz.getAnnotation(RegisterCommand.class).async();
+        }
+        return false;
     }
 
     @Override
     public boolean hasParent(Class<? extends Command> clazz) {
-        return clazz.getAnnotation(RegisterCommand.class).childOf() != EmptyCommand.class;
+        if (clazz.isAnnotationPresent(RegisterCommand.class)) {
+            return clazz.getAnnotation(RegisterCommand.class).childOf() != EmptyCommand.class;
+        }
+        return false;
     }
 
     @Override
     public Optional<Class<? extends Command>> getParent(Class<? extends Command> clazz) {
+        if (!clazz.isAnnotationPresent(RegisterCommand.class)) {
+            return Optional.empty();
+        }
+
         Class<? extends Command> parent = clazz.getAnnotation(RegisterCommand.class).childOf();
         if (!parent.equals(EmptyCommand.class)) {
             return Optional.of(parent);
@@ -59,6 +69,10 @@ public class CommandAnnotationHelperImpl implements CommandAnnotationHelper {
 
     @Override
     public Optional<Command> getParentObject(Class<? extends Command> clazz) {
+        if (!clazz.isAnnotationPresent(RegisterCommand.class)) {
+            return Optional.empty();
+        }
+
         Optional<Class<? extends Command>> parentClass = getParent(clazz);
         if (parentClass.isPresent()) {
             return CoreImpl.instance.getCommandRegistry().getCommand(parentClass.get());

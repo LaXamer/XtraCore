@@ -35,6 +35,7 @@ import com.xtra.api.ban.BanHandler;
 import com.xtra.api.command.CommandHandler;
 import com.xtra.api.command.annotation.CommandAnnotationHelper;
 import com.xtra.api.config.ConfigHandler;
+import com.xtra.api.config.annotation.ConfigAnnotationHelper;
 import com.xtra.api.entity.EntityHandler;
 import com.xtra.api.listener.ListenerHandler;
 import com.xtra.api.logger.LoggerHandler;
@@ -48,6 +49,7 @@ import com.xtra.core.ban.BanHandlerImpl;
 import com.xtra.core.command.CommandHandlerImpl;
 import com.xtra.core.command.annotation.CommandAnnotationHelperImpl;
 import com.xtra.core.config.ConfigHandlerImpl;
+import com.xtra.core.config.annotation.ConfigAnnotationHelperImpl;
 import com.xtra.core.entity.EntityHandlerImpl;
 import com.xtra.core.event.XtraCoreCommandHandlerInitializedEventImpl;
 import com.xtra.core.event.XtraCoreConfigHandlerInitializedEventImpl;
@@ -68,7 +70,8 @@ public class CoreImpl implements ICore {
 
     public static CoreImpl instance;
     private BanHandler banHandler = new BanHandlerImpl();
-    private CommandAnnotationHelper annotationHelper = new CommandAnnotationHelperImpl();
+    private CommandAnnotationHelper commandAnnotationHelper = new CommandAnnotationHelperImpl();
+    private ConfigAnnotationHelper configAnnotationHelper = new ConfigAnnotationHelperImpl();
     private EntityHandler entityHandler = new EntityHandlerImpl();
     private XtraCorePluginHandler pluginHandler = new XtraCorePluginHandlerImpl();
     private CommandRegistry commandRegistry = new CommandRegistryImpl();
@@ -182,7 +185,12 @@ public class CoreImpl implements ICore {
 
     @Override
     public CommandAnnotationHelper getCommandAnnotationHelper() {
-        return this.annotationHelper;
+        return this.commandAnnotationHelper;
+    }
+
+    @Override
+    public ConfigAnnotationHelper getConfigAnnotationHelper() {
+        return this.configAnnotationHelper;
     }
 
     @Override
