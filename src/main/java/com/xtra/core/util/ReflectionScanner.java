@@ -36,6 +36,8 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.plugin.Plugin;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.xtra.api.command.Command;
 import com.xtra.api.command.annotation.RegisterCommand;
 import com.xtra.api.config.Config;
@@ -118,27 +120,22 @@ public class ReflectionScanner {
         return configs;
     }
 
-    public Set<Object> getPluginListeners() {
+    public Multimap<Class<?>, Method> getPluginListeners() {
         this.container.getLogger().info(Internals.LOG_HEADER);
         this.container.getLogger().info("Using reflection to access and register the listeners...");
         Set<Method> methods = this.reflections.getMethodsAnnotatedWith(Listener.class);
-        Set<Class<?>> listenerClasses = new HashSet<>();
+        Multimap<Class<?>, Method> map = ArrayListMultimap.create();
         for (Method method : methods) {
-            if (method.getDeclaringClass().getAnnotation(Plugin.class) == null && !listenerClasses.contains(method.getDeclaringClass())) {
+            if (method.getDeclaringClass().getAnnotation(Plugin.class) == null) {
                 this.container.getLogger().info("Registering method listener:");
                 this.container.getLogger().info(method.toString());
-                listenerClasses.add(method.getDeclaringClass());
+                if (map.containsKey(method.getDeclaringClass())) {
+                    map.get(method.getDeclaringClass()).add(method);
+                } else {
+                    map.put(method.getDeclaringClass(), method);
+                }
             }
         }
-        Set<Object> listenerObject = new HashSet<>();
-        for (Class<?> listenerClass : listenerClasses) {
-            try {
-                listenerObject.add(Internals.checkIfAlreadyExists(this.container, listenerClass));
-            } catch (InstantiationException | IllegalAccessException e) {
-                this.container.getLogger().error("An error has occurred while attempting to instantiate the listeners!", e);
-            }
-        }
-        this.container.getLogger().info("Listeners added.");
-        return listenerObject;
+        return map;
     }
 }

@@ -25,8 +25,10 @@
 
 package com.xtra.core.listener;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.spongepowered.api.Sponge;
@@ -38,7 +40,8 @@ import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 
 public class ListenerHandlerImpl implements ListenerHandler {
 
-    private Set<Class<?>> listenerClasses = new HashSet<>();
+    private Set<Object> listenerObjects = new HashSet<>();
+    private Set<Method> listenerMethods = new HashSet<>();
 
     public ListenerHandlerImpl(XtraCorePluginContainer container) {
         this.registerListeners((XtraCorePluginContainerImpl) container);
@@ -46,15 +49,39 @@ public class ListenerHandlerImpl implements ListenerHandler {
 
     public void registerListeners(XtraCorePluginContainerImpl container) {
         Internals.globalLogger.info("Registering listeners for " + container.getPluginContainer().getId());
-        for (Object listener : container.scanner.getPluginListeners()) {
-            this.listenerClasses.add(listener.getClass());
-            Sponge.getEventManager().registerListeners(container.getPlugin(), listener);
+        for (Map.Entry<Class<?>, Method> listener : container.scanner.getPluginListeners().entries()) {
+            this.listenerMethods.add(listener.getValue());
+            // To prevent duplicate classes getting instantiated, we need to
+            // check if the current class already exists as a listener object.
+            boolean skip = false;
+            for (Object o : this.listenerObjects) {
+                if (o.getClass().equals(listener.getKey())) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (skip) {
+                continue;
+            }
+
+            try {
+                Object o = Internals.checkIfAlreadyExists(container, listener.getKey());
+                this.listenerObjects.add(o);
+                Sponge.getEventManager().registerListeners(container.getPlugin(), o);
+            } catch (InstantiationException | IllegalAccessException e) {
+                container.getLogger().error("An error has occurred while attempting to instantiate the listeners!", e);
+            }
         }
         container.setListenerHandler(this);
     }
 
     @Override
-    public Collection<Class<?>> getListenerClasses() {
-        return this.listenerClasses;
+    public Collection<Object> getListenerObjects() {
+        return this.listenerObjects;
+    }
+
+    @Override
+    public Collection<Method> getListenerMethods() {
+        return this.listenerMethods;
     }
 }
