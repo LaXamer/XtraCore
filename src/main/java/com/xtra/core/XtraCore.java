@@ -26,7 +26,6 @@
 package com.xtra.core;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -40,32 +39,27 @@ import com.xtra.api.command.base.CommandBaseLite;
 import com.xtra.api.config.Config;
 import com.xtra.api.config.annotation.DoNotReload;
 import com.xtra.api.config.base.ConfigBase;
+import com.xtra.api.text.HelpPaginationHandler.ChildBehavior;
 import com.xtra.core.command.base.CommandBaseImpl;
 import com.xtra.core.command.base.CommandBaseLiteImpl;
 import com.xtra.core.config.base.ConfigBaseImpl;
-import com.xtra.core.event.XtraCoreInitializationEventImpl;
-import com.xtra.core.internal.InternalCommands;
 import com.xtra.core.internal.Internals;
-import com.xtra.core.logger.LoggerHandlerImpl;
 
 @Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwsomeMan34"}, description = Internals.DESCRIPTION)
 public class XtraCore {
 
-    private CoreImpl core = new CoreImpl();
+    private CoreImpl core;
 
     @Listener(order = Order.FIRST)
     public void onPreInit(GamePreInitializationEvent event) {
-        ((LoggerHandlerImpl) this.core.getLoggerHandler()).createGlobal();
-        Internals.globalLogger.info(Internals.LOG_HEADER);
-        Internals.globalLogger.info("Initializing XtraCore version " + Internals.VERSION);
-        Sponge.getEventManager().post(new XtraCoreInitializationEventImpl(this));
-
+        this.core = new CoreImpl(this);
         this.provideImplementations();
     }
 
     @Listener
     public void onInit(GameInitializationEvent event) {
-        InternalCommands.createCommands(this);
+        CoreImpl.instance.createCommandHandler(this.getClass());
+        CoreImpl.instance.createHelpPaginationBuilder(this.getClass()).childBehavior(ChildBehavior.IGNORE_PARENT).build();
     }
 
     @Listener

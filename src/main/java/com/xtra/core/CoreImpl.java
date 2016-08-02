@@ -55,6 +55,7 @@ import com.xtra.core.config.annotation.ConfigAnnotationHelperImpl;
 import com.xtra.core.entity.EntityHandlerImpl;
 import com.xtra.core.event.XtraCoreCommandHandlerInitializedEventImpl;
 import com.xtra.core.event.XtraCoreConfigHandlerInitializedEventImpl;
+import com.xtra.core.event.XtraCoreInitializedEventImpl;
 import com.xtra.core.event.XtraCoreListenerHandlerInitializedEventImpl;
 import com.xtra.core.event.XtraCorePluginInitializedEventImpl;
 import com.xtra.core.internal.Internals;
@@ -81,8 +82,17 @@ public class CoreImpl implements ICore {
     private DirectionHandler directionHandler = new DirectionHandlerImpl();
     private LoggerHandlerImpl loggerHandler = new LoggerHandlerImpl();
 
-    public CoreImpl() {
+    public CoreImpl(XtraCore core) {
         instance = this;
+        XtraCorePluginContainerImpl containerImpl = (XtraCorePluginContainerImpl) ((XtraCorePluginHandlerImpl) this.pluginHandler).add(core);
+        containerImpl.scanner = ReflectionScanner.create(containerImpl);
+
+        ((LoggerHandlerImpl) this.loggerHandler).createGlobal();
+        Internals.globalLogger.info(Internals.LOG_HEADER);
+        Internals.globalLogger.info("Initializing XtraCore version " + Internals.VERSION);
+        containerImpl.setLogger(Internals.globalLogger);
+
+        Sponge.getEventManager().post(new XtraCoreInitializedEventImpl(containerImpl));
     }
 
     @Override

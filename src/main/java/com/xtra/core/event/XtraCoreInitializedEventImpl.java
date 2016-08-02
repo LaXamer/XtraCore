@@ -25,18 +25,17 @@
 
 package com.xtra.core.event;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.Cause;
 
-import com.xtra.api.event.XtraCoreInitializationEvent;
-import com.xtra.core.XtraCore;
+import com.xtra.api.event.XtraCoreInitializedEvent;
+import com.xtra.api.plugin.XtraCorePluginContainer;
 
-public class XtraCoreInitializationEventImpl implements XtraCoreInitializationEvent {
+public class XtraCoreInitializedEventImpl implements XtraCoreInitializedEvent {
 
     private Cause cause;
 
-    public XtraCoreInitializationEventImpl(XtraCore instance) {
-        this.cause = Cause.source(Sponge.getPluginManager().fromInstance(instance).get()).build();
+    public XtraCoreInitializedEventImpl(XtraCorePluginContainer container) {
+        this.cause = Cause.source(container).build();
     }
 
     @Override
