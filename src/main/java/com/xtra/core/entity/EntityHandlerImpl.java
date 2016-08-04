@@ -27,8 +27,6 @@ package com.xtra.core.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Optional;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -55,12 +53,8 @@ public class EntityHandlerImpl implements EntityHandler {
         checkNotNull(type, "Entity type cannot be null!");
         checkNotNull(spawnType, "Spawn type cannot be null!");
         Extent extent = loc.getExtent();
-        Optional<Entity> optional = extent.createEntity(type, loc.getPosition());
-        if (optional.isPresent()) {
-            return extent.spawnEntity(optional.get(),
-                    Cause.source(EntitySpawnCause.builder().entity(optional.get()).type(spawnType).build()).build());
-        }
-        return false;
+        Entity entity = extent.createEntity(type, loc.getPosition());
+        return extent.spawnEntity(entity, Cause.source(EntitySpawnCause.builder().entity(entity).type(spawnType).build()).build());
     }
 
     @Override
@@ -69,12 +63,8 @@ public class EntityHandlerImpl implements EntityHandler {
         checkNotNull(type, "Item type cannot be null!");
         checkNotNull(spawnType, "Spawn type cannot be null!");
         Extent extent = loc.getExtent();
-        Optional<Entity> optional = extent.createEntity(EntityTypes.ITEM, loc.getPosition());
-        if (optional.isPresent()) {
-            Entity entity = optional.get();
-            entity.offer(Keys.REPRESENTED_ITEM, ItemStack.of(type, quantity).createSnapshot());
-            return extent.spawnEntity(entity, Cause.source(EntitySpawnCause.builder().entity(entity).type(spawnType).build()).build());
-        }
-        return false;
+        Entity entity = extent.createEntity(EntityTypes.ITEM, loc.getPosition());
+        entity.offer(Keys.REPRESENTED_ITEM, ItemStack.of(type, quantity).createSnapshot());
+        return extent.spawnEntity(entity, Cause.source(EntitySpawnCause.builder().entity(entity).type(spawnType).build()).build());
     }
 }
