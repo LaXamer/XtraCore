@@ -73,7 +73,9 @@ public class CommandBaseImpl implements CommandBaseExecutor {
     @Override
     public CommandResult execute(CommandBase commandBase, Class<?> targetSource, CommandSource source, CommandContext args)
             throws CommandException {
-        this.container = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(commandBase.getClass()).get().getValue();
+        if (this.container == null) {
+            this.container = (XtraCorePluginContainerImpl) CoreImpl.instance.getCommandRegistry().getEntry(commandBase.getClass()).get().getValue();
+        }
         this.base = commandBase;
         // Start again with an empty map
         this.map = new HashMap<>();

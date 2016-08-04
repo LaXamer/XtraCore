@@ -42,9 +42,14 @@ import com.xtra.core.CoreImpl;
 
 public class CommandBaseLiteImpl implements CommandBaseLiteExecutor {
 
+    private XtraCorePluginContainer container;
+
     @Override
     public CommandResult execute(CommandBaseLite base, CommandSource source, CommandContext args) throws CommandException {
-        XtraCorePluginContainer container = CoreImpl.instance.getCommandRegistry().getEntry(base.getClass()).get().getValue();
+        if (this.container == null) {
+            this.container = CoreImpl.instance.getCommandRegistry().getEntry(base.getClass()).get().getValue();
+        }
+
         if (base.getClass().getAnnotation(RegisterCommand.class).async()) {
             Sponge.getScheduler().createTaskBuilder().execute(
                     task -> {
