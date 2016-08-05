@@ -125,7 +125,7 @@ public class LoggerHandlerImpl implements LoggerHandler {
         ConsoleAppender appender2 =
                 ConsoleAppender.createAppender(PatternLayout.createLayout("[%d{HH:mm:ss}] [%t/%level] [" + consoleName + "]: %msg%n", config, null,
                         StandardCharsets.UTF_8.name(), null), null, "SYSTEM_OUT", "XtraCore-ConsoleAppender-" + name, "false", "false");
-        appender2.addFilter(ThresholdFilter.createFilter(Level.ERROR.name(), "ACCEPT", "DENY"));
+        appender2.addFilter(ThresholdFilter.createFilter(Level.WARN.name(), "ACCEPT", "DENY"));
         appender2.start();
         config.addLoggerAppender(coreLogger, appender2);
 

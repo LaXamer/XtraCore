@@ -58,6 +58,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
             container.getLogger().info("Initializing configuration for '" + rc.configName() + ".conf'.");
 
             HoconConfigurationLoader.Builder loaderBuilder = HoconConfigurationLoader.builder();
+            loaderBuilder.setDefaultOptions(base.setOptions());
             Path dir;
             // The file is created automatically, however we need to know if we
             // need
