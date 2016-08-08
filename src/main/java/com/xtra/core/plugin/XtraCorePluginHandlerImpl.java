@@ -44,7 +44,7 @@ public class XtraCorePluginHandlerImpl implements XtraCorePluginHandler {
 
     private Set<XtraCorePluginContainer> containers = new HashSet<>();
 
-    public XtraCorePluginContainer add(Object plugin) {
+    public XtraCorePluginContainerImpl add(Object plugin) {
         Optional<PluginContainer> optional = Sponge.getPluginManager().fromInstance(plugin);
         if (!optional.isPresent()) {
             Internals.globalLogger.error("Cannot find the plugin instance for " + plugin.getClass().getName() + "! Did you pass the wrong object?",

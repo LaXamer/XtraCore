@@ -32,9 +32,8 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.game.GameReloadEvent;
+import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
 import com.xtra.api.Core;
@@ -60,29 +59,18 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 @Plugin(name = "XtraCore", id = "xtracore", version = Internals.VERSION, authors = {"12AwsomeMan34"}, description = Internals.DESCRIPTION)
 public class XtraCore {
 
-    private CoreImpl core;
-
-    // Provide initial services to Core first.
+    // Provide initial services to Core.
     @Listener(order = Order.FIRST)
-    public void onPreInit(GamePreInitializationEvent event) {
-        this.core = new CoreImpl(this);
+    public void onPreInit(GameConstructionEvent event) {
         this.provideImplementations();
+        this.loadCommandConfig();
     }
 
     // Now register internal XtraCore things during init. If plugins wish to
     // modify these, they may listen at a later order.
     @Listener
     public void onInit(GameInitializationEvent event) {
-        CoreImpl.instance.createConfigHandler(this.getClass());
-        CoreImpl.instance.createCommandHandler(this.getClass());
         CoreImpl.instance.createHelpPaginationBuilder(this.getClass()).childBehavior(ChildBehavior.IGNORE_PARENT).build();
-    }
-
-    // Now we can assume that every plugin has initialized with XtraCore. If
-    // they haven't, then too bad.
-    @Listener(order = Order.LATE)
-    public void onPost(GamePostInitializationEvent event) {
-        this.loadCommandConfig().save();
     }
 
     // For automatic configuration reloading.
@@ -97,7 +85,7 @@ public class XtraCore {
         }
     }
 
-    private Config loadCommandConfig() {
+    private void loadCommandConfig() {
         // Here we will initialize the command.conf file, for customizing the
         // commands.
         Config commandConfig = CoreImpl.instance.getConfigHandler(this.getClass()).get().getConfig(CommandsConfig.class).get();
@@ -131,15 +119,15 @@ public class XtraCore {
                 }
             }
         }
-        return commandConfig;
+        commandConfig.save();
     }
 
     private void provideImplementations() {
         try {
-            FieldUtils.writeStaticField(Core.class, "CORE", this.core, true);
             FieldUtils.writeStaticField(CommandBase.class, "BASE", new CommandBaseImpl(), true);
             FieldUtils.writeStaticField(CommandBaseLite.class, "BASE", new CommandBaseLiteImpl(), true);
             FieldUtils.writeStaticField(ConfigBase.class, "BASE", new ConfigBaseImpl(), true);
+            FieldUtils.writeStaticField(Core.class, "CORE", new CoreImpl(this), true);
         } catch (Exception e) {
             Internals.globalLogger.error("An error has occurred while attempting to set the static API fields!", e);
         }

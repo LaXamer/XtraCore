@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.plugin.PluginContainer;
 
 import com.xtra.api.ICore;
 import com.xtra.api.ban.BanHandler;
@@ -41,6 +42,7 @@ import com.xtra.api.config.annotation.ConfigAnnotationHelper;
 import com.xtra.api.entity.EntityHandler;
 import com.xtra.api.listener.ListenerHandler;
 import com.xtra.api.logger.LoggerHandler;
+import com.xtra.api.plugin.XtraCorePlugin;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.plugin.XtraCorePluginHandler;
 import com.xtra.api.registry.CommandRegistry;
@@ -72,59 +74,76 @@ import com.xtra.core.world.direction.DirectionHandlerImpl;
 public class CoreImpl implements ICore {
 
     public static CoreImpl instance;
-    private BanHandler banHandler = new BanHandlerImpl();
-    private CommandAnnotationHelper commandAnnotationHelper = new CommandAnnotationHelperImpl();
-    private ConfigAnnotationHelper configAnnotationHelper = new ConfigAnnotationHelperImpl();
-    private EntityHandler entityHandler = new EntityHandlerImpl();
-    private XtraCorePluginHandler pluginHandler = new XtraCorePluginHandlerImpl();
-    private CommandRegistry commandRegistry = new CommandRegistryImpl();
-    private ConfigRegistry configRegistry = new ConfigRegistryImpl();
-    private DirectionHandler directionHandler = new DirectionHandlerImpl();
+    private BanHandlerImpl banHandler = new BanHandlerImpl();
+    private CommandAnnotationHelperImpl commandAnnotationHelper = new CommandAnnotationHelperImpl();
+    private ConfigAnnotationHelperImpl configAnnotationHelper = new ConfigAnnotationHelperImpl();
+    private EntityHandlerImpl entityHandler = new EntityHandlerImpl();
+    private XtraCorePluginHandlerImpl pluginHandler = new XtraCorePluginHandlerImpl();
+    private CommandRegistryImpl commandRegistry = new CommandRegistryImpl();
+    private ConfigRegistryImpl configRegistry = new ConfigRegistryImpl();
+    private DirectionHandlerImpl directionHandler = new DirectionHandlerImpl();
     private LoggerHandlerImpl loggerHandler = new LoggerHandlerImpl();
 
     public CoreImpl(XtraCore core) {
+        // Initialize XtraCore stuff
         instance = this;
-        XtraCorePluginContainerImpl containerImpl = (XtraCorePluginContainerImpl) ((XtraCorePluginHandlerImpl) this.pluginHandler).add(core);
+        XtraCorePluginContainerImpl containerImpl = this.pluginHandler.add(core);
         containerImpl.scanner = ReflectionScanner.create(containerImpl);
 
-        ((LoggerHandlerImpl) this.loggerHandler).createGlobal();
+        this.loggerHandler.createGlobal();
         Internals.globalLogger.info(Internals.LOG_HEADER);
         Internals.globalLogger.info("Initializing XtraCore version " + Internals.VERSION);
         containerImpl.setLogger(Internals.globalLogger);
 
+        ConfigHandler configHandler = ConfigHandlerImpl.create(containerImpl);
+        containerImpl.setConfigHandler(configHandler);
+        Sponge.getEventManager().post(new XtraCoreConfigHandlerInitializedEventImpl(containerImpl, configHandler));
+
+        CommandHandler commandHandler = CommandHandlerImpl.create(containerImpl);
+        containerImpl.setCommandHandler(commandHandler);
+        Sponge.getEventManager().post(new XtraCoreCommandHandlerInitializedEventImpl(containerImpl, commandHandler));
+
         Sponge.getEventManager().post(new XtraCoreInitializedEventImpl(containerImpl));
-    }
 
-    @Override
-    public XtraCorePluginContainer initialize(Object plugin) {
-        checkNotNull(plugin, "Plugin object cannot be null!");
-        // Create a plugin container
-        XtraCorePluginHandlerImpl handlerImpl = (XtraCorePluginHandlerImpl) this.pluginHandler;
-        XtraCorePluginContainerImpl containerImpl = (XtraCorePluginContainerImpl) handlerImpl.add(plugin);
-        LoggerHandlerImpl log = (LoggerHandlerImpl) this.loggerHandler;
-        // Create a logger for the plugin
-        Logger logger = log.create(containerImpl);
-        logger.info(Internals.LOG_HEADER);
-        logger.info("Initializing with XtraCore version " + Internals.VERSION + "!");
+        // Initialize XtraCore plugins
+        for (PluginContainer container : Sponge.getPluginManager().getPlugins()) {
+            if (container.getInstance().isPresent()) {
+                Object instance = container.getInstance().get();
+                XtraCorePlugin annotation = instance.getClass().getAnnotation(XtraCorePlugin.class);
+                if (annotation != null) {
+                    // Now we have an XtraCore plugin, so create an XtraCore
+                    // plugin container.
+                    XtraCorePluginContainerImpl pluginContainerImpl = this.pluginHandler.add(instance);
+                    // Create a logger for the plugin
+                    Logger logger = this.loggerHandler.create(pluginContainerImpl);
+                    logger.info(Internals.LOG_HEADER);
+                    logger.info("Initializing with XtraCore version " + Internals.VERSION + "!");
 
-        Internals.globalLogger.info(Internals.LOG_HEADER);
-        Internals.globalLogger.info("Initializing plugin class " + plugin.getClass().getName());
+                    Internals.globalLogger.info(Internals.LOG_HEADER);
+                    Internals.globalLogger.info("Initializing plugin class " + instance.getClass().getName());
 
-        containerImpl.scanner = ReflectionScanner.create(containerImpl);
-        Sponge.getEventManager().post(new XtraCorePluginInitializedEventImpl(containerImpl));
-        return containerImpl;
-    }
+                    pluginContainerImpl.scanner = ReflectionScanner.create(pluginContainerImpl);
+                    Sponge.getEventManager().post(new XtraCorePluginInitializedEventImpl(pluginContainerImpl));
 
-    @Override
-    public CommandHandler createCommandHandler(Class<?> clazz) {
-        checkNotNull(clazz, "Plugin class cannot be null!");
-        XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
-        if (container.getCommandHandler().isPresent()) {
-            return container.getCommandHandler().get();
+                    // Now initialize other XtraCore specific handlers, if they
+                    // have not been disabled.
+                    if (!annotation.disableConfigHandler()) {
+                        ConfigHandler handler = ConfigHandlerImpl.create(pluginContainerImpl);
+                        Sponge.getEventManager().post(new XtraCoreConfigHandlerInitializedEventImpl(pluginContainerImpl, handler));
+                    }
+
+                    if (!annotation.disableCommandHandler()) {
+                        CommandHandler handler = CommandHandlerImpl.create(pluginContainerImpl);
+                        Sponge.getEventManager().post(new XtraCoreCommandHandlerInitializedEventImpl(pluginContainerImpl, handler));
+                    }
+
+                    if (!annotation.disableListenerHandler()) {
+                        ListenerHandlerImpl handler = new ListenerHandlerImpl(pluginContainerImpl);
+                        Sponge.getEventManager().post(new XtraCoreListenerHandlerInitializedEventImpl(pluginContainerImpl, handler));
+                    }
+                }
+            }
         }
-        CommandHandler handler = CommandHandlerImpl.create(container);
-        Sponge.getEventManager().post(new XtraCoreCommandHandlerInitializedEventImpl(container, handler));
-        return handler;
     }
 
     @Override
@@ -138,18 +157,6 @@ public class CoreImpl implements ICore {
     }
 
     @Override
-    public ConfigHandler createConfigHandler(Class<?> clazz) {
-        checkNotNull(clazz, "Plugin class cannot be null!");
-        XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
-        if (container.getConfigHandler().isPresent()) {
-            return container.getConfigHandler().get();
-        }
-        ConfigHandler handler = ConfigHandlerImpl.create(container);
-        Sponge.getEventManager().post(new XtraCoreConfigHandlerInitializedEventImpl(container, handler));
-        return handler;
-    }
-
-    @Override
     public Optional<ConfigHandler> getConfigHandler(Class<?> clazz) {
         checkNotNull(clazz, "Plugin class cannot be null!");
         Optional<XtraCorePluginContainer> container = this.pluginHandler.getContainer(clazz);
@@ -157,18 +164,6 @@ public class CoreImpl implements ICore {
             return Optional.empty();
         }
         return container.get().getConfigHandler();
-    }
-
-    @Override
-    public ListenerHandler createListenerHandler(Class<?> clazz) {
-        checkNotNull(clazz, "Plugin class cannot be null!");
-        XtraCorePluginContainer container = this.pluginHandler.getContainerUnchecked(clazz);
-        if (container.getListenerHandler().isPresent()) {
-            return container.getListenerHandler().get();
-        }
-        ListenerHandlerImpl handler = new ListenerHandlerImpl(container);
-        Sponge.getEventManager().post(new XtraCoreListenerHandlerInitializedEventImpl(container, handler));
-        return handler;
     }
 
     @Override
