@@ -39,9 +39,10 @@ import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.api.registry.CommandRegistry;
 import com.xtra.core.internal.Internals;
 import com.xtra.core.plugin.XtraCorePluginContainerImpl;
+import com.xtra.core.util.CommandGetter;
 
 public class CommandRegistryImpl implements CommandRegistry {
-    
+
     private Map<Command, XtraCorePluginContainer> globalCommands = new HashMap<>();
 
     public void add(Command command, XtraCorePluginContainerImpl container) {
@@ -61,6 +62,15 @@ public class CommandRegistryImpl implements CommandRegistry {
     }
 
     @Override
+    public Optional<Command> getCommand(String primaryAlias) {
+        Optional<Map.Entry<Command, XtraCorePluginContainer>> optionalEntry = CommandGetter.getEntry(primaryAlias, globalCommands);
+        if (optionalEntry.isPresent()) {
+            return Optional.of(optionalEntry.get().getKey());
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Map.Entry<Command, XtraCorePluginContainer>> getEntry(Class<? extends Command> clazz) {
         checkNotNull(clazz, "Command class caannot be null!");
         for (Map.Entry<Command, XtraCorePluginContainer> entry : this.globalCommands.entrySet()) {
@@ -69,6 +79,11 @@ public class CommandRegistryImpl implements CommandRegistry {
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Map.Entry<Command, XtraCorePluginContainer>> getEntry(String primaryAlias) {
+        return CommandGetter.getEntry(primaryAlias, globalCommands);
     }
 
     @Override

@@ -60,10 +60,32 @@ public class ConfigRegistryImpl implements ConfigRegistry {
     }
 
     @Override
+    public Optional<Config> getConfig(String configName) {
+        checkNotNull(configName, "Config name cannot be null!");
+        for (Config config : this.globalConfigs.keySet()) {
+            if (config.getClass().getAnnotation(RegisterConfig.class).configName().equals(configName)) {
+                return Optional.of(config);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Map.Entry<Config, XtraCorePluginContainer>> getEntry(Class<? extends Config> clazz) {
         checkNotNull(clazz, "Config class cannot be null!");
         for (Map.Entry<Config, XtraCorePluginContainer> entry : this.globalConfigs.entrySet()) {
             if (entry.getKey().getClass().equals(clazz)) {
+                return Optional.of(entry);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Map.Entry<Config, XtraCorePluginContainer>> getEntry(String configName) {
+        checkNotNull(configName, "Config name cannot be null!");
+        for (Map.Entry<Config, XtraCorePluginContainer> entry : this.globalConfigs.entrySet()) {
+            if (entry.getKey().getClass().getAnnotation(RegisterConfig.class).configName().equals(configName)) {
                 return Optional.of(entry);
             }
         }

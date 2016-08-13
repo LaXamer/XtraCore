@@ -45,8 +45,10 @@ import com.xtra.core.CoreImpl;
 import com.xtra.core.command.runnable.CommandRunnableHandlerImpl;
 import com.xtra.core.command.state.CommandStateHandlerImpl;
 import com.xtra.core.internal.Internals;
+import com.xtra.core.internal.config.ConfigChecker;
 import com.xtra.core.plugin.XtraCorePluginContainerImpl;
 import com.xtra.core.registry.CommandRegistryImpl;
+import com.xtra.core.util.CommandGetter;
 import com.xtra.core.util.CommandHelper;
 import com.xtra.core.util.store.CommandStore;
 
@@ -76,6 +78,9 @@ public class CommandHandlerImpl implements CommandHandler {
 
         this.commands = this.container.scanner.getCommands();
         this.container.setCommandHandler(this);
+
+        ConfigChecker.commandConfig();
+
         this.helper = new CommandHelper(this.container);
         this.container.getLogger().info(Internals.LOG_HEADER);
         this.container.getLogger().info("Initializing the command handler!");
@@ -167,6 +172,11 @@ public class CommandHandlerImpl implements CommandHandler {
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Command> getCommand(String primaryAlias) {
+        return CommandGetter.getCommand(primaryAlias, this.commands, container);
     }
 
     @Override

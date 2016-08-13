@@ -33,6 +33,7 @@ import java.util.Set;
 
 import com.xtra.api.config.Config;
 import com.xtra.api.config.ConfigHandler;
+import com.xtra.api.config.annotation.RegisterConfig;
 import com.xtra.api.plugin.XtraCorePluginContainer;
 import com.xtra.core.CoreImpl;
 import com.xtra.core.internal.Internals;
@@ -72,6 +73,17 @@ public class ConfigHandlerImpl implements ConfigHandler {
         checkNotNull(clazz, "Config class cannot be null!");
         for (Config config : this.configs) {
             if (clazz.isInstance(config)) {
+                return Optional.of(config);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Config> getConfig(String configName) {
+        checkNotNull(configName, "Config name cannot be null!");
+        for (Config config : this.configs) {
+            if (config.getClass().getAnnotation(RegisterConfig.class).configName().equals(configName)) {
                 return Optional.of(config);
             }
         }
