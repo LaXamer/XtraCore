@@ -15,9 +15,6 @@ repositories {
         name 'Sponge maven repo'
         url 'http://repo.spongepowered.org/maven/'
     }
-    maven {
-        url 'https://jitpack.io'
-    }
 }
 
 ext.api = project(':XtraAPI')

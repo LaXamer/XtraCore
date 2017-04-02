@@ -61,8 +61,7 @@ public class ConfigBaseImpl implements ConfigExecutor {
             loaderBuilder.setDefaultOptions(base.setOptions());
             Path dir;
             // The file is created automatically, however we need to know if we
-            // need
-            // to populate it or not
+            // need to populate it or not
             boolean exists;
             if (rc.sharedRoot()) {
                 dir = Paths.get(System.getProperty("user.dir"), "/config/");
