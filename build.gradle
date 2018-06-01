@@ -3,7 +3,7 @@ plugins {
     id 'maven'
     id 'net.minecrell.licenser' version '0.2.1'
     id 'ninja.miserable.blossom' version '1.0.1'
-    id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
 sourceCompatibility = '1.8'
@@ -24,11 +24,16 @@ dependencies {
     compile api
     compile 'org.reflections:reflections:0.9.10'
     compile 'org.javassist:javassist:3.20.0-GA'
-    compile 'org.apache.logging.log4j:log4j-core:2.0-beta9'
+    compile 'org.apache.logging.log4j:log4j-core:2.11.0'
 }
 
 blossom {
-    replaceToken '@project.version@', project.version, 'src/main/java/com/xtra/core/internal/Internals.java'
+	replaceToken '@project.id@', project.id, 'src/main/java/io/github/narikiro/core/util/PluginInfo.java'
+	replaceToken '@project.name@', project.name, 'src/main/java/io/github/narikiro/core/util/PluginInfo.java'
+	replaceToken '@project.version@', project.version, 'src/main/java/io/github/narikiro/core/util/PluginInfo.java'
+	replaceToken '@project.description@', project.description, 'src/main/java/io/github/narikiro/core/util/PluginInfo.java'
+	replaceToken '@project.authors@', project.authors, 'src/main/java/io/github/narikiro/core/util/PluginInfo.java'
+	replaceToken '@project.website@', project.website, 'src/main/java/io/github/narikiro/core/util/PluginInfo.java'
 }
 
 license {
@@ -43,15 +48,17 @@ license {
 }
 
 shadowJar {
+	configurations = [project.configurations.compile]
     dependencies {
         include(dependency('org.reflections:reflections'))
         include(dependency('org.javassist:javassist'))
         include(dependency(':XtraAPI'))
     }
-    relocate 'org.reflections', 'com.xtra.core.core-dependencies.reflections'
-    relocate 'javassist', 'com.xtra.core.core-dependencies.javassist'
-    relocate 'com.xtra.api', 'com.xtra.core.core-dependencies.api'
+    relocate 'org.reflections', 'io.github.narikiro.core-dependencies.reflections'
+    relocate 'javassist', 'io.github.narikiro.core-dependencies.javassist'
+    relocate 'io.github.narikiro.api', 'io.github.narikiro.core-dependencies.api'
     classifier = ''
+    version = project.version
 }
 
 artifacts {
@@ -59,5 +66,6 @@ artifacts {
 }
 
 task wrapper(type: Wrapper) {
+// todo update
     gradleVersion = '2.14.1'
 }

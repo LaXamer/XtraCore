@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) XtraStudio Team
+Copyright (c) LaXamer Team
 Copyright (c) Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
